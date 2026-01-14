@@ -76,24 +76,39 @@
             border-color: #0056b3;
         }
 
-        button {
+        /* Botões */
+        .btn {
             width: 100%;
             padding: 14px;
-            background-color: #ffcc00; /* Botão chamativo */
-            color: #003366;
             border: none;
             border-radius: 6px;
             font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.1s, background 0.3s;
+            margin-bottom: 10px;
         }
 
-        button:hover {
+        #btn-entrar {
+            background-color: #ffcc00;
+            color: #003366;
+        }
+
+        #btn-entrar:hover {
             background-color: #e6b800;
         }
 
-        button:active {
+        #btn-matricular {
+            background-color: #25d366; /* Cor do WhatsApp */
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        #btn-matricular:hover {
+            background-color: #1eb954;
+        }
+
+        .btn:active {
             transform: scale(0.98);
         }
 
@@ -137,7 +152,9 @@
             <input type="password" id="senha" placeholder="••••••••">
         </div>
 
-        <button id="btn-entrar">ENTRAR NA SALA DE AULA</button>
+        <button id="btn-entrar" class="btn">ENTRAR NA SALA DE AULA</button>
+        
+        <button id="btn-matricular" class="btn">QUERO ME MATRICULAR</button>
 
         <div id="mensagem-status"></div>
     </div>
@@ -150,6 +167,7 @@
 
         // ELEMENTOS DA TELA
         const btnEntrar = document.getElementById('btn-entrar');
+        const btnMatricular = document.getElementById('btn-matricular');
         const campoEmail = document.getElementById('email');
         const campoSenha = document.getElementById('senha');
         const statusDiv = document.getElementById('mensagem-status');
@@ -159,11 +177,13 @@
             const email = campoEmail.value;
             const password = campoSenha.value;
 
-            // Feedback visual inicial
+            if(!email || !password) {
+                exibirMensagem("Por favor, preencha todos os campos.", "erro");
+                return;
+            }
+
             btnEntrar.innerText = "VERIFICANDO...";
             btnEntrar.disabled = true;
-            statusDiv.className = "";
-            statusDiv.style.display = "none";
 
             const { data, error } = await _supabase.auth.signInWithPassword({
                 email: email,
@@ -171,55 +191,40 @@
             });
 
             if (error) {
-                statusDiv.innerText = "Erro: " + error.message;
-                statusDiv.classList.add('erro');
+                exibirMensagem("Erro: " + error.message, "erro");
                 btnEntrar.innerText = "ENTRAR NA SALA DE AULA";
                 btnEntrar.disabled = false;
             } else {
-                statusDiv.innerText = "Acesso autorizado! Carregando módulos...";
-                statusDiv.classList.add('sucesso');
-                
-                // Pequeno delay para o aluno ver que deu certo antes de redirecionar
+                exibirMensagem("Acesso autorizado! Entrando...", "sucesso");
                 setTimeout(() => {
-                    window.location.href = "curso.html"; 
+                    window.location.href = "modulos.html"; 
                 }, 1000);
             }
         }
 
-        // Eventos de clique e tecla Enter
+        // FUNÇÃO MATRICULAR (WHATSAPP)
+        function matricularNoCurso() {
+            const telefone = "5544988068858"; // SUBSTITUA PELO SEU NÚMERO
+            const mensagem = "Olá! Gostaria de me matricular no Telecurso de Montagem de PC. Como devo proceder?";
+            const url = `https://wa.me/${telefone}?text=${encodeURIComponent(mensagem)}`;
+            window.open(url, '_blank');
+        }
+
+        // FUNÇÃO AUXILIAR DE MENSAGEM
+        function exibirMensagem(texto, tipo) {
+            statusDiv.innerText = texto;
+            statusDiv.className = tipo; // 'erro' ou 'sucesso'
+            statusDiv.style.display = "block";
+        }
+
+        // EVENTOS
         btnEntrar.addEventListener('click', realizarLogin);
+        btnMatricular.addEventListener('click', matricularNoCurso);
         
         document.addEventListener('keypress', (e) => {
             if(e.key === 'Enter') realizarLogin();
         });
-
-        // ... (resto do seu código de configuração do Supabase)
-
-    async function realizarLogin() {
-    const email = campoEmail.value;
-    const password = campoSenha.value;
-
-    // Feedback visual
-    btnEntrar.innerText = "VERIFICANDO...";
-    btnEntrar.disabled = true;
-
-    const { data, error } = await _supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-    });
-
-    if (error) {
-        statusDiv.innerText = "Erro: " + error.message;
-        statusDiv.classList.add('erro');
-        btnEntrar.innerText = "ENTRAR NA SALA DE AULA";
-        btnEntrar.disabled = false;
-    } else {
-        // --- O DIRECIONAMENTO ACONTECE AQUI ---
-        statusDiv.innerText = "Acesso autorizado! Entrando...";
-        statusDiv.classList.add('sucesso');
-        
-        // Redireciona para a página modulos.html
-        window.location.href = "modulos.html"; 
-    }
-}
     </script>
+
+</body>
+</html>

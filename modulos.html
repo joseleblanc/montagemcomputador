@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Módulos | Telecurso PC</title>
+    <title>Módulos | Telecurso Montagem de PC</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
         :root {
             --azul-escuro: #003366;
@@ -12,9 +15,10 @@
             --amarelo: #ffcc00;
             --cinza-fundo: #f4f7f9;
             --verde: #28a745;
+            --branco: #ffffff;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--cinza-fundo); margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--cinza-fundo); margin: 0; padding: 0; }
 
         header {
             background-color: var(--azul-escuro);
@@ -24,105 +28,164 @@
             border-bottom: 5px solid var(--amarelo);
         }
 
-        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
 
-        .boas-vindas {
-            margin-bottom: 30px;
-            color: #333;
+        /* Painel de Boas-vindas e Progresso */
+        .painel-topo {
+            background: var(--branco);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
             align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .info-aluno { flex: 1; min-width: 250px; }
+        .progresso-sessao { flex: 2; min-width: 300px; }
+
+        .barra-fundo {
+            background: #e0e0e0;
+            height: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .barra-preenchimento {
+            background: var(--verde);
+            height: 100%;
+            width: 0%;
+            transition: width 0.8s ease;
+        }
+
+        .btn-acao {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-sair { background: #ff4444; color: white; font-size: 0.8rem; margin-top: 10px; }
+        
+        .btn-certificado {
+            background: #bdc3c7;
+            color: white;
+            cursor: not-allowed;
+            min-width: 200px;
+        }
+
+        .btn-certificado.liberado {
+            background: var(--amarelo);
+            color: var(--azul-escuro);
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 204, 0, 0.4);
         }
 
         .grid-modulos {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
         }
 
         .card-modulo {
-            background: white;
+            background: var(--branco);
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
             border: 1px solid #ddd;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        /* Estilo para módulo bloqueado */
-        .card-modulo.bloqueado {
-            opacity: 0.6;
-            cursor: not-allowed;
-            filter: grayscale(0.8);
-        }
-
-        .card-modulo:not(.bloqueado):hover {
-            transform: translateY(-5px);
-            border-color: var(--azul-claro);
-        }
-
-        .card-banner {
-            background: var(--azul-claro);
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        /* Cores dinâmicas para o banner */
-        .card-modulo.concluido .card-banner { background: var(--verde); }
-        .card-modulo.bloqueado .card-banner { background: #666; }
-
-        .card-corpo {
-            padding: 20px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .status-badge {
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-top: 10px;
-            display: block;
-        }
-
-        .status-concluido { color: var(--verde); }
-        .status-bloqueado { color: #888; }
-        .status-disponivel { color: var(--azul-claro); }
-
-        .btn-sair {
-            background: #ff4444;
-            border: none;
-            color: white;
-            padding: 10px 20px;
+            transition: 0.3s;
             cursor: pointer;
+        }
+
+        .card-modulo.bloqueado { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
+        .card-modulo:not(.bloqueado):hover { transform: translateY(-5px); border-color: var(--azul-claro); }
+
+        .card-banner { padding: 10px; text-align: center; background: var(--azul-claro); color: white; font-weight: bold; }
+        .card-modulo.concluido .card-banner { background: var(--verde); }
+        .card-corpo { padding: 15px; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0 20px 0;
+            border: 1px solid #ddd;
             border-radius: 5px;
-            font-weight: bold;
+            display: block;
         }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>Telecurso: Montagem de PC</h1>
+    <h1>TELECURSO: Montagem de Computadores</h1>
 </header>
 
 <div class="container">
-    <div class="boas-vindas">
-        <div>
+    <div class="painel-topo">
+        <div class="info-aluno">
             <h2 id="nome-aluno" style="margin:0">Carregando...</h2>
-            <p>Seu progresso é salvo automaticamente ao finalizar os desafios.</p>
+            <button class="btn-acao btn-sair" onclick="sair()">Sair da Sala</button>
         </div>
-        <button class="btn-sair" onclick="sair()">Sair</button>
+
+        <div class="progresso-sessao">
+            <div style="display: flex; justify-content: space-between;">
+                <strong>Seu Progresso</strong>
+                <span id="txt-porcentagem" style="color: var(--verde); font-weight: bold;">0%</span>
+            </div>
+            <div class="barra-fundo">
+                <div id="barra-progresso" class="barra-preenchimento"></div>
+            </div>
+            <small>Conclua todas as aulas para liberar o diploma.</small>
+        </div>
+
+        <div>
+            <button id="btn-certificado" class="btn-acao btn-certificado" onclick="abrirModal()">
+                EMITIR CERTIFICADO
+            </button>
+        </div>
     </div>
 
-    <div class="grid-modulos" id="grid-modulos">
-        </div>
+    <div class="grid-modulos" id="grid-modulos"></div>
+</div>
+
+<div id="modal-dados" class="modal">
+    <div class="modal-content">
+        <h2 style="margin-top:0; color: var(--azul-escuro)">Dados do Diploma</h2>
+        <p style="font-size: 0.9rem; color: #666;">Confirme seus dados para a emissão do PDF oficial.</p>
+        
+        <label>Nome Completo:</label>
+        <input type="text" id="input-nome" placeholder="Ex: João da Silva">
+        
+        <label>CPF:</label>
+        <input type="text" id="input-cpf" placeholder="000.000.000-00">
+        
+        <label>Data de Nascimento:</label>
+        <input type="date" id="input-nasc">
+        
+        <button class="btn-acao" style="background: var(--verde); color:white; width: 100%;" onclick="gerarPDF()">
+            GERAR E BAIXAR AGORA
+        </button>
+        <button style="background:none; border:none; width:100%; margin-top:10px; cursor:pointer;" onclick="fecharModal()">Cancelar</button>
+    </div>
 </div>
 
 <script>
@@ -130,81 +193,116 @@
     const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Definição dos módulos (mesma ordem do seu HTML original)
-    const modulosInfo = [
-        { id: 1, titulo: "Conhecendo as peças", desc: "Identificação de componentes e funções." },
-        { id: 2, titulo: "Separando ferramentas", desc: "O que não pode faltar na bancada." },
-        { id: 3, titulo: "Cuidados de segurança", desc: "Eletricidade estática e proteção." },
-        { id: 4, titulo: "Montando o processador", desc: "Encaixe da CPU e pasta térmica." },
-        { id: 5, titulo: "Montando a memória RAM", desc: "Dual Channel e travas de segurança." },
-        { id: 6, titulo: "Montando a placa no Gabinete", desc: "Espelho e parafusos de fixação." },
-        { id: 7, titulo: "Fonte de alimentação", desc: "Instalação da PSU e roteamento." },
-        { id: 8, titulo: "Montando armazenamento", desc: "SSD SATA e M.2 NVMe." },
-        { id: 9, titulo: "Montando Placa de vídeo", desc: "Slot PCI-e e alimentação extra." },
-        { id: 10, titulo: "Coolers de gabinete", desc: "Configurando o fluxo de ar." },
-        { id: 11, titulo: "Primeiro boot de testes", desc: "BIOS e conferência inicial." },
-        { id: 12, titulo: "Formatação com Windows", desc: "Instalação do sistema operacional." }
+    const modulos = [
+        { id: 1, t: "Conhecendo as peças", d: "Identificação de componentes e funções." },
+        { id: 2, t: "Separando ferramentas", d: "O que não pode faltar na bancada." },
+        { id: 3, t: "Cuidados de segurança", d: "Eletricidade estática e proteção." },
+        { id: 4, t: "Montando o processador", d: "Encaixe da CPU e pasta térmica." },
+        { id: 5, t: "Montando a memória RAM", d: "Dual Channel e travas de segurança." },
+        { id: 6, t: "Montando a placa no Gabinete", d: "Espelho e parafusos de fixação." },
+        { id: 7, t: "Fonte de alimentação", d: "Instalação da PSU e roteamento." },
+        { id: 8, t: "Montando armazenamento", d: "SSD SATA e M.2 NVMe." },
+        { id: 9, t: "Montando Placa de vídeo", d: "Slot PCI-e e alimentação extra." },
+        { id: 10, t: "Coolers de gabinete", d: "Configurando o fluxo de ar." },
+        { id: 11, t: "Primeiro boot de testes", d: "BIOS e conferência inicial." },
+        { id: 12, t: "Formatação com Windows", d: "Instalação do sistema operacional." }
     ];
 
     async function inicializar() {
         const { data: { user } } = await _supabase.auth.getUser();
-        if (!user) {
-            window.location.href = "index.html";
-            return;
-        }
-
-        document.getElementById('nome-aluno').innerText = `Bem-vindo, ${user.email.split('@')[0]}`;
-
-        // Busca o progresso do aluno no Supabase
-        const { data: progresso, error } = await _supabase
-            .from('progresso_alunos')
-            .select('modulo_id')
-            .eq('user_id', user.id);
-
+        if (!user) { window.location.href = "index.html"; return; }
+        document.getElementById('nome-aluno').innerText = `Olá, ${user.email.split('@')[0]}!`;
+        const { data: progresso } = await _supabase.from('progresso_alunos').select('modulo_id').eq('user_id', user.id);
         const concluidos = progresso ? progresso.map(p => p.modulo_id) : [];
-        renderizarModulos(concluidos);
+        const pct = Math.round((concluidos.length / modulos.length) * 100);
+        document.getElementById('barra-progresso').style.width = pct + "%";
+        document.getElementById('txt-porcentagem').innerText = pct + "%";
+        if(pct === 100) {
+            const btn = document.getElementById('btn-certificado');
+            btn.classList.add('liberado');
+            btn.innerText = "⭐ EMITIR CERTIFICADO";
+        }
+        renderizar(concluidos);
     }
 
-    function renderizarModulos(concluidos) {
+    function renderizar(concluidos) {
         const grid = document.getElementById('grid-modulos');
-        grid.innerHTML = '';
-
-        modulosInfo.forEach((mod, index) => {
-            const isConcluido = concluidos.includes(mod.id);
-            
-            // Lógica de Bloqueio: O primeiro está sempre aberto. 
-            // Os demais só abrem se o anterior (index - 1) estiver concluído.
-            const isBloqueado = mod.id !== 1 && !concluidos.includes(mod.id - 1);
-
-            const card = document.createElement('div');
-            card.className = `card-modulo ${isBloqueado ? 'bloqueado' : ''} ${isConcluido ? 'concluido' : ''}`;
-            
-            // Só adiciona o clique se não estiver bloqueado
-            if (!isBloqueado) {
-                card.onclick = () => window.location.href = `aulas/aula${mod.id}.html`;
-            }
-
-            let statusHTML = `<span class="status-badge status-disponivel">Acessar Aula →</span>`;
-            if (isConcluido) statusHTML = `<span class="status-badge status-concluido">✅ Concluído</span>`;
-            if (isBloqueado) statusHTML = `<span class="status-badge status-bloqueado">🔒 Bloqueado</span>`;
-
-            card.innerHTML = `
-                <div class="card-banner">Módulo ${mod.id.toString().padStart(2, '0')}</div>
-                <div class="card-corpo">
-                    <h3>${mod.titulo}</h3>
-                    <p>${mod.desc}</p>
-                    ${statusHTML}
-                </div>
-            `;
-            grid.appendChild(card);
-        });
+        grid.innerHTML = modulos.map((m, i) => {
+            const isConcluido = concluidos.includes(m.id);
+            const isBloqueado = m.id !== 1 && !concluidos.includes(m.id - 1);
+            return `
+                <div class="card-modulo ${isBloqueado ? 'bloqueado' : ''} ${isConcluido ? 'concluido' : ''}" 
+                     onclick="${isBloqueado ? '' : `location.href='aulas/aula${m.id}.html'`}">
+                    <div class="card-banner">MÓDULO ${m.id}</div>
+                    <div class="card-corpo">
+                        <h3>${m.t}</h3>
+                        <p style="font-size:0.85rem; color:#666">${m.d}</p>
+                        <span style="font-weight:bold; font-size:0.8rem; color:${isConcluido ? 'var(--verde)' : (isBloqueado ? '#888' : 'var(--azul-claro)')}">
+                            ${isConcluido ? '✅ CONCLUÍDO' : (isBloqueado ? '🔒 BLOQUEADO' : 'FAZER AULA →')}
+                        </span>
+                    </div>
+                </div>`;
+        }).join('');
     }
 
-    async function sair() {
-        await _supabase.auth.signOut();
-        window.location.href = "index.html";
+    function abrirModal() {
+        if(document.getElementById('btn-certificado').classList.contains('liberado')) {
+            document.getElementById('modal-dados').style.display = 'flex';
+        }
+    }
+    function fecharModal() { document.getElementById('modal-dados').style.display = 'none'; }
+
+    async function gerarPDF() {
+        const { jsPDF } = window.jspdf;
+        const nome = document.getElementById('input-nome').value;
+        const cpf = document.getElementById('input-cpf').value;
+        const nasc = document.getElementById('input-nasc').value;
+
+        if(!nome || !cpf || !nasc) return alert("Preencha tudo!");
+
+        const doc = new jsPDF({ orientation: "landscape" });
+        
+        // Moldura do Certificado
+        doc.setDrawColor(0, 51, 102); doc.setLineWidth(10); doc.rect(5, 5, 287, 200);
+        
+        // Títulos Principais
+        doc.setFont("helvetica", "bold"); doc.setFontSize(40);
+        doc.text("CERTIFICADO DE CONCLUSÃO", 148, 50, { align: "center" });
+        
+        doc.setFontSize(20); doc.text("Certificamos que:", 148, 80, { align: "center" });
+        doc.setFontSize(35); doc.setTextColor(0, 86, 179);
+        doc.text(nome.toUpperCase(), 148, 105, { align: "center" });
+        
+        doc.setTextColor(0); doc.setFontSize(16);
+        doc.text("Concluiu com sucesso o curso técnico de", 148, 130, { align: "center" });
+        doc.setFont("helvetica", "bold");
+        doc.text("MONTAGEM E MANUTENÇÃO DE COMPUTADORES", 148, 140, { align: "center" });
+        
+        doc.setFont("helvetica", "normal"); doc.setFontSize(12);
+        doc.text(`CPF: ${cpf} | Data de Nascimento: ${nasc.split('-').reverse().join('/')}`, 148, 155, { align: "center" });
+        
+        // --- SEÇÃO DE ASSINATURA DO CRIADOR ---
+        doc.setFont("courier", "italic"); // Fonte cursiva simulada
+        doc.setFontSize(22);
+        doc.setTextColor(0, 51, 102);
+        // Texto da assinatura baseado na sua imagem
+        doc.text("José Estevão de Araujo Campos", 148, 175, { align: "center" });
+        
+        // Linha da Assinatura
+        doc.setDrawColor(255, 204, 0); doc.setLineWidth(0.5);
+        doc.line(100, 178, 196, 178);
+        
+        // Rodapé de Autenticação
+        doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(0);
+        doc.text("TELECURSO: MONTAGEM DE PC | INSTRUTOR RESPONSÁVEL", 148, 185, { align: "center" });
+        doc.setFont("helvetica", "normal");
+        doc.text(`Emitido em: ${new Date().toLocaleDateString()}`, 148, 192, { align: "center" });
+        
+        doc.save(`Certificado_${nome.replace(" ","_")}.pdf`);
+        fecharModal();
     }
 
+    async function sair() { await _supabase.auth.signOut(); window.location.href = "index.html"; }
     inicializar();
 </script>
 
