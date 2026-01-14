@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Telecurso Montagem de PC</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* Estilos Globais */
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #003366; /* Azul clássico Telecurso */
+            background-image: linear-gradient(180deg, #003366 0%, #0056b3 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        /* Card de Login */
+        .login-container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .logo-area h1 {
+            color: #0056b3;
+            margin: 0;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            border-bottom: 3px solid #ffcc00; /* Detalhe em amarelo */
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .logo-area p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* Formulário */
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #0056b3;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #ffcc00; /* Botão chamativo */
+            color: #003366;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.3s;
+        }
+
+        button:hover {
+            background-color: #e6b800;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Mensagens */
+        #mensagem-status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .erro {
+            background-color: #f8d7da;
+            color: #721c24;
+            display: block !important;
+        }
+
+        .sucesso {
+            background-color: #d4edda;
+            color: #155724;
+            display: block !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="logo-area">
+            <h1>TELECURSO</h1>
+            <p>Montagem e Manutenção de computadores</p>
+        </div>
+
+        <div class="form-group">
+            <label for="email">E-mail do Aluno</label>
+            <input type="email" id="email" placeholder="exemplo@email.com">
+        </div>
+
+        <div class="form-group">
+            <label for="senha">Senha de Acesso</label>
+            <input type="password" id="senha" placeholder="••••••••">
+        </div>
+
+        <button id="btn-entrar">ENTRAR NA SALA DE AULA</button>
+
+        <div id="mensagem-status"></div>
+    </div>
+
+    <script>
+        // CONFIGURAÇÃO SUPABASE
+        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ELEMENTOS DA TELA
+        const btnEntrar = document.getElementById('btn-entrar');
+        const campoEmail = document.getElementById('email');
+        const campoSenha = document.getElementById('senha');
+        const statusDiv = document.getElementById('mensagem-status');
+
+        // FUNÇÃO DE LOGIN
+        async function realizarLogin() {
+            const email = campoEmail.value;
+            const password = campoSenha.value;
+
+            // Feedback visual inicial
+            btnEntrar.innerText = "VERIFICANDO...";
+            btnEntrar.disabled = true;
+            statusDiv.className = "";
+            statusDiv.style.display = "none";
+
+            const { data, error } = await _supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                statusDiv.innerText = "Erro: " + error.message;
+                statusDiv.classList.add('erro');
+                btnEntrar.innerText = "ENTRAR NA SALA DE AULA";
+                btnEntrar.disabled = false;
+            } else {
+                statusDiv.innerText = "Acesso autorizado! Carregando módulos...";
+                statusDiv.classList.add('sucesso');
+                
+                // Pequeno delay para o aluno ver que deu certo antes de redirecionar
+                setTimeout(() => {
+                    window.location.href = "curso.html"; 
+                }, 1000);
+            }
+        }
+
+        // Eventos de clique e tecla Enter
+        btnEntrar.addEventListener('click', realizarLogin);
+        
+        document.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') realizarLogin();
+        });
+
+        // ... (resto do seu código de configuração do Supabase)
+
+    async function realizarLogin() {
+    const email = campoEmail.value;
+    const password = campoSenha.value;
+
+    // Feedback visual
+    btnEntrar.innerText = "VERIFICANDO...";
+    btnEntrar.disabled = true;
+
+    const { data, error } = await _supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        statusDiv.innerText = "Erro: " + error.message;
+        statusDiv.classList.add('erro');
+        btnEntrar.innerText = "ENTRAR NA SALA DE AULA";
+        btnEntrar.disabled = false;
+    } else {
+        // --- O DIRECIONAMENTO ACONTECE AQUI ---
+        statusDiv.innerText = "Acesso autorizado! Entrando...";
+        statusDiv.classList.add('sucesso');
+        
+        // Redireciona para a página modulos.html
+        window.location.href = "modulos.html"; 
+    }
+}
+    </script>

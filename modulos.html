@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulos | Telecurso PC</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --azul-escuro: #003366;
+            --azul-claro: #0056b3;
+            --amarelo: #ffcc00;
+            --cinza-fundo: #f4f7f9;
+            --verde: #28a745;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--cinza-fundo); margin: 0; padding: 0; }
+
+        header {
+            background-color: var(--azul-escuro);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 5px solid var(--amarelo);
+        }
+
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+
+        .boas-vindas {
+            margin-bottom: 30px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .grid-modulos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card-modulo {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Estilo para módulo bloqueado */
+        .card-modulo.bloqueado {
+            opacity: 0.6;
+            cursor: not-allowed;
+            filter: grayscale(0.8);
+        }
+
+        .card-modulo:not(.bloqueado):hover {
+            transform: translateY(-5px);
+            border-color: var(--azul-claro);
+        }
+
+        .card-banner {
+            background: var(--azul-claro);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Cores dinâmicas para o banner */
+        .card-modulo.concluido .card-banner { background: var(--verde); }
+        .card-modulo.bloqueado .card-banner { background: #666; }
+
+        .card-corpo {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .status-badge {
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        .status-concluido { color: var(--verde); }
+        .status-bloqueado { color: #888; }
+        .status-disponivel { color: var(--azul-claro); }
+
+        .btn-sair {
+            background: #ff4444;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Telecurso: Montagem de PC</h1>
+</header>
+
+<div class="container">
+    <div class="boas-vindas">
+        <div>
+            <h2 id="nome-aluno" style="margin:0">Carregando...</h2>
+            <p>Seu progresso é salvo automaticamente ao finalizar os desafios.</p>
+        </div>
+        <button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+
+    <div class="grid-modulos" id="grid-modulos">
+        </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Definição dos módulos (mesma ordem do seu HTML original)
+    const modulosInfo = [
+        { id: 1, titulo: "Conhecendo as peças", desc: "Identificação de componentes e funções." },
+        { id: 2, titulo: "Separando ferramentas", desc: "O que não pode faltar na bancada." },
+        { id: 3, titulo: "Cuidados de segurança", desc: "Eletricidade estática e proteção." },
+        { id: 4, titulo: "Montando o processador", desc: "Encaixe da CPU e pasta térmica." },
+        { id: 5, titulo: "Montando a memória RAM", desc: "Dual Channel e travas de segurança." },
+        { id: 6, titulo: "Montando a placa no Gabinete", desc: "Espelho e parafusos de fixação." },
+        { id: 7, titulo: "Fonte de alimentação", desc: "Instalação da PSU e roteamento." },
+        { id: 8, titulo: "Montando armazenamento", desc: "SSD SATA e M.2 NVMe." },
+        { id: 9, titulo: "Montando Placa de vídeo", desc: "Slot PCI-e e alimentação extra." },
+        { id: 10, titulo: "Coolers de gabinete", desc: "Configurando o fluxo de ar." },
+        { id: 11, titulo: "Primeiro boot de testes", desc: "BIOS e conferência inicial." },
+        { id: 12, titulo: "Formatação com Windows", desc: "Instalação do sistema operacional." }
+    ];
+
+    async function inicializar() {
+        const { data: { user } } = await _supabase.auth.getUser();
+        if (!user) {
+            window.location.href = "index.html";
+            return;
+        }
+
+        document.getElementById('nome-aluno').innerText = `Bem-vindo, ${user.email.split('@')[0]}`;
+
+        // Busca o progresso do aluno no Supabase
+        const { data: progresso, error } = await _supabase
+            .from('progresso_alunos')
+            .select('modulo_id')
+            .eq('user_id', user.id);
+
+        const concluidos = progresso ? progresso.map(p => p.modulo_id) : [];
+        renderizarModulos(concluidos);
+    }
+
+    function renderizarModulos(concluidos) {
+        const grid = document.getElementById('grid-modulos');
+        grid.innerHTML = '';
+
+        modulosInfo.forEach((mod, index) => {
+            const isConcluido = concluidos.includes(mod.id);
+            
+            // Lógica de Bloqueio: O primeiro está sempre aberto. 
+            // Os demais só abrem se o anterior (index - 1) estiver concluído.
+            const isBloqueado = mod.id !== 1 && !concluidos.includes(mod.id - 1);
+
+            const card = document.createElement('div');
+            card.className = `card-modulo ${isBloqueado ? 'bloqueado' : ''} ${isConcluido ? 'concluido' : ''}`;
+            
+            // Só adiciona o clique se não estiver bloqueado
+            if (!isBloqueado) {
+                card.onclick = () => window.location.href = `aulas/aula${mod.id}.html`;
+            }
+
+            let statusHTML = `<span class="status-badge status-disponivel">Acessar Aula →</span>`;
+            if (isConcluido) statusHTML = `<span class="status-badge status-concluido">✅ Concluído</span>`;
+            if (isBloqueado) statusHTML = `<span class="status-badge status-bloqueado">🔒 Bloqueado</span>`;
+
+            card.innerHTML = `
+                <div class="card-banner">Módulo ${mod.id.toString().padStart(2, '0')}</div>
+                <div class="card-corpo">
+                    <h3>${mod.titulo}</h3>
+                    <p>${mod.desc}</p>
+                    ${statusHTML}
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    async function sair() {
+        await _supabase.auth.signOut();
+        window.location.href = "index.html";
+    }
+
+    inicializar();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio Técnico | Telecurso PC</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .quiz-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 550px; width: 90%; }
+        h2 { color: #003366; text-align: center; margin-top: 0; }
+        .pergunta { margin-top: 20px; margin-bottom: 10px; font-weight: bold; color: #444; }
+        .opcao { display: block; background: #f8f9fa; padding: 12px; margin: 8px 0; border: 2px solid #eee; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
+        .opcao:hover { border-color: #0056b3; background: #eef4ff; }
+        input[type="radio"] { margin-right: 10px; }
+        .btn-verificar { width: 100%; background: #003366; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 1rem; }
+        .btn-verificar:hover { background: #0056b3; }
+        .resultado-tela { display: none; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-card" id="caixa-quiz">
+        <h2 id="titulo-quiz">Desafio de Conhecimento</h2>
+        <div id="conteudo-questoes">
+            </div>
+        <button class="btn-verificar" onclick="verificarRespostas()">Finalizar Desafio</button>
+    </div>
+
+    <div class="quiz-card resultado-tela" id="caixa-resultado">
+        <h2 id="titulo-res"></h2>
+        <p id="texto-res"></p>
+        <button class="btn-verificar" id="btn-acao"></button>
+    </div>
+
+    <script>
+        // BANCO DE DADOS DE TODOS OS MÓDULOS
+        const bancoDeDados = {
+            "1": [
+                { q: "Qual componente é o 'Cérebro' do computador?", opts: ["SSD", "RAM", "Processador (CPU)", "Fonte"], a: 2 },
+                { q: "Onde todas as peças se conectam?", opts: ["No Gabinete", "Na Placa-Mãe", "No HD", "Na RAM"], a: 1 },
+                { q: "A memória RAM serve para:", opts: ["Arquivos permanentes", "Energia", "Imagens", "Dados temporários"], a: 3 },
+                { q: "Peça que não pode ter economia por risco de queima:", opts: ["Gabinete", "Fonte de Alimentação", "Mouse", "Cooler"], a: 1 },
+                { q: "O SSD M.2 NVMe é conhecido por:", opts: ["Ser lento", "Alta velocidade", "Substituir a GPU", "Cabo SATA"], a: 1 }
+            ],
+            "2": [
+                { q: "Ferramenta mais utilizada na montagem:", opts: ["Martelo", "Chave Philips", "Chave de Fenda", "Alicate"], a: 1 },
+                { q: "Para que servem as luvas antiestáticas?", opts: ["Limpeza", "Aderência", "Proteção de componentes", "Estética"], a: 2 },
+                { q: "Onde deve ser aplicada a pasta térmica?", opts: ["Placa-mãe", "Entre CPU e Cooler", "RAM", "Ventoinhas"], a: 1 },
+                { q: "A chave de fenda (ponta chata) auxilia em:", opts: ["Parafusar CPU", "Instalar Windows", "Abrir travas específicas", "Energia"], a: 2 }
+            ],
+            "3": [
+                { q: "Pergunta do Módulo 3 (Segurança)?", opts: ["Opção A", "Opção B", "Opção C", "Opção D"], a: 0 },
+                { q: "Pergunta 2 do Módulo 3?", opts: ["Opção A", "Opção B", "Opção C", "Opção D"], a: 1 }
+            ],
+            "4": [
+                { q: "Pergunta do Módulo 4 (Processador)?", opts: ["Opção A", "Opção B", "Opção C", "Opção D"], a: 0 }
+            ],
+            "5": [
+                { q: "Pergunta do Módulo 5 (Memória RAM)?", opts: ["Opção A", "Opção B", "Opção C", "Opção D"], a: 0 }
+            ],
+            "6": [
+                { q: "Pergunta do Módulo 6 (Gabinete)?", opts: ["Opção A", "Opção B", "Opção C", "Opção D"], a: 0 }
+            ],
+            "7": [
+                { q: "Pergunta do Módulo 7 (Fonte)?", opts: ["Opção A", "Opção B", "Opção C", "Opção D"], a: 0 }
+            ],
+            "8": [
+                { q: "Pergunta do Módulo 8 (Armazenamento)?", opts: ["Opção A", "Opção B", "Opção C", "Opção D"], a: 0 }
+            ],
+            "9": [
+                { q: "Pergunta do Módulo 9 (GPU)?", opts: ["Opção A", "Opção B", "Opção C", "Opção D"], a: 0 }
+            ],
+            "10": [
+                { q: "Pergunta do Módulo 10 (Coolers)?", opts: ["Opção A", "Opção B", "Opção C", "Opção D"], a: 0 }
+            ],
+            "11": [
+                { q: "Pergunta do Módulo 11 (Boot)?", opts: ["Opção A", "Opção B", "Opção C", "Opção D"], a: 0 }
+            ],
+            "12": [
+                { q: "Pergunta do Módulo 12 (Windows)?", opts: ["Opção A", "Opção B", "Opção C", "Opção D"], a: 0 }
+            ]
+        };
+
+        // Captura o número do módulo pela URL (ex: quiz.html?modulo=2)
+        const urlParams = new URLSearchParams(window.location.search);
+        const moduloAtual = urlParams.get('modulo') || "1";
+        const perguntas = bancoDeDados[moduloAtual];
+
+        // Ajusta o título da página conforme o módulo
+        document.getElementById('titulo-quiz').innerText = `Desafio: Módulo ${moduloAtual}`;
+
+        function carregarQuestoes() {
+            const container = document.getElementById('conteudo-questoes');
+            container.innerHTML = ""; 
+
+            perguntas.forEach((p, i) => {
+                let html = `<div class="pergunta">${i+1}. ${p.q}</div>`;
+                p.opts.forEach((opt, index) => {
+                    html += `<label class="opcao">
+                                <input type="radio" name="q${i}" value="${index}"> ${opt}
+                             </label>`;
+                });
+                container.innerHTML += html;
+            });
+        }
+
+        function verificarRespostas() {
+            let acertos = 0;
+            let todasRespondidas = true;
+
+            perguntas.forEach((p, i) => {
+                const marcada = document.querySelector(`input[name="q${i}"]:checked`);
+                if (marcada) {
+                    if (parseInt(marcada.value) === p.a) {
+                        acertos++;
+                    }
+                } else {
+                    todasRespondidas = false;
+                }
+            });
+
+            if (!todasRespondidas) {
+                alert("Por favor, responda todas as questões antes de finalizar!");
+                return;
+            }
+
+            const percentual = Math.round((acertos / perguntas.length) * 100);
+            mostrarResultado(percentual);
+        }
+
+        function mostrarResultado(nota) {
+            document.getElementById('caixa-quiz').style.display = 'none';
+            const tela = document.getElementById('caixa-resultado');
+            tela.style.display = 'block';
+
+            const titulo = document.getElementById('titulo-res');
+            const texto = document.getElementById('texto-res');
+            const btn = document.getElementById('btn-acao');
+
+            if (nota >= 60) {
+                titulo.innerText = "Mandou bem! 🎉";
+                titulo.style.color = "#28a745";
+                texto.innerText = `Você acertou ${nota}%. Conhecimento validado!`;
+                btn.innerText = "Voltar para a Aula";
+                // Redireciona para a aula correspondente com o parâmetro de aprovação
+                btn.onclick = () => window.location.href = `aulas/aula${moduloAtual}.html?aprovado=true`;
+            } else {
+                titulo.innerText = "Não foi dessa vez... ❌";
+                titulo.style.color = "#dc3545";
+                texto.innerText = `Você acertou ${nota}%. O mínimo necessário é 60%. Revise o conteúdo e tente novamente.`;
+                btn.innerText = "Tentar Novamente";
+                btn.onclick = () => location.reload();
+            }
+        }
+
+        // Inicializa o quiz ao carregar a página
+        carregarQuestoes();
+    </script>
+</body>
+</html>
