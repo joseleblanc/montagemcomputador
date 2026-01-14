@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aula 2: Ferramentas Essenciais | Telecurso PC</title>
+    <title>Aula 3: Cuidados de Segurança | Telecurso PC</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -13,6 +13,7 @@
             --branco: #ffffff;
             --texto: #333;
             --verde: #28a745;
+            --vermelho-alerta: #dc3545;
         }
 
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; color: var(--texto); line-height: 1.6; }
@@ -21,6 +22,8 @@
         .container { max-width: 900px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
         h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
         
+        .alerta-box { background: #fff3f3; border-left: 5px solid var(--vermelho-alerta); padding: 20px; margin: 20px 0; border-radius: 8px; }
+
         .peça-card { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 40px; padding: 25px; border-left: 5px solid var(--azul-claro); background: #f9f9f9; border-radius: 8px; }
         .peça-card img { max-width: 100%; height: auto; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .peça-info h3 { margin: 0 0 10px 0; color: var(--azul-claro); font-size: 1.3rem; }
@@ -31,7 +34,7 @@
 
         @media (min-width: 768px) {
             .peça-card { flex-direction: row; align-items: flex-start; text-align: left; }
-            .peça-card img { max-width: 250px; }
+            .peça-card img { max-width: 200px; }
         }
     </style>
 </head>
@@ -43,55 +46,66 @@
     </nav>
 
     <div class="container">
-        <h1>Módulo 2: Ferramentas e Insumos</h1>
-        <p>Para montar um computador com precisão, você não precisa de muitas ferramentas, mas precisa das ferramentas certas.</p>
+        <h1>Módulo 3: Segurança e Estática</h1>
+        <p>Antes de tocar em qualquer peça, precisamos entender o maior inimigo do hardware: a <strong>Eletricidade Estática (ESD)</strong>.</p>
+
+        <div class="alerta-box">
+            <h3 style="color: var(--vermelho-alerta); margin-top: 0;">⚠️ Regra de Ouro</h3>
+            <p><strong>Nunca</strong> monte o computador descalço em pisos frios ou sobre tapetes. O ideal é usar calçados de borracha e trabalhar em uma superfície de madeira ou vidro.</p>
+        </div>
 
         <div class="secao-tecnica">
             <div class="peça-card">
-                <img src="../img/chave-philips.webp" alt="Chave Philips">
+                <img src="../img/eletricidade-estatica.webp" alt="Eletricidade Estática">
                 <div class="peça-info">
-                    <h3>1. Chave Philips (Cruz)</h3>
-                    <p>É a principal ferramenta. Usada em 90% dos parafusos do PC: placa-mãe, gabinete, fonte e discos rígidos.</p>
-                </div>
-            </div>
-            
-
-            <div class="peça-card">
-                <img src="../img/chave-fenda.webp" alt="Chave de Fenda">
-                <div class="peça-info">
-                    <h3>2. Chave de Fenda (Chata)</h3>
-                    <p>Menos comum em parafusos modernos, mas útil para fazer alavancas leves ou abrir travas específicas de alguns gabinetes antigos.</p>
+                    <h3>1. O que é a Estática?</h3>
+                    <p>É uma carga elétrica que acumulamos no corpo. Um choque invisível e indolor já é suficiente para queimar os transistores microscópicos de um processador ou memória RAM.</p>
                 </div>
             </div>
 
             <div class="peça-card">
-                <img src="../img/luvas-antiestaticas.webp" alt="Luvas Antiestáticas">
+                <img src="../img/segurar-peca.jpg" alt="Como segurar peças">
                 <div class="peça-info">
-                    <h3>3. Luvas Antiestáticas</h3>
-                    <p>Uma alternativa moderna à pulseira. Elas impedem que a gordura das mãos e a eletricidade estática entrem em contato direto com os circuitos sensíveis.</p>
+                    <h3>2. Como segurar as peças</h3>
+                    <p>Sempre segure as placas (mãe, vídeo, memórias) pelas <strong>bordas laterais</strong>. Evite tocar nos contatos dourados e nos circuitos impressos (os "caminhos" na placa).</p>
                 </div>
             </div>
 
             <div class="peça-card">
-                <img src="../img/pasta-termica.webp" alt="Pasta Térmica">
+                <img src="../img/placa-caixa.jpg" alt="Placa sobre a caixa">
                 <div class="peça-info">
-                    <h3>4. Pasta Térmica</h3>
-                    <p>O insumo mais importante para a temperatura. Ela preenche as imperfeições microscópicas entre o processador e o cooler.</p>
+                    <h3>3. A Caixa como Bancada</h3>
+                    <p>Ao tirar a placa-mãe da embalagem, apoie-a em cima da <strong>caixa de papelão</strong> original. O papelão é um isolante que protege as soldas pontiagudas embaixo da placa e evita curtos-circuitos acidentais durante a montagem do processador.</p>
                 </div>
             </div>
-            
+
+            <div class="peça-card">
+                <img src="../img/mao-parede.jpg" alt="Aterramento">
+                <div class="peça-info">
+                    <h3>4. Descarregando o corpo</h3>
+                    <p>Se não tiver pulseira antiestática, toque em uma parede ou em uma parte metálica sem pintura por 5 segundos para equilibrar sua carga antes de manipular os componentes.</p>
+                </div>
+            </div>
+
+            <div class="peça-card">
+                <img src="../img/mesa.jpg" alt="Ambiente Limpo">
+                <div class="peça-info">
+                    <h3>5. Ambiente de Trabalho</h3>
+                    <p>Mantenha sua bancada organizada e livre de líquidos. Evite usar roupas de lã ou tecidos sintéticos, pois o atrito desses materiais gera altos níveis de estática.</p>
+                </div>
+            </div>
         </div>
 
         <div class="area-final">
             <div id="status-aprovacao">
-                <h3>Tudo pronto na bancada?</h3>
-                <p>Responda o quiz sobre ferramentas para liberar a conclusão.</p>
-                <button class="btn-quiz" onclick="irParaQuiz()">FAZER DESAFIO DO MÓDULO 2</button>
+                <h3>Sua segurança está em primeiro lugar?</h3>
+                <p>Responda o quiz sobre segurança para liberar este módulo.</p>
+                <button class="btn-quiz" onclick="irParaQuiz()">FAZER DESAFIO DO MÓDULO 3</button>
             </div>
 
             <div id="box-concluir" style="display:none">
-                <h3 style="color: var(--verde)">Ferramentas OK! 🎉</h3>
-                <p>Você já sabe o que precisa ter em mãos para começar.</p>
+                <h3 style="color: var(--verde)">Segurança Entendida! 🛡️</h3>
+                <p>Você agora sabe como proteger seu investimento contra descargas elétricas.</p>
                 <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()">CONCLUIR MÓDULO ✅</button>
             </div>
         </div>
@@ -114,19 +128,37 @@
             }
         }
 
-        function irParaQuiz() { window.location.href = `../quiz.html?modulo=2`; }
+        function irParaQuiz() { window.location.href = `../quiz.html?modulo=3`; }
 
-        async function concluirModulo() {
-            const { data: { user } } = await _supabase.auth.getUser();
-            const { error } = await _supabase
-                .from('progresso_alunos')
-                .upsert({ user_id: user.id, modulo_id: 2, concluido: true });
-
-            if (!error) {
-                alert("Módulo 2 Concluído!");
-                window.location.href = "../modulos.html";
-            }
+async function concluirModulo() {
+    try {
+        const { data: { user } } = await _supabase.auth.getUser();
+        
+        if (!user) {
+            alert("Sessão expirada. Faça login novamente.");
+            return;
         }
+
+        // Simplificado para bater com a estrutura do modulos.html
+        const { error } = await _supabase
+            .from('progresso_alunos')
+            .upsert({ 
+                user_id: user.id, 
+                modulo_id: 3 
+            }, { onConflict: 'user_id, modulo_id' }); // Garante que não duplique
+
+        if (error) {
+            console.error("Erro detalhado do Supabase:", error.message);
+            alert("Erro do Banco: " + error.message);
+        } else {
+            alert("Módulo 3 Concluído com Sucesso!");
+            window.location.href = "../modulos.html";
+        }
+    } catch (err) {
+        console.error("Erro inesperado:", err);
+        alert("Erro inesperado ao salvar.");
+    }
+}
         inicializar();
     </script>
 </body>

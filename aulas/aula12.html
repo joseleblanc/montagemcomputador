@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aula 2: Ferramentas Essenciais | Telecurso PC</title>
+    <title>Aula 12: Instalação do Windows | Telecurso PC</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -13,26 +13,28 @@
             --branco: #ffffff;
             --texto: #333;
             --verde: #28a745;
+            --vermelho: #dc3545;
         }
 
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; color: var(--texto); line-height: 1.6; }
         .navbar { background: var(--azul-escuro); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; }
         .btn-voltar { color: white; text-decoration: none; font-weight: bold; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 5px; }
-        .container { max-width: 900px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
-        h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
+        .container { max-width: 1000px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
         
-        .peça-card { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 40px; padding: 25px; border-left: 5px solid var(--azul-claro); background: #f9f9f9; border-radius: 8px; }
-        .peça-card img { max-width: 100%; height: auto; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .peça-info h3 { margin: 0 0 10px 0; color: var(--azul-claro); font-size: 1.3rem; }
+        h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
+        h2 { color: var(--azul-claro); margin-top: 30px; border-left: 5px solid var(--amarelo); padding-left: 15px; }
+        
+        .box-instrucao { background: #eef7ff; border-radius: 10px; padding: 25px; margin: 20px 0; border: 1px solid #cce5ff; }
+        .alerta { background: #fff4e5; border-left: 5px solid #ffa000; padding: 15px; margin: 15px 0; }
+        
+        .grid-passos { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .passo-card { background: #f9f9f9; padding: 20px; border-radius: 8px; border-bottom: 3px solid var(--azul-claro); }
 
         .area-final { text-align: center; margin-top: 50px; padding: 40px; border-top: 2px dashed #ccc; background: #fffcf0; border-radius: 0 0 12px 12px; }
         .btn-quiz { background: var(--azul-escuro); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
         .btn-concluir { background: var(--verde); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; display: none; }
 
-        @media (min-width: 768px) {
-            .peça-card { flex-direction: row; align-items: flex-start; text-align: left; }
-            .peça-card img { max-width: 250px; }
-        }
+        @media (min-width: 768px) { .grid-passos { grid-template-columns: 1fr 1fr; } }
     </style>
 </head>
 <body>
@@ -43,56 +45,68 @@
     </nav>
 
     <div class="container">
-        <h1>Módulo 2: Ferramentas e Insumos</h1>
-        <p>Para montar um computador com precisão, você não precisa de muitas ferramentas, mas precisa das ferramentas certas.</p>
+        <h1>Módulo 12: Instalação do Windows (Formatação)</h1>
+        <p>Com o hardware pronto e a BIOS configurada, agora vamos instalar o cérebro do PC: o Sistema Operacional.</p>
 
-        <div class="secao-tecnica">
-            <div class="peça-card">
-                <img src="../img/chave-philips.webp" alt="Chave Philips">
-                <div class="peça-info">
-                    <h3>1. Chave Philips (Cruz)</h3>
-                    <p>É a principal ferramenta. Usada em 90% dos parafusos do PC: placa-mãe, gabinete, fonte e discos rígidos.</p>
-                </div>
-            </div>
-            
-
-            <div class="peça-card">
-                <img src="../img/chave-fenda.webp" alt="Chave de Fenda">
-                <div class="peça-info">
-                    <h3>2. Chave de Fenda (Chata)</h3>
-                    <p>Menos comum em parafusos modernos, mas útil para fazer alavancas leves ou abrir travas específicas de alguns gabinetes antigos.</p>
-                </div>
-            </div>
-
-            <div class="peça-card">
-                <img src="../img/luvas-antiestaticas.webp" alt="Luvas Antiestáticas">
-                <div class="peça-info">
-                    <h3>3. Luvas Antiestáticas</h3>
-                    <p>Uma alternativa moderna à pulseira. Elas impedem que a gordura das mãos e a eletricidade estática entrem em contato direto com os circuitos sensíveis.</p>
-                </div>
-            </div>
-
-            <div class="peça-card">
-                <img src="../img/pasta-termica.webp" alt="Pasta Térmica">
-                <div class="peça-info">
-                    <h3>4. Pasta Térmica</h3>
-                    <p>O insumo mais importante para a temperatura. Ela preenche as imperfeições microscópicas entre o processador e o cooler.</p>
-                </div>
-            </div>
-            
+        <h2>1. Preparação da Mídia (Pendrive Bootável)</h2>
+        <div class="box-instrucao">
+            <p>Você precisará de um pendrive de no mínimo 8GB em outro computador:</p>
+            <ul>
+                <li>Baixe a <strong>Ferramenta de Criação de Mídia</strong> no site oficial da Microsoft.</li>
+                <li>Siga as etapas para criar um pendrive de instalação para "outro PC".</li>
+                <li><strong>Atenção:</strong> Isso apagará todos os arquivos que estiverem no pendrive!</li>
+            </ul>
         </div>
+        
+
+        <h2>2. O Processo de Instalação</h2>
+        <div class="grid-passos">
+            <div class="passo-card">
+                <h3>A. O Início</h3>
+                <p>Com o pendrive espetado, ligue o PC. Ele deve iniciar a tela roxa do Windows. Escolha o idioma "Português (Brasil)" e o teclado "ABNT2".</p>
+            </div>
+            <div class="passo-card">
+                <h3>B. Chave de Produto</h3>
+                <p>Quando pedir a chave, se você não tiver uma agora, clique em <strong>"Não tenho a chave do produto"</strong>. Você poderá ativar o Windows depois.</p>
+            </div>
+            <div class="passo-card">
+                <h3>C. Tipo de Instalação</h3>
+                <p>Escolha sempre a opção <strong>"Personalizada: Instalar apenas o Windows (avançado)"</strong>. Isso permite configurar o disco do zero.</p>
+            </div>
+            <div class="passo-card">
+                <h3>D. Partições de Disco</h3>
+                <p>Se o seu SSD for novo, ele aparecerá como "Espaço Não Alocado". Clique em <strong>Novo -> Aplicar</strong> (o Windows criará partições de sistema automaticamente) e clique em Avançar.</p>
+            </div>
+        </div>
+        
+
+        <h2>3. Configurações Iniciais</h2>
+        <div class="alerta">
+            <p><strong>DICA DE PRIVACIDADE:</strong> Durante a configuração (Cortana, localização, telemetria), é recomendado desativar as opções de rastreamento de anúncios e envio de dados para deixar o sistema mais leve e privado.</p>
+        </div>
+
+        <h2>4. Pós-Instalação: Drivers</h2>
+        <div class="box-instrucao">
+            <p>O Windows está pronto, mas o trabalho não acabou. Você deve:</p>
+            <ol>
+                <li>Rodar o <strong>Windows Update</strong> para baixar drivers básicos.</li>
+                <li>Baixar o driver oficial da sua <strong>Placa de Vídeo</strong> (Nvidia ou AMD).</li>
+                <li>Acessar o site da fabricante da placa-mãe para baixar os drivers de Áudio e Chipset mais recentes.</li>
+            </ol>
+        </div>
+        
 
         <div class="area-final">
             <div id="status-aprovacao">
-                <h3>Tudo pronto na bancada?</h3>
-                <p>Responda o quiz sobre ferramentas para liberar a conclusão.</p>
-                <button class="btn-quiz" onclick="irParaQuiz()">FAZER DESAFIO DO MÓDULO 2</button>
+                <h3>Tudo pronto para navegar?</h3>
+                <p>Responda o quiz de software para concluir definitivamente o curso!</p>
+                <button class="btn-quiz" onclick="irParaQuiz()">FAZER DESAFIO DO MÓDULO 12</button>
             </div>
 
             <div id="box-concluir" style="display:none">
-                <h3 style="color: var(--verde)">Ferramentas OK! 🎉</h3>
-                <p>Você já sabe o que precisa ter em mãos para começar.</p>
-                <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()">CONCLUIR MÓDULO ✅</button>
+                <h3 style="color: var(--verde)">PC TOTALMENTE OPERACIONAL! 🖥️✨</h3>
+                <p>Você foi do hardware ao software. Agora, aproveite sua máquina!</p>
+                <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()">FINALIZAR CURSO ✅</button>
             </div>
         </div>
     </div>
@@ -114,18 +128,15 @@
             }
         }
 
-        function irParaQuiz() { window.location.href = `../quiz.html?modulo=2`; }
+        function irParaQuiz() { window.location.href = `../quiz.html?modulo=12`; }
 
         async function concluirModulo() {
-            const { data: { user } } = await _supabase.auth.getUser();
-            const { error } = await _supabase
-                .from('progresso_alunos')
-                .upsert({ user_id: user.id, modulo_id: 2, concluido: true });
-
-            if (!error) {
-                alert("Módulo 2 Concluído!");
+            try {
+                const { data: { user } } = await _supabase.auth.getUser();
+                await _supabase.from('progresso_alunos').upsert({ user_id: user.id, modulo_id: 12 });
+                alert("CURSO CONCLUÍDO COM SUCESSO! Você é um mestre da montagem.");
                 window.location.href = "../modulos.html";
-            }
+            } catch (err) { alert("Erro ao salvar."); }
         }
         inicializar();
     </script>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aula 2: Ferramentas Essenciais | Telecurso PC</title>
+    <title>Aula 8 Armazenamento (SSD e HD) | Telecurso PC</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -21,6 +21,8 @@
         .container { max-width: 900px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
         h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
         
+        .dica-box { background: #e7f3ff; border-left: 5px solid var(--azul-claro); padding: 20px; margin: 20px 0; border-radius: 8px; }
+
         .peça-card { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 40px; padding: 25px; border-left: 5px solid var(--azul-claro); background: #f9f9f9; border-radius: 8px; }
         .peça-card img { max-width: 100%; height: auto; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .peça-info h3 { margin: 0 0 10px 0; color: var(--azul-claro); font-size: 1.3rem; }
@@ -31,7 +33,7 @@
 
         @media (min-width: 768px) {
             .peça-card { flex-direction: row; align-items: flex-start; text-align: left; }
-            .peça-card img { max-width: 250px; }
+            .peça-card img { max-width: 200px; }
         }
     </style>
 </head>
@@ -43,55 +45,52 @@
     </nav>
 
     <div class="container">
-        <h1>Módulo 2: Ferramentas e Insumos</h1>
-        <p>Para montar um computador com precisão, você não precisa de muitas ferramentas, mas precisa das ferramentas certas.</p>
+        <h1>Módulo 8: Instalando o Armazenamento</h1>
+        <p>O armazenamento é onde o sistema operacional e seus arquivos moram. Atualmente, o padrão <strong>NVMe M.2</strong> é o mais rápido e fácil de instalar.</p>
+
+        <div class="dica-box">
+            <h3>💡 SSD vs HD</h3>
+            <p>Sempre instale o Windows em um <strong>SSD</strong>. Deixe os HDs mecânicos apenas para arquivos grandes, como filmes ou backups, devido à sua lentidão comparada aos SSDs modernos.</p>
+        </div>
 
         <div class="secao-tecnica">
             <div class="peça-card">
-                <img src="../img/chave-philips.webp" alt="Chave Philips">
+                <img src="../img/m2-ssd-install.webp" alt="Instalação de SSD M.2">
                 <div class="peça-info">
-                    <h3>1. Chave Philips (Cruz)</h3>
-                    <p>É a principal ferramenta. Usada em 90% dos parafusos do PC: placa-mãe, gabinete, fonte e discos rígidos.</p>
+                    <h3>1. SSD M.2 (NVMe)</h3>
+                    <p>Encaixe o SSD no slot M.2 em um ângulo de 30 graus. Pressione-o levemente para baixo e prenda-o com o parafuso minúsculo que acompanha a placa-mãe. Alguns modelos usam travas de plástico (EZ-Latch).</p>
                 </div>
             </div>
             
 
             <div class="peça-card">
-                <img src="../img/chave-fenda.webp" alt="Chave de Fenda">
+                <img src="../img/ssd-sata-install.webp" alt="SSD SATA de 2.5 polegadas">
                 <div class="peça-info">
-                    <h3>2. Chave de Fenda (Chata)</h3>
-                    <p>Menos comum em parafusos modernos, mas útil para fazer alavancas leves ou abrir travas específicas de alguns gabinetes antigos.</p>
-                </div>
-            </div>
-
-            <div class="peça-card">
-                <img src="../img/luvas-antiestaticas.webp" alt="Luvas Antiestáticas">
-                <div class="peça-info">
-                    <h3>3. Luvas Antiestáticas</h3>
-                    <p>Uma alternativa moderna à pulseira. Elas impedem que a gordura das mãos e a eletricidade estática entrem em contato direto com os circuitos sensíveis.</p>
-                </div>
-            </div>
-
-            <div class="peça-card">
-                <img src="../img/pasta-termica.webp" alt="Pasta Térmica">
-                <div class="peça-info">
-                    <h3>4. Pasta Térmica</h3>
-                    <p>O insumo mais importante para a temperatura. Ela preenche as imperfeições microscópicas entre o processador e o cooler.</p>
+                    <h3>2. SSD ou HD SATA</h3>
+                    <p>Essas unidades ficam presas em gavetas ou furos no próprio gabinete. Diferente do M.2, elas precisam de dois cabos: o de <strong>dados SATA</strong> (conectado à placa-mãe) e o de <strong>energia SATA</strong> (vindo da fonte).</p>
                 </div>
             </div>
             
+
+            <div class="peça-card">
+                <img src="../img/sata-motherboard.webp" alt="Portas SATA na placa-mãe">
+                <div class="peça-info">
+                    <h3>3. Conectando os Dados</h3>
+                    <p>O cabo de dados SATA tem um formato de "L" no conector. Ele deve ser ligado em uma das portas SATA da placa-mãe. Prefira sempre a porta <strong>SATA_0</strong> ou <strong>SATA_1</strong> para o disco principal.</p>
+                </div>
+            </div>
         </div>
 
         <div class="area-final">
             <div id="status-aprovacao">
-                <h3>Tudo pronto na bancada?</h3>
-                <p>Responda o quiz sobre ferramentas para liberar a conclusão.</p>
-                <button class="btn-quiz" onclick="irParaQuiz()">FAZER DESAFIO DO MÓDULO 2</button>
+                <h3>Onde o Windows vai morar?</h3>
+                <p>Responda o quiz de armazenamento para concluir este módulo.</p>
+                <button class="btn-quiz" onclick="irParaQuiz()">FAZER DESAFIO DO MÓDULO 8</button>
             </div>
 
             <div id="box-concluir" style="display:none">
-                <h3 style="color: var(--verde)">Ferramentas OK! 🎉</h3>
-                <p>Você já sabe o que precisa ter em mãos para começar.</p>
+                <h3 style="color: var(--verde)">Armazenamento Instalado! 💾</h3>
+                <p>Agora seu computador tem memória para guardar tudo o que você precisar.</p>
                 <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()">CONCLUIR MÓDULO ✅</button>
             </div>
         </div>
@@ -114,17 +113,23 @@
             }
         }
 
-        function irParaQuiz() { window.location.href = `../quiz.html?modulo=2`; }
+        function irParaQuiz() { window.location.href = `../quiz.html?modulo=8`; }
 
         async function concluirModulo() {
-            const { data: { user } } = await _supabase.auth.getUser();
-            const { error } = await _supabase
-                .from('progresso_alunos')
-                .upsert({ user_id: user.id, modulo_id: 2, concluido: true });
+            try {
+                const { data: { user } } = await _supabase.auth.getUser();
+                const { error } = await _supabase
+                    .from('progresso_alunos')
+                    .upsert({ user_id: user.id, modulo_id: 8 }, { onConflict: 'user_id, modulo_id' });
 
-            if (!error) {
-                alert("Módulo 2 Concluído!");
-                window.location.href = "../modulos.html";
+                if (!error) {
+                    alert("Módulo 8 Concluído!");
+                    window.location.href = "../modulos.html";
+                } else {
+                    alert("Erro ao salvar: " + error.message);
+                }
+            } catch (err) {
+                alert("Erro inesperado.");
             }
         }
         inicializar();

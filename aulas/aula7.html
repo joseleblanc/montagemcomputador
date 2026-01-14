@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aula 2: Ferramentas Essenciais | Telecurso PC</title>
+    <title>Aula 7: Fonte e Cabeamento | Telecurso PC</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -13,6 +13,7 @@
             --branco: #ffffff;
             --texto: #333;
             --verde: #28a745;
+            --vermelho: #dc3545;
         }
 
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; color: var(--texto); line-height: 1.6; }
@@ -21,6 +22,8 @@
         .container { max-width: 900px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
         h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
         
+        .alerta-box { background: #fff3f3; border-left: 5px solid var(--vermelho); padding: 20px; margin: 20px 0; border-radius: 8px; }
+
         .peça-card { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 40px; padding: 25px; border-left: 5px solid var(--azul-claro); background: #f9f9f9; border-radius: 8px; }
         .peça-card img { max-width: 100%; height: auto; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .peça-info h3 { margin: 0 0 10px 0; color: var(--azul-claro); font-size: 1.3rem; }
@@ -31,7 +34,7 @@
 
         @media (min-width: 768px) {
             .peça-card { flex-direction: row; align-items: flex-start; text-align: left; }
-            .peça-card img { max-width: 250px; }
+            .peça-card img { max-width: 220px; }
         }
     </style>
 </head>
@@ -43,40 +46,46 @@
     </nav>
 
     <div class="container">
-        <h1>Módulo 2: Ferramentas e Insumos</h1>
-        <p>Para montar um computador com precisão, você não precisa de muitas ferramentas, mas precisa das ferramentas certas.</p>
+        <h1>Módulo 7: Fonte e Conexões de Cabos</h1>
+        <p>A fonte de alimentação (PSU) envia energia para todo o PC. Aprenderemos a instalá-la e a conectar os fios do gabinete.</p>
+
+        <div class="alerta-box">
+            <h3 style="color: var(--vermelho); margin-top: 0;">⚠️ Cuidado com a Inversão</h3>
+            <p>Nunca force um cabo. Conectores de energia e do painel frontal possuem guias. Se não encaixa, você pode estar tentando ligar o cabo de vídeo (PCI-E) no lugar do processador (CPU).</p>
+        </div>
 
         <div class="secao-tecnica">
             <div class="peça-card">
-                <img src="../img/chave-philips.webp" alt="Chave Philips">
+                <img src="../img/posicao-fonte.webp" alt="Posição correta da ventoinha da fonte">
                 <div class="peça-info">
-                    <h3>1. Chave Philips (Cruz)</h3>
-                    <p>É a principal ferramenta. Usada em 90% dos parafusos do PC: placa-mãe, gabinete, fonte e discos rígidos.</p>
+                    <h3>1. Instalando a Fonte</h3>
+                    <p>Posicione a fonte no gabinete. Se houver furos na base, vire a ventoinha <strong>para baixo</strong>. Parafuse os 4 parafusos externos firmemente.</p>
+                </div>
+            </div>
+
+            <div class="peça-card">
+                <img src="../img/atx-cpu-cables.webp" alt="Cabos ATX 24 pinos e CPU 8 pinos">
+                <div class="peça-info">
+                    <h3>2. Cabos de Energia Principais</h3>
+                    <p>Conecte o <strong>ATX 24 pinos</strong> (maior cabo) na lateral da placa. Depois, ligue o <strong>EPS/CPU (4+4 pinos)</strong> no topo da placa para alimentar o processador.</p>
                 </div>
             </div>
             
 
             <div class="peça-card">
-                <img src="../img/chave-fenda.webp" alt="Chave de Fenda">
+                <img src="../img/front-panel-pins.webp" alt="Esquema do Painel Frontal JFP1">
                 <div class="peça-info">
-                    <h3>2. Chave de Fenda (Chata)</h3>
-                    <p>Menos comum em parafusos modernos, mas útil para fazer alavancas leves ou abrir travas específicas de alguns gabinetes antigos.</p>
+                    <h3>3. Painel Frontal (Botões e LEDs)</h3>
+                    <p>Ligue os pequenos fios (Power SW, Reset SW, HDD LED) no header JFP1 da placa-mãe. O texto no conector deve ficar virado para fora ou conforme o manual da sua placa.</p>
                 </div>
             </div>
+            
 
             <div class="peça-card">
-                <img src="../img/luvas-antiestaticas.webp" alt="Luvas Antiestáticas">
+                <img src="../img/usb-hd-audio.webp" alt="Conectores USB e Áudio Frontal">
                 <div class="peça-info">
-                    <h3>3. Luvas Antiestáticas</h3>
-                    <p>Uma alternativa moderna à pulseira. Elas impedem que a gordura das mãos e a eletricidade estática entrem em contato direto com os circuitos sensíveis.</p>
-                </div>
-            </div>
-
-            <div class="peça-card">
-                <img src="../img/pasta-termica.webp" alt="Pasta Térmica">
-                <div class="peça-info">
-                    <h3>4. Pasta Térmica</h3>
-                    <p>O insumo mais importante para a temperatura. Ela preenche as imperfeições microscópicas entre o processador e o cooler.</p>
+                    <h3>4. USB e Som Frontal</h3>
+                    <p>O cabo <strong>USB 3.0</strong> (azul grosso) e o <strong>HD Audio</strong> devem ser conectados nos seus respectivos slots na parte inferior da placa-mãe. Note que ambos possuem um pino cego como guia.</p>
                 </div>
             </div>
             
@@ -84,14 +93,14 @@
 
         <div class="area-final">
             <div id="status-aprovacao">
-                <h3>Tudo pronto na bancada?</h3>
-                <p>Responda o quiz sobre ferramentas para liberar a conclusão.</p>
-                <button class="btn-quiz" onclick="irParaQuiz()">FAZER DESAFIO DO MÓDULO 2</button>
+                <h3>O PC está pronto para ganhar vida?</h3>
+                <p>Responda o quiz sobre cabeamento para concluir o módulo.</p>
+                <button class="btn-quiz" onclick="irParaQuiz()">FAZER DESAFIO DO MÓDULO 7</button>
             </div>
 
             <div id="box-concluir" style="display:none">
-                <h3 style="color: var(--verde)">Ferramentas OK! 🎉</h3>
-                <p>Você já sabe o que precisa ter em mãos para começar.</p>
+                <h3 style="color: var(--verde)">Energia e Cabos OK! ⚡</h3>
+                <p>Todos os sistemas estão interconectados. Você concluiu a parte mais complexa!</p>
                 <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()">CONCLUIR MÓDULO ✅</button>
             </div>
         </div>
@@ -114,19 +123,26 @@
             }
         }
 
-        function irParaQuiz() { window.location.href = `../quiz.html?modulo=2`; }
+        function irParaQuiz() { window.location.href = `../quiz.html?modulo=7`; }
 
         async function concluirModulo() {
-            const { data: { user } } = await _supabase.auth.getUser();
-            const { error } = await _supabase
-                .from('progresso_alunos')
-                .upsert({ user_id: user.id, modulo_id: 2, concluido: true });
+            try {
+                const { data: { user } } = await _supabase.auth.getUser();
+                const { error } = await _supabase
+                    .from('progresso_alunos')
+                    .upsert({ user_id: user.id, modulo_id: 7 }, { onConflict: 'user_id, modulo_id' });
 
-            if (!error) {
-                alert("Módulo 2 Concluído!");
-                window.location.href = "../modulos.html";
+                if (!error) {
+                    alert("Módulo 7 Concluído com Sucesso!");
+                    window.location.href = "../modulos.html";
+                } else {
+                    alert("Erro ao salvar progresso.");
+                }
+            } catch (err) {
+                alert("Erro inesperado.");
             }
         }
+        
         inicializar();
     </script>
 </body>
