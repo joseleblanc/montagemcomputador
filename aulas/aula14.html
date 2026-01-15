@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 14 - Conclusão | Telecurso</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --azul-marinho: #002347;
+            --azul-royal: #0056b3;
+            --ouro: #ffcc00;
+            --sucesso: #28a745;
+            --branco: #ffffff;
+        }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            line-height: 1.8; 
+            padding: 40px 20px; 
+            max-width: 850px; 
+            margin: auto; 
+            background: var(--azul-marinho); 
+            color: #f4f4f4;
+        }
+        .congratulations-card { 
+            background: var(--branco); 
+            color: #333; 
+            padding: 50px; 
+            border-radius: 20px; 
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3); 
+            text-align: center;
+            border-bottom: 10px solid var(--ouro);
+        }
+        .star-icon { font-size: 60px; color: var(--ouro); margin-bottom: 20px; }
+        h1 { color: var(--azul-marinho); font-size: 2.5rem; margin-top: 0; }
+        h2 { color: var(--azul-royal); margin-top: 35px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        p { margin-bottom: 20px; text-align: left; }
+        .quote { 
+            font-style: italic; 
+            color: #555; 
+            background: #f9f9f9; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 30px 0;
+            border-left: 5px solid var(--ouro);
+        }
+        .checklist-final {
+            background: #eef9f1;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: left;
+            margin: 30px 0;
+        }
+        .checklist-final ul { list-style: none; padding: 0; }
+        .checklist-final li { margin-bottom: 12px; display: flex; align-items: center; }
+        .checklist-final li::before { content: '✓'; color: var(--sucesso); font-weight: bold; margin-right: 10px; }
+
+        .btn-finalizar { 
+            background: var(--sucesso); 
+            color: white; 
+            border: none; 
+            padding: 22px 40px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 1.3rem; 
+            font-weight: bold;
+            width: 100%; 
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+        }
+        .btn-finalizar:hover { 
+            background: #218838; 
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="congratulations-card">
+        <div class="star-icon">🏆</div>
+        <h1>Missão Cumprida!</h1>
+        
+        <p>Parabéns! Você acaba de concluir a última etapa da sua formação teórica e prática no <strong>Telecurso: Montagem de Computadores</strong>. Chegar até aqui demonstra não apenas interesse técnico, mas disciplina e foco em se tornar um profissional de qualidade.</p>
+
+        <div class="quote">
+            "A tecnologia é apenas uma ferramenta. No final do dia, o que importa é a habilidade e a ética de quem a manipula."
+        </div>
+
+        <h2>O que você conquistou?</h2>
+        <p>Neste treinamento, passamos por toda a anatomia de um PC moderno. Você aprendeu desde a delicadeza necessária para instalar um processador de última geração até a lógica de configuração de BIOS e instalação de sistemas. Você não é mais um "curioso", agora você possui a base técnica oficial.</p>
+
+        <div class="checklist-final">
+            <h3>✅ Agora você está apto a:</h3>
+            <ul>
+                <li>Identificar e solucionar gargalos de hardware.</li>
+                <li>Realizar montagens limpas com gerenciamento de cabos.</li>
+                <li>Aplicar normas de segurança contra estática e curto-circuitos.</li>
+                <li>Configurar setups otimizados para trabalho ou jogos.</li>
+            </ul>
+        </div>
+
+        <h2>Próximos Passos na sua Carreira</h2>
+        <p>O mercado de hardware está em constante evolução. Recomendamos que você nunca pare de ler sobre novos chipsets, frequências de memórias e tecnologias de refrigeração. O seu certificado é o primeiro passo de muitos em sua jornada profissional.</p>
+
+        <p><strong>Atenção:</strong> Ao clicar no botão abaixo, sua nota de conclusão será enviada ao sistema e o seu certificado ficará disponível imediatamente para download no seu painel de módulos.</p>
+
+        <button class="btn-finalizar" onclick="registrarFim(14)">
+            REGISTRAR CONCLUSÃO E GERAR CERTIFICADO
+        </button>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function registrarFim(id) {
+            try {
+                const { data: { user } } = await _supabase.auth.getUser();
+                if(!user) return alert("Sessão expirada!");
+
+                // Verifica se já registrou para evitar erros
+                const { data: existe } = await _supabase
+                    .from('progresso_alunos')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('modulo_id', id);
+
+                if (existe && existe.length === 0) {
+                    await _supabase.from('progresso_alunos').insert([{ 
+                        user_id: user.id, 
+                        modulo_id: id 
+                    }]);
+                }
+
+                alert("Excelente trabalho! Redirecionando para a área de certificado...");
+                window.location.href = '../modulos.html';
+            } catch (e) {
+                console.error(e);
+                alert("Erro ao salvar finalização. Verifique sua conexão.");
+            }
+        }
+    </script>
+</body>
+</html>

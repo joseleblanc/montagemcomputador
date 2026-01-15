@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 00 - Introdução Geral | Telecurso</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --azul-escuro: #003366;
+            --azul-claro: #0056b3;
+            --amarelo: #ffcc00;
+            --verde: #28a745;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.8; 
+            padding: 40px 20px; 
+            max-width: 900px; 
+            margin: auto; 
+            background: #f4f7f9; 
+            color: #333;
+        }
+        .card { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            border-top: 8px solid var(--azul-escuro);
+        }
+        h1 { color: var(--azul-escuro); border-bottom: 2px solid var(--amarelo); padding-bottom: 10px; }
+        h2 { color: var(--azul-claro); margin-top: 30px; }
+        p { margin-bottom: 20px; text-align: justify; }
+        .highlight-box { 
+            background: #eef6ff; 
+            border-left: 5px solid var(--azul-claro); 
+            padding: 20px; 
+            margin: 25px 0;
+            font-style: italic;
+        }
+        .instrucoes {
+            background: #fffdf2;
+            border: 1px solid #ffeeba;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        ul { margin-bottom: 20px; }
+        li { margin-bottom: 10px; }
+        .btn-concluir { 
+            background: var(--verde); 
+            color: white; 
+            border: none; 
+            padding: 20px 30px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            font-weight: bold;
+            width: 100%; 
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        .btn-concluir:hover { background: #218838; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Módulo 00: Bem-vindo à sua Jornada Técnica</h1>
+        
+        <p>Olá, futuro técnico! É com grande entusiasmo que iniciamos este curso de <strong>Montagem e Manutenção de Computadores</strong>. Você não está apenas prestes a aprender a "encaixar peças", mas sim a entender a arquitetura que move o mundo moderno. Seja para uso próprio, para entrar no mercado de trabalho ou para entusiastas de hardware, este curso foi estruturado para ser o seu guia definitivo.</p>
+
+        <div class="highlight-box">
+            "Hardware não é apenas silício e metal; é a base sobre a qual toda a tecnologia da informação é construída. Dominar a montagem é dominar a fundação da era digital."
+        </div>
+
+        <h2>Por que este curso é diferente?</h2>
+        <p>No <strong>Telecurso Montagem de PC</strong>, focamos na técnica aliada à segurança. Muitos iniciantes cometem erros fatais, como queimar componentes por eletricidade estática ou entortar pinos de processadores caros por falta de método. Aqui, você aprenderá o "jeito certo" desde o primeiro parafuso, evitando prejuízos e garantindo a longevidade do equipamento.</p>
+
+        <h2>Como tirar o melhor proveito das aulas:</h2>
+        <ol>
+            <li><strong>Siga a Sequência:</strong> O curso é bloqueado módulo a módulo por um motivo. A complexidade aumenta gradativamente. Não tente pular etapas.</li>
+            <li><strong>Tenha um Bloco de Notas:</strong> Anote termos como TDP, Socket, Dual-Channel e NVMe. Entender a teoria facilitará a prática nos módulos finais.</li>
+            <li><strong>Atenção aos Detalhes:</strong> Em hardware, a diferença entre um PC que liga e um que não liga pode ser um cabo mal encaixado por 1 milímetro.</li>
+            <li><strong>Segurança em Primeiro Lugar:</strong> Sempre que falarmos de segurança (Módulo 03), preste o dobro de atenção. Sua integridade física e a do seu bolso dependem disso.</li>
+        </ol>
+
+        <div class="instrucoes">
+            <h3>🏁 Sua Meta neste Curso</h3>
+            <p>Ao chegar no Módulo 14, você será capaz de:</p>
+            <ul>
+                <li>Escolher peças compatíveis sem medo de errar o socket ou a frequência.</li>
+                <li>Montar um computador do zero, desde o gabinete vazio até o sistema operacional pronto.</li>
+                <li>Organizar cabos de forma profissional (Cable Management).</li>
+                <li>Realizar o diagnóstico inicial caso a máquina não apresente imagem.</li>
+            </ul>
+        </div>
+
+        <h2>Compromisso com o Diploma</h2>
+        <p>Este sistema monitora seu progresso em tempo real através do nosso banco de dados. Ao clicar no botão de conclusão abaixo, seu progresso será salvo e o <strong>Módulo 01</strong> será desbloqueado automaticamente na sua tela principal. Somente após completar todos os módulos e os vídeos tutoriais, o sistema habilitará a emissão do seu certificado oficial assinado.</p>
+
+        <p>Prepare sua bancada, limpe sua mente e vamos começar!</p>
+
+        <button class="btn-concluir" onclick="concluirAula(0)">LI O CONTEÚDO E DESEJO INICIAR O CURSO</button>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function concluirAula(id) {
+            try {
+                const { data: { user } } = await _supabase.auth.getUser();
+                if(!user) {
+                    alert("Sessão expirada. Faça login novamente.");
+                    return;
+                }
+
+                // Verifica se já concluiu para não duplicar no banco
+                const { data: existe } = await _supabase
+                    .from('progresso_alunos')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('modulo_id', id);
+
+                if (existe && existe.length === 0) {
+                    await _supabase.from('progresso_alunos').insert([{ 
+                        user_id: user.id, 
+                        modulo_id: id 
+                    }]);
+                }
+
+                window.location.href = '../modulos.html';
+            } catch (error) {
+                console.error("Erro ao salvar progresso:", error);
+                alert("Erro ao salvar. Tente novamente.");
+            }
+        }
+    </script>
+</body>
+</html>

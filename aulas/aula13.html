@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <title>Módulo 13 - Vídeos Tutoriais | Telecurso</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --azul-escuro: #003366;
+            --azul-claro: #0056b3;
+            --amarelo: #ffcc00;
+            --cinza-claro: #f8f9fa;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            padding: 20px; 
+            max-width: 1000px; 
+            margin: auto; 
+            background: #e9ecef;
+            color: #333;
+        }
+        .container { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+        }
+        h1 { color: var(--azul-escuro); text-align: center; border-bottom: 3px solid var(--amarelo); padding-bottom: 10px; }
+        h2 { color: var(--azul-claro); margin-top: 40px; }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* Proporção 16:9 */
+            height: 0;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #000;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .video-info {
+            background: var(--cinza-claro);
+            padding: 20px;
+            border-radius: 0 0 10px 10px;
+            margin-bottom: 40px;
+            border-left: 5px solid var(--azul-claro);
+        }
+        .creditos {
+            font-weight: bold;
+            color: #555;
+            display: block;
+            margin-top: 10px;
+        }
+        .btn-concluir { 
+            background: #28a745; 
+            color: white; 
+            border: none; 
+            padding: 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            width: 100%; 
+            font-weight: bold;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+        .btn-concluir:hover { background: #218838; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Módulo 13: Laboratório Prático em Vídeo</h1>
+        <p>Assista aos vídeos abaixo para consolidar o conhecimento prático de montagem e software. Estes vídeos são essenciais para a sua formação técnica.</p>
+
+        <h2>1. Montagem Completa Passo a Passo</h2>
+        <div class="video-container">
+            <iframe 
+                src="https://www.youtube.com/embed/6uVbxr09DBE?rel=0&showinfo=0" 
+                title="COMO MONTAR UM PC PASSO A PASSO COMPLETO 2024" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin" 
+                allowfullscreen>
+            </iframe>
+        </div>
+        <div class="video-info">
+            <p>Acompanhe detalhadamente a instalação física de todos os componentes no gabinete.</p>
+            <span class="creditos">🎬 Créditos: MW Informática</span>
+            <small><a href="https://www.youtube.com/watch?v=6uVbxr09DBE" target="_blank">Ver no YouTube</a></small>
+        </div>
+
+        <h2>2. Como Formatar o PC e Instalar o Windows</h2>
+        <div class="video-container">
+            <iframe 
+                src="https://www.youtube.com/embed/gaos8yXNwyk?rel=0&showinfo=0" 
+                title="COMO FORMATAR O PC DA FORMA RÁPIDA, CERTA E FÁCIL" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin" 
+                allowfullscreen>
+            </iframe>
+        </div>
+        <div class="video-info">
+            <p>Aprenda a criar a média de instalação e configurar o sistema operacional do zero.</p>
+            <span class="creditos">🎬 Créditos: Iuri Indica</span>
+            <small><a href="https://www.youtube.com/watch?v=gaos8yXNwyk" target="_blank">Ver no YouTube</a></small>
+        </div>
+
+        <button class="btn-concluir" id="btnConcluir" onclick="concluirAula(13)">
+            LI O CONTEÚDO E ASSISTI AOS VÍDEOS
+        </button>
+    </div>
+
+    <script>
+        // Configurações do Supabase
+        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA'; // Chave pública
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function concluirAula(id) {
+            const btn = document.getElementById('btnConcluir');
+            btn.disabled = true;
+            btn.innerText = "A guardar progresso...";
+
+            try {
+                // Obter utilizador atual
+                const { data: { user }, error: userError } = await _supabase.auth.getUser();
+                
+                if (userError || !user) {
+                    alert("Erro: Sessão expirada ou utilizador não autenticado.");
+                    window.location.href = '../index.html'; // Redireciona para login
+                    return;
+                }
+
+                // Verificar se já existe o registo para evitar erro de chave duplicada
+                const { data: existe } = await _supabase
+                    .from('progresso_alunos')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('modulo_id', id);
+
+                if (existe && existe.length === 0) {
+                    const { error: insertError } = await _supabase
+                        .from('progresso_alunos')
+                        .insert([{ 
+                            user_id: user.id, 
+                            modulo_id: id 
+                        }]);
+
+                    if (insertError) throw insertError;
+                }
+
+                // Sucesso: Redirecionar
+                window.location.href = '../modulos.html';
+
+            } catch (error) {
+                console.error("Erro completo:", error);
+                alert("Ocorreu um erro ao guardar o progresso. Verifique a consola.");
+                btn.disabled = false;
+                btn.innerText = "Tentar novamente";
+            }
+        }
+    </script>
+</body>
+</html>

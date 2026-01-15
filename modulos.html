@@ -30,7 +30,6 @@
 
         .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
 
-        /* Painel de Boas-vindas e Progresso */
         .painel-topo {
             background: var(--branco);
             padding: 25px;
@@ -194,6 +193,7 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const modulos = [
+        { id: 0, t: "Introdução ao Curso", d: "Boas-vindas e como aproveitar o Telecurso." },
         { id: 1, t: "Conhecendo as peças", d: "Identificação de componentes e funções." },
         { id: 2, t: "Separando ferramentas", d: "O que não pode faltar na bancada." },
         { id: 3, t: "Cuidados de segurança", d: "Eletricidade estática e proteção." },
@@ -205,18 +205,23 @@
         { id: 9, t: "Montando Placa de vídeo", d: "Slot PCI-e e alimentação extra." },
         { id: 10, t: "Coolers de gabinete", d: "Configurando o fluxo de ar." },
         { id: 11, t: "Primeiro boot de testes", d: "BIOS e conferência inicial." },
-        { id: 12, t: "Formatação com Windows", d: "Instalação do sistema operacional." }
+        { id: 12, t: "Formatação com Windows", d: "Instalação do sistema operacional." },
+        { id: 13, t: "Vídeos Tutoriais", d: "Demonstrações práticas em vídeo passo a passo." },
+        { id: 14, t: "Conclusão", d: "Encerramento e orientações para o mercado." }
     ];
 
     async function inicializar() {
         const { data: { user } } = await _supabase.auth.getUser();
         if (!user) { window.location.href = "index.html"; return; }
         document.getElementById('nome-aluno').innerText = `Olá, ${user.email.split('@')[0]}!`;
+        
         const { data: progresso } = await _supabase.from('progresso_alunos').select('modulo_id').eq('user_id', user.id);
         const concluidos = progresso ? progresso.map(p => p.modulo_id) : [];
+        
         const pct = Math.round((concluidos.length / modulos.length) * 100);
         document.getElementById('barra-progresso').style.width = pct + "%";
         document.getElementById('txt-porcentagem').innerText = pct + "%";
+        
         if(pct === 100) {
             const btn = document.getElementById('btn-certificado');
             btn.classList.add('liberado');
@@ -229,11 +234,13 @@
         const grid = document.getElementById('grid-modulos');
         grid.innerHTML = modulos.map((m, i) => {
             const isConcluido = concluidos.includes(m.id);
-            const isBloqueado = m.id !== 1 && !concluidos.includes(m.id - 1);
+            // Módulo 0 sempre aberto. Os demais dependem do ID anterior concluído.
+            const isBloqueado = m.id !== 0 && !concluidos.includes(m.id - 1);
+            
             return `
                 <div class="card-modulo ${isBloqueado ? 'bloqueado' : ''} ${isConcluido ? 'concluido' : ''}" 
                      onclick="${isBloqueado ? '' : `location.href='aulas/aula${m.id}.html'`}">
-                    <div class="card-banner">MÓDULO ${m.id}</div>
+                    <div class="card-banner">MÓDULO ${String(m.id).padStart(2, '0')}</div>
                     <div class="card-corpo">
                         <h3>${m.t}</h3>
                         <p style="font-size:0.85rem; color:#666">${m.d}</p>
@@ -261,43 +268,25 @@
         if(!nome || !cpf || !nasc) return alert("Preencha tudo!");
 
         const doc = new jsPDF({ orientation: "landscape" });
-        
-        // Moldura do Certificado
         doc.setDrawColor(0, 51, 102); doc.setLineWidth(10); doc.rect(5, 5, 287, 200);
-        
-        // Títulos Principais
         doc.setFont("helvetica", "bold"); doc.setFontSize(40);
         doc.text("CERTIFICADO DE CONCLUSÃO", 148, 50, { align: "center" });
-        
         doc.setFontSize(20); doc.text("Certificamos que:", 148, 80, { align: "center" });
         doc.setFontSize(35); doc.setTextColor(0, 86, 179);
         doc.text(nome.toUpperCase(), 148, 105, { align: "center" });
-        
         doc.setTextColor(0); doc.setFontSize(16);
         doc.text("Concluiu com sucesso o curso técnico de", 148, 130, { align: "center" });
         doc.setFont("helvetica", "bold");
         doc.text("MONTAGEM E MANUTENÇÃO DE COMPUTADORES", 148, 140, { align: "center" });
-        
         doc.setFont("helvetica", "normal"); doc.setFontSize(12);
         doc.text(`CPF: ${cpf} | Data de Nascimento: ${nasc.split('-').reverse().join('/')}`, 148, 155, { align: "center" });
-        
-        // --- SEÇÃO DE ASSINATURA DO CRIADOR ---
-        doc.setFont("courier", "italic"); // Fonte cursiva simulada
-        doc.setFontSize(22);
-        doc.setTextColor(0, 51, 102);
-        // Texto da assinatura baseado na sua imagem
+        doc.setFont("courier", "italic"); doc.setFontSize(22); doc.setTextColor(0, 51, 102);
         doc.text("José Estevão de Araujo Campos", 148, 175, { align: "center" });
-        
-        // Linha da Assinatura
-        doc.setDrawColor(255, 204, 0); doc.setLineWidth(0.5);
-        doc.line(100, 178, 196, 178);
-        
-        // Rodapé de Autenticação
+        doc.setDrawColor(255, 204, 0); doc.setLineWidth(0.5); doc.line(100, 178, 196, 178);
         doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(0);
         doc.text("TELECURSO: MONTAGEM DE PC | INSTRUTOR RESPONSÁVEL", 148, 185, { align: "center" });
         doc.setFont("helvetica", "normal");
         doc.text(`Emitido em: ${new Date().toLocaleDateString()}`, 148, 192, { align: "center" });
-        
         doc.save(`Certificado_${nome.replace(" ","_")}.pdf`);
         fecharModal();
     }
