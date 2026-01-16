@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aula 3: Cuidados de Segurança | Telecurso PC</title>
+    <title>Aula 3: Protocolos de Segurança e ESD | Telecurso PC</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -14,27 +14,71 @@
             --texto: #333;
             --verde: #28a745;
             --vermelho-alerta: #dc3545;
+            --cinza-fundo: #f4f7f6;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; color: var(--texto); line-height: 1.6; }
-        .navbar { background: var(--azul-escuro); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; }
-        .btn-voltar { color: white; text-decoration: none; font-weight: bold; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 5px; }
-        .container { max-width: 900px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #e9ecef; margin: 0; color: var(--texto); line-height: 1.6; }
+        
+        .navbar { background: var(--azul-escuro); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .btn-voltar { color: white; text-decoration: none; font-weight: bold; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 5px; transition: 0.3s; }
+
+        .container { max-width: 1000px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+
         h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
         
-        .alerta-box { background: #fff3f3; border-left: 5px solid var(--vermelho-alerta); padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .alerta-box { background: #fff5f5; border-left: 6px solid var(--vermelho-alerta); padding: 25px; margin: 25px 0; border-radius: 8px; }
+        .alerta-box h3 { color: var(--vermelho-alerta); margin-top: 0; display: flex; align-items: center; gap: 10px; }
 
-        .peça-card { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 40px; padding: 25px; border-left: 5px solid var(--azul-claro); background: #f9f9f9; border-radius: 8px; }
-        .peça-card img { max-width: 100%; height: auto; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .peça-info h3 { margin: 0 0 10px 0; color: var(--azul-claro); font-size: 1.3rem; }
+        .secao-tecnica { margin-top: 30px; }
+        
+        .peça-card { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 25px; 
+            margin-bottom: 45px; 
+            padding: 30px; 
+            border-left: 5px solid var(--azul-claro); 
+            background: var(--cinza-fundo); 
+            border-radius: 0 12px 12px 0;
+            transition: transform 0.2s;
+        }
+        .peça-card:hover { transform: translateX(5px); }
+        
+        .peça-card img {
+            max-width: 100%; 
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
 
-        .area-final { text-align: center; margin-top: 50px; padding: 40px; border-top: 2px dashed #ccc; background: #fffcf0; border-radius: 0 0 12px 12px; }
-        .btn-quiz { background: var(--azul-escuro); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
-        .btn-concluir { background: var(--verde); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; display: none; }
+        .peça-info h3 { margin: 0 0 15px 0; color: var(--azul-escuro); font-size: 1.4rem; }
+        
+        .tech-note { 
+            background: #fff; 
+            padding: 15px; 
+            border-radius: 6px; 
+            font-size: 0.9rem; 
+            border: 1px solid #ddd;
+            margin-top: 15px;
+            border-right: 4px solid var(--amarelo);
+        }
+
+        .area-final { 
+            text-align: center; 
+            margin-top: 50px; 
+            padding: 45px; 
+            border-top: 2px dashed #ccc; 
+            background: #fdfae6;
+            border-radius: 12px;
+        }
+        .btn-quiz { background: var(--azul-escuro); color: white; padding: 20px 40px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.2rem; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,51,102,0.3); }
+        .btn-quiz:hover { background: var(--azul-claro); transform: translateY(-2px); }
+        
+        .btn-concluir { background: var(--verde); color: white; padding: 20px 40px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.2rem; display: none; transition: 0.3s; }
 
         @media (min-width: 768px) {
-            .peça-card { flex-direction: row; align-items: flex-start; text-align: left; }
-            .peça-card img { max-width: 200px; }
+            .peça-card { flex-direction: row; align-items: flex-start; }
+            .peça-card img { width: 240px; }
         }
     </style>
 </head>
@@ -42,71 +86,95 @@
 
     <nav class="navbar">
         <a href="../modulos.html" class="btn-voltar">← Voltar aos Módulos</a>
-        <span>Telecurso Montagem de PC - 2026</span>
+        <span>Módulo 3: Proteção de Hardware - 2026</span>
     </nav>
 
     <div class="container">
-        <h1>Módulo 3: Segurança e Estática</h1>
-        <p>Antes de tocar em qualquer peça, precisamos entender o maior inimigo do hardware: a <strong>Eletricidade Estática (ESD)</strong>.</p>
+        <h1>Módulo 3: Segurança e Eletricidade Estática</h1>
+        <p>A montagem de um PC moderno envolve manipular bilhões de transistores que operam em voltagens baixíssimas. Um descuido de segurança pode não quebrar a peça na hora, mas reduzir sua vida útil em anos.</p>
 
         <div class="alerta-box">
-            <h3 style="color: var(--vermelho-alerta); margin-top: 0;">⚠️ Regra de Ouro</h3>
-            <p><strong>Nunca</strong> monte o computador descalço em pisos frios ou sobre tapetes. O ideal é usar calçados de borracha e trabalhar em uma superfície de madeira ou vidro.</p>
+            <h3>⚠️ O Inimigo Invisível: ESD</h3>
+            <p>A <strong>Eletricidade Estática (Electrostatic Discharge)</strong> é o acúmulo de cargas em superfícies isolantes. O corpo humano pode acumular até <strong>20.000 volts</strong> apenas caminhando sobre um tapete. Enquanto você só sente o "choque" acima de 3.000V, um componente de PC pode ser danificado com apenas <strong>30V</strong>.</p>
         </div>
 
         <div class="secao-tecnica">
             <div class="peça-card">
                 <img src="../img/eletricidade-estatica.webp" alt="Eletricidade Estática">
                 <div class="peça-info">
-                    <h3>1. O que é a Estática?</h3>
-                    <p>É uma carga elétrica que acumulamos no corpo. Um choque invisível e indolor já é suficiente para queimar os transistores microscópicos de um processador ou memória RAM.</p>
+                    <h3>1. O Fenômeno da Descarga</h3>
+                    <p>Ao tocar em um componente sem estar aterrado, a carga salta do seu dedo para as trilhas de cobre. Isso causa um superaquecimento instantâneo em escala microscópica, derretendo conexões internas do chip.</p>
+                    <div class="tech-note">
+                        <b>Fato Técnico:</b> O maior perigo são as "Falhas Latentes". O PC liga, mas apresenta telas azuis aleatórias ou travamentos meses depois devido ao dano parcial sofrido na montagem.
+                    </div>
+                </div>
+            </div>
+
+            
+
+            <div class="peça-card">
+                <img src="../img/segurar-peca.jpg" alt="Manuseio Correto">
+                <div class="peça-info">
+                    <h3>2. Manuseio de Componentes Críticos</h3>
+                    <p>A regra fundamental é: minimize o contato com áreas condutoras.</p>
+                    <div class="tech-note">
+                        <b>Como proceder:</b> Segure memórias RAM e placas de vídeo exclusivamente pelo <b>PCB (parte verde/preta)</b> ou pelas bordas plásticas. Nunca toque nos contatos dourados; a gordura dos dedos causa oxidação e impede o fluxo de dados em alta velocidade.
+                    </div>
                 </div>
             </div>
 
             <div class="peça-card">
-                <img src="../img/segurar-peca.jpg" alt="Como segurar peças">
+                <img src="../img/placa-caixa.jpg" alt="Placa na caixa">
                 <div class="peça-info">
-                    <h3>2. Como segurar as peças</h3>
-                    <p>Sempre segure as placas (mãe, vídeo, memórias) pelas <strong>bordas laterais</strong>. Evite tocar nos contatos dourados e nos circuitos impressos (os "caminhos" na placa).</p>
+                    <h3>3. Superfícies de Trabalho</h3>
+                    <p>Onde você apoia suas peças define a segurança da soldagem.</p>
+                    <div class="tech-note">
+                        <b>O Truque da Caixa:</b> A caixa de papelão da placa-mãe é o melhor suporte temporário. Ela é um material dielétrico (isolante) e firme o suficiente para suportar a pressão necessária ao instalar o cooler e a RAM. <b>Evite</b> apoiar sobre o saco plástico antiestático por fora, pois algumas embalagens são condutoras na camada externa.
+                    </div>
+                </div>
+            </div>
+
+            
+
+            <div class="peça-card">
+                <img src="../img/mao-parede.jpg" alt="Aterramento Manual">
+                <div class="peça-info">
+                    <h3>4. Descarregando sem Pulseira</h3>
+                    <p>Se você não possui equipamentos profissionais de ESD, deve equalizar seu potencial elétrico com o chassi.</p>
+                    <div class="tech-note">
+                        <b>Procedimento:</b> Toque periodicamente em uma parte metálica sem pintura do gabinete do PC (que esteja idealmente conectado à tomada, mas desligado). Isso garante que você e o gabinete estejam na mesma voltagem zero.
+                    </div>
                 </div>
             </div>
 
             <div class="peça-card">
-                <img src="../img/placa-caixa.jpg" alt="Placa sobre a caixa">
+                <img src="../img/mesa.jpg" alt="Ambiente de Trabalho">
                 <div class="peça-info">
-                    <h3>3. A Caixa como Bancada</h3>
-                    <p>Ao tirar a placa-mãe da embalagem, apoie-a em cima da <strong>caixa de papelão</strong> original. O papelão é um isolante que protege as soldas pontiagudas embaixo da placa e evita curtos-circuitos acidentais durante a montagem do processador.</p>
-                </div>
-            </div>
-
-            <div class="peça-card">
-                <img src="../img/mao-parede.jpg" alt="Aterramento">
-                <div class="peça-info">
-                    <h3>4. Descarregando o corpo</h3>
-                    <p>Se não tiver pulseira antiestática, toque em uma parede ou em uma parte metálica sem pintura por 5 segundos para equilibrar sua carga antes de manipular os componentes.</p>
-                </div>
-            </div>
-
-            <div class="peça-card">
-                <img src="../img/mesa.jpg" alt="Ambiente Limpo">
-                <div class="peça-info">
-                    <h3>5. Ambiente de Trabalho</h3>
-                    <p>Mantenha sua bancada organizada e livre de líquidos. Evite usar roupas de lã ou tecidos sintéticos, pois o atrito desses materiais gera altos níveis de estática.</p>
+                    <h3>5. O Cenário Ideal</h3>
+                    <p>O ambiente influencia diretamente na geração de estática por atrito (Efeito Triboelétrico).</p>
+                    <div class="tech-note">
+                        <b>Checklist de Ambiente:</b>
+                        <ul>
+                            <li>Evite roupas de lã, nylon ou poliéster puro. Prefira algodão.</li>
+                            <li>Remova anéis, relógios metálicos e pulseiras.</li>
+                            <li>Trabalhe em locais com umidade moderada (ar seco demais aumenta a estática).</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="area-final">
             <div id="status-aprovacao">
-                <h3>Sua segurança está em primeiro lugar?</h3>
-                <p>Responda o quiz sobre segurança para liberar este módulo.</p>
-                <button class="btn-quiz" onclick="irParaQuiz()">FAZER DESAFIO DO MÓDULO 3</button>
+                <h3>Certificação de Segurança</h3>
+                <p>Compreender a ESD separa os curiosos dos técnicos profissionais. Responda ao desafio para avançar para a montagem prática.</p>
+                <button class="btn-quiz" onclick="irParaQuiz()">INICIAR TESTE DE SEGURANÇA</button>
             </div>
 
             <div id="box-concluir" style="display:none">
-                <h3 style="color: var(--verde)">Segurança Entendida! 🛡️</h3>
-                <p>Você agora sabe como proteger seu investimento contra descargas elétricas.</p>
-                <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()">CONCLUIR MÓDULO ✅</button>
+                <h3 style="color: var(--verde)">Protocolo de Segurança Validado! 🛡️</h3>
+                <p>Você demonstrou conhecimento sobre proteção de integridade de hardware.</p>
+                <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()">REGISTRAR CONCLUSÃO ✅</button>
             </div>
         </div>
     </div>
@@ -130,35 +198,26 @@
 
         function irParaQuiz() { window.location.href = `../quiz.html?modulo=3`; }
 
-async function concluirModulo() {
-    try {
-        const { data: { user } } = await _supabase.auth.getUser();
-        
-        if (!user) {
-            alert("Sessão expirada. Faça login novamente.");
-            return;
-        }
+        async function concluirModulo() {
+            try {
+                const { data: { user } } = await _supabase.auth.getUser();
+                if (!user) return;
 
-        // Simplificado para bater com a estrutura do modulos.html
-        const { error } = await _supabase
-            .from('progresso_alunos')
-            .upsert({ 
-                user_id: user.id, 
-                modulo_id: 3 
-            }, { onConflict: 'user_id, modulo_id' }); // Garante que não duplique
+                const { error } = await _supabase
+                    .from('progresso_alunos')
+                    .upsert({ 
+                        user_id: user.id, 
+                        modulo_id: 3 
+                    }, { onConflict: 'user_id, modulo_id' });
 
-        if (error) {
-            console.error("Erro detalhado do Supabase:", error.message);
-            alert("Erro do Banco: " + error.message);
-        } else {
-            alert("Módulo 3 Concluído com Sucesso!");
-            window.location.href = "../modulos.html";
+                if (!error) {
+                    alert("Módulo 3 Concluído! Você está pronto para a montagem física.");
+                    window.location.href = "../modulos.html";
+                }
+            } catch (err) {
+                alert("Erro ao salvar progresso.");
+            }
         }
-    } catch (err) {
-        console.error("Erro inesperado:", err);
-        alert("Erro inesperado ao salvar.");
-    }
-}
         inicializar();
     </script>
 </body>

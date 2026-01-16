@@ -17,6 +17,7 @@
             --cinza-fundo: #f4f7f9;
             --verde: #25d366;
             --branco: #ffffff;
+            --vermelho: #ff4444;
         }
 
         body { 
@@ -47,7 +48,6 @@
 
         .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
 
-        /* Painel de Identidade do Aluno */
         .painel-topo {
             background: rgba(255, 255, 255, 0.95);
             padding: 25px;
@@ -61,9 +61,16 @@
         }
 
         .info-aluno { flex: 1; min-width: 250px; }
-        .info-aluno h2 { color: var(--azul-escuro); font-size: 1.4rem; }
+        .info-aluno h2 { color: var(--azul-escuro); font-size: 1.4rem; margin-bottom: 5px; }
 
         .progresso-sessao { flex: 2; min-width: 300px; }
+
+        #status-prova-topo {
+            font-size: 0.9rem;
+            display: block;
+            margin-top: 5px;
+            font-weight: bold;
+        }
 
         .barra-fundo {
             background: #e0e0e0;
@@ -92,12 +99,11 @@
 
         .btn-sair { 
             background: transparent; 
-            color: #ff4444; 
+            color: var(--vermelho); 
             font-size: 0.75rem; 
-            border: 1px solid #ff4444;
-            margin-top: 8px;
+            border: 1px solid var(--vermelho);
         }
-        .btn-sair:hover { background: #ff4444; color: white; }
+        .btn-sair:hover { background: var(--vermelho); color: white; }
         
         .btn-certificado {
             background: #bdc3c7;
@@ -112,9 +118,7 @@
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(255, 204, 0, 0.5);
         }
-        .btn-certificado.liberado:hover { transform: scale(1.05); }
 
-        /* Grid de Módulos */
         .grid-modulos {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -138,7 +142,6 @@
         
         .card-modulo:not(.bloqueado):hover { 
             transform: translateY(-8px); 
-            border-color: var(--amarelo); 
             box-shadow: 0 12px 30px rgba(0,0,0,0.3);
         }
 
@@ -151,8 +154,12 @@
             font-size: 0.9rem;
         }
         
-        .card-modulo.concluido .card-banner { background: var(--verde); }
+        /* Estados Especiais */
         .card-modulo.concluido { border-color: var(--verde); }
+        .card-modulo.concluido .card-banner { background: var(--verde); }
+
+        .card-modulo.reprovado { border-color: var(--vermelho); }
+        .card-modulo.reprovado .card-banner { background: var(--vermelho); }
 
         .card-corpo { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
         .card-corpo h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: var(--azul-escuro); }
@@ -193,7 +200,6 @@
             border-radius: 6px;
             box-sizing: border-box;
         }
-        .modal-content input:focus { border-color: var(--azul-claro); outline: none; }
     </style>
 </head>
 <body>
@@ -211,13 +217,16 @@
 
         <div class="progresso-sessao">
             <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                <strong style="color: var(--azul-escuro)">Seu Progresso</strong>
+                <div>
+                    <strong style="color: var(--azul-escuro)">Seu Progresso</strong>
+                    <span id="status-prova-topo"></span>
+                </div>
                 <span id="txt-porcentagem" style="color: var(--verde); font-weight: bold; font-size: 1.2rem;">0%</span>
             </div>
             <div class="barra-fundo">
                 <div id="barra-progresso" class="barra-preenchimento"></div>
             </div>
-            <small style="color: #666;"><i class="fas fa-info-circle"></i> Conclua todas as aulas para liberar o diploma.</small>
+            <small style="color: #666;"><i class="fas fa-info-circle"></i> Conclua as aulas e atinja 70 pontos na prova para o diploma.</small>
         </div>
 
         <div>
@@ -233,26 +242,18 @@
 <div id="modal-dados" class="modal">
     <div class="modal-content">
         <h2 style="margin-top:0; color: var(--azul-escuro)"><i class="fas fa-id-card"></i> Dados do Diploma</h2>
-        <p style="font-size: 0.9rem; color: #666; margin-bottom: 25px;">Confirme seus dados para a emissão do PDF oficial.</p>
-        
         <label><b>Nome Completo:</b></label>
-        <input type="text" id="input-nome" placeholder="Como aparecerá no certificado">
-        
+        <input type="text" id="input-nome">
         <label><b>CPF:</b></label>
         <input type="text" id="input-cpf" placeholder="000.000.000-00">
-        
         <label><b>Data de Nascimento:</b></label>
         <input type="date" id="input-nasc">
-        
-        <button class="btn-acao" style="background: var(--verde); color:white; width: 100%; margin-top: 10px;" onclick="gerarPDF()">
-            <i class="fas fa-download"></i> GERAR E BAIXAR AGORA
-        </button>
+        <button class="btn-acao" style="background: var(--verde); color:white; width: 100%;" onclick="gerarPDF()">BAIXAR AGORA</button>
         <button style="background:none; border:none; width:100%; margin-top:15px; cursor:pointer; color: #999;" onclick="fecharModal()">Voltar</button>
     </div>
 </div>
 
 <script>
-    // Mesma lógica de conexão e funções que você já possui
     const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -272,45 +273,74 @@
         { id: 11, t: "Primeiro boot de testes", d: "BIOS e conferência inicial." },
         { id: 12, t: "Formatação com Windows", d: "Instalação do sistema operacional." },
         { id: 13, t: "Vídeos Tutoriais", d: "Demonstrações práticas em vídeo passo a passo." },
-        { id: 14, t: "Conclusão", d: "Encerramento e orientações para o mercado." }
+        { id: 14, t: "Conclusão", d: "Encerramento e orientações para o mercado." },
+        { id: 100, t: "PROVA FINAL", d: "Avaliação final de certificação técnica." }
     ];
 
     async function inicializar() {
         const { data: { user } } = await _supabase.auth.getUser();
         if (!user) { window.location.href = "index.html"; return; }
+        
         document.getElementById('nome-aluno').innerHTML = `<i class="fas fa-user-circle"></i> Olá, ${user.email.split('@')[0]}!`;
         
-        const { data: progresso } = await _supabase.from('progresso_alunos').select('modulo_id').eq('user_id', user.id);
+        const { data: progresso } = await _supabase.from('progresso_alunos').select('*').eq('user_id', user.id);
         const concluidos = progresso ? progresso.map(p => p.modulo_id) : [];
         
-        const pct = Math.round((concluidos.length / modulos.length) * 100);
+        // Progresso das aulas (0-14)
+        const concluidosConteudo = concluidos.filter(id => id >= 0 && id <= 14);
+        const pct = Math.round((concluidosConteudo.length / 15) * 100);
         document.getElementById('barra-progresso').style.width = pct + "%";
         document.getElementById('txt-porcentagem').innerText = pct + "%";
         
-        if(pct === 100) {
-            const btn = document.getElementById('btn-certificado');
-            btn.classList.add('liberado');
-            btn.innerHTML = "<i class='fas fa-star'></i> EMITIR CERTIFICADO";
+        // Registro da Prova (100)
+        const registroProva = progresso ? progresso.find(p => p.modulo_id === 100) : null;
+        const notaStatusTopo = document.getElementById('status-prova-topo');
+
+        if(registroProva) {
+            notaStatusTopo.innerHTML = `Nota da Prova: <span style="color:${registroProva.nota >= 70 ? 'var(--verde)' : 'var(--vermelho)'}">${registroProva.nota}/100</span>`;
+            if(registroProva.nota >= 70) {
+                const btn = document.getElementById('btn-certificado');
+                btn.classList.add('liberado');
+                btn.innerHTML = "<i class='fas fa-star'></i> EMITIR CERTIFICADO";
+            }
         }
-        renderizar(concluidos);
+
+        renderizar(concluidos, registroProva ? registroProva.nota : null);
     }
 
-    function renderizar(concluidos) {
+    function renderizar(concluidos, nota) {
         const grid = document.getElementById('grid-modulos');
-        grid.innerHTML = modulos.map((m, i) => {
+        grid.innerHTML = modulos.map((m) => {
+            const isProva = m.id === 100;
             const isConcluido = concluidos.includes(m.id);
-            const isBloqueado = m.id !== 0 && !concluidos.includes(m.id - 1);
+            const isReprovado = isProva && nota !== null && nota < 70;
             
+            let isBloqueado = false;
+            if (m.id === 0) isBloqueado = false;
+            else if (isProva) isBloqueado = !concluidos.includes(14);
+            else isBloqueado = !concluidos.includes(m.id - 1);
+            
+            const link = isProva ? 'prova-final.html' : `aulas/aula${m.id}.html`;
+            
+            let statusTexto = isConcluido ? 'CONCLUÍDO' : (isBloqueado ? 'BLOQUEADO' : 'INICIAR →');
+            let statusIcone = isConcluido ? 'fa-check-circle' : (isBloqueado ? 'fa-lock' : 'fa-play-circle');
+            let corStatus = isConcluido ? 'var(--verde)' : (isBloqueado ? '#888' : 'var(--azul-claro)');
+
+            if (isReprovado) {
+                statusTexto = 'REFAZER: MÉDIA NÃO ALCANÇADA';
+                statusIcone = 'fa-redo';
+                corStatus = 'white';
+            }
+
             return `
-                <div class="card-modulo ${isBloqueado ? 'bloqueado' : ''} ${isConcluido ? 'concluido' : ''}" 
-                     onclick="${isBloqueado ? '' : `location.href='aulas/aula${m.id}.html'`}">
-                    <div class="card-banner">MÓDULO ${String(m.id).padStart(2, '0')}</div>
+                <div class="card-modulo ${isBloqueado ? 'bloqueado' : ''} ${isConcluido && !isReprovado ? 'concluido' : ''} ${isReprovado ? 'reprovado' : ''}" 
+                     onclick="${isBloqueado ? '' : `location.href='${link}'`}">
+                    <div class="card-banner">${isProva ? 'AVALIAÇÃO' : `MÓDULO ${String(m.id).padStart(2, '0')}`}</div>
                     <div class="card-corpo">
                         <h3>${m.t}</h3>
-                        <p>${m.d}</p>
-                        <span class="status-aula" style="color:${isConcluido ? 'var(--verde)' : (isBloqueado ? '#888' : 'var(--azul-claro)')}">
-                            <i class="fas ${isConcluido ? 'fa-check-circle' : (isBloqueado ? 'fa-lock' : 'fa-play-circle')}"></i>
-                            ${isConcluido ? 'CONCLUÍDO' : (isBloqueado ? 'BLOQUEADO' : 'FAZER AULA →')}
+                        <p>${m.d} ${isProva && nota !== null ? `<br><b>Última tentativa: ${nota}/100</b>` : ''}</p>
+                        <span class="status-aula" style="color:${corStatus}">
+                            <i class="fas ${statusIcone}"></i> ${statusTexto}
                         </span>
                     </div>
                 </div>`;
@@ -320,41 +350,27 @@
     function abrirModal() {
         if(document.getElementById('btn-certificado').classList.contains('liberado')) {
             document.getElementById('modal-dados').style.display = 'flex';
+        } else {
+            alert("O certificado exige aprovação na Prova Final (Nota 70+).");
         }
     }
+
     function fecharModal() { document.getElementById('modal-dados').style.display = 'none'; }
 
     async function gerarPDF() {
         const { jsPDF } = window.jspdf;
         const nome = document.getElementById('input-nome').value;
-        const cpf = document.getElementById('input-cpf').value;
-        const nasc = document.getElementById('input-nasc').value;
-
-        if(!nome || !cpf || !nasc) return alert("Por favor, preencha todos os campos para o certificado.");
-
+        if(!nome || !document.getElementById('input-cpf').value) return alert("Preencha os dados.");
         const doc = new jsPDF({ orientation: "landscape" });
-        // Estilo básico de certificado
-        doc.setDrawColor(0, 51, 102); doc.setLineWidth(10); doc.rect(5, 5, 287, 200);
-        doc.setFont("helvetica", "bold"); doc.setFontSize(40);
-        doc.text("CERTIFICADO DE CONCLUSÃO", 148, 50, { align: "center" });
-        doc.setFontSize(20); doc.text("Certificamos que:", 148, 80, { align: "center" });
-        doc.setFontSize(35); doc.setTextColor(0, 86, 179);
-        doc.text(nome.toUpperCase(), 148, 105, { align: "center" });
-        doc.setTextColor(0); doc.setFontSize(16);
-        doc.text("Concluiu com sucesso o curso técnico de", 148, 130, { align: "center" });
-        doc.text("MONTAGEM E MANUTENÇÃO DE COMPUTADORES", 148, 140, { align: "center" });
-        doc.setFontSize(12);
-        doc.text(`CPF: ${cpf} | Nascimento: ${nasc.split('-').reverse().join('/')}`, 148, 155, { align: "center" });
-        doc.save(`Certificado_Telecurso_${nome.replace(" ","_")}.pdf`);
+        doc.setFontSize(30); doc.text("CERTIFICADO DE CONCLUSÃO", 148, 50, { align: "center" });
+        doc.setFontSize(20); doc.text(nome.toUpperCase(), 148, 100, { align: "center" });
+        doc.setFontSize(14); doc.text("Curso de Montagem e Manutenção de Computadores", 148, 130, { align: "center" });
+        doc.save(`Certificado_${nome}.pdf`);
         fecharModal();
     }
 
     async function sair() { await _supabase.auth.signOut(); window.location.href = "index.html"; }
     inicializar();
-
-
-    
 </script>
-
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aula 8 Armazenamento (SSD e HD) | Telecurso PC</title>
+    <title>Aula 8: Armazenamento (SSD e HD) | Telecurso PC</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -13,6 +13,7 @@
             --branco: #ffffff;
             --texto: #333;
             --verde: #28a745;
+            --vermelho: #dc3545;
         }
 
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; color: var(--texto); line-height: 1.6; }
@@ -21,11 +22,13 @@
         .container { max-width: 900px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
         h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
         
-        .dica-box { background: #e7f3ff; border-left: 5px solid var(--azul-claro); padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .dica-box { background: #fff8e1; border-left: 5px solid var(--amarelo); padding: 20px; margin: 20px 0; border-radius: 8px; }
 
         .peça-card { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 40px; padding: 25px; border-left: 5px solid var(--azul-claro); background: #f9f9f9; border-radius: 8px; }
         .peça-card img { max-width: 100%; height: auto; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .peça-info h3 { margin: 0 0 10px 0; color: var(--azul-claro); font-size: 1.3rem; }
+        
+        .instrucao-detalhe { background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.95rem; margin-top: 10px; }
 
         .area-final { text-align: center; margin-top: 50px; padding: 40px; border-top: 2px dashed #ccc; background: #fffcf0; border-radius: 0 0 12px 12px; }
         .btn-quiz { background: var(--azul-escuro); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
@@ -33,7 +36,7 @@
 
         @media (min-width: 768px) {
             .peça-card { flex-direction: row; align-items: flex-start; text-align: left; }
-            .peça-card img { max-width: 200px; }
+            .peça-card img { max-width: 220px; }
         }
     </style>
 </head>
@@ -46,19 +49,22 @@
 
     <div class="container">
         <h1>Módulo 8: Instalando o Armazenamento</h1>
-        <p>O armazenamento é onde o sistema operacional e seus arquivos moram. Atualmente, o padrão <strong>NVMe M.2</strong> é o mais rápido e fácil de instalar.</p>
+        <p>O armazenamento é a memória de longo prazo do seu PC. Vamos instalar o local onde o Windows, seus programas e jogos ficarão guardados.</p>
 
         <div class="dica-box">
-            <h3>💡 SSD vs HD</h3>
-            <p>Sempre instale o Windows em um <strong>SSD</strong>. Deixe os HDs mecânicos apenas para arquivos grandes, como filmes ou backups, devido à sua lentidão comparada aos SSDs modernos.</p>
+            <h3>⚠️ Onde instalar o Windows?</h3>
+            <p>Sempre priorize o <strong>SSD</strong> para o sistema operacional. Um SSD é até 50 vezes mais rápido que um HD mecânico, fazendo o PC ligar em segundos em vez de minutos.</p>
         </div>
 
         <div class="secao-tecnica">
             <div class="peça-card">
-                <img src="../img/ssdm2.jpg" alt="Instalação de SSD M.2">
+                <img src="../img/ssdm2.jpg" alt="Instalação de SSD M.2 NVMe">
                 <div class="peça-info">
-                    <h3>1. SSD M.2 (NVMe)</h3>
-                    <p>Encaixe o SSD no slot M.2 em um ângulo de 30 graus. Pressione-o levemente para baixo e prenda-o com o parafuso minúsculo que acompanha a placa-mãe. Alguns modelos usam travas de plástico (EZ-Latch).</p>
+                    <h3>1. SSD M.2 NVMe (O chip de alta velocidade)</h3>
+                    <p>Ele parece um "pente" pequeno e é instalado diretamente na placa-mãe, sem cabos.</p>
+                    <div class="instrucao-detalhe">
+                        <strong>Como instalar:</strong> Insira o SSD no slot M.2 em um ângulo de 30°. Ele ficará levemente "empinado". Empurre-o para baixo suavemente e prenda-o com o parafuso minúsculo que vem na placa-mãe.
+                    </div>
                 </div>
             </div>
             
@@ -66,8 +72,11 @@
             <div class="peça-card">
                 <img src="../img/ssdsata.jpg" alt="SSD SATA de 2.5 polegadas">
                 <div class="peça-info">
-                    <h3>2. SSD ou HD SATA</h3>
-                    <p>Essas unidades ficam presas em gavetas ou furos no próprio gabinete. Diferente do M.2, elas precisam de dois cabos: o de <strong>dados SATA</strong> (conectado à placa-mãe) e o de <strong>energia SATA</strong> (vindo da fonte).</p>
+                    <h3>2. Unidades SATA (SSD 2.5" ou HD 3.5")</h3>
+                    <p>Diferente do M.2, estas unidades precisam de dois cabos vindo de lugares diferentes.</p>
+                    <div class="instrucao-detalhe">
+                        <strong>Os dois cabos:</strong> Conecte o cabo de <strong>Dados SATA</strong> (fininho, vai na placa-mãe) e o cabo de <strong>Energia SATA</strong> (mais largo, vem direto da fonte). Note que ambos possuem um conector em formato de "L" para evitar inversão.
+                    </div>
                 </div>
             </div>
             
@@ -75,8 +84,11 @@
             <div class="peça-card">
                 <img src="../img/saida sata placa.jpg" alt="Portas SATA na placa-mãe">
                 <div class="peça-info">
-                    <h3>3. Conectando os Dados</h3>
-                    <p>O cabo de dados SATA tem um formato de "L" no conector. Ele deve ser ligado em uma das portas SATA da placa-mãe. Prefira sempre a porta <strong>SATA_0</strong> ou <strong>SATA_1</strong> para o disco principal.</p>
+                    <h3>3. Portas na Placa-mãe</h3>
+                    <p>Conecte o cabo de dados nas portas identificadas como SATA_0 ou SATA_1.</p>
+                    <div class="instrucao-detalhe">
+                        <strong>Dica:</strong> Se você estiver usando um SSD M.2 e um HD comum ao mesmo tempo, verifique o manual da sua placa, pois às vezes o uso do slot M.2 desativa uma das portas SATA.
+                    </div>
                 </div>
             </div>
         </div>
@@ -123,15 +135,16 @@
                     .upsert({ user_id: user.id, modulo_id: 8 }, { onConflict: 'user_id, modulo_id' });
 
                 if (!error) {
-                    alert("Módulo 8 Concluído!");
+                    alert("Módulo 8 Concluído com Sucesso!");
                     window.location.href = "../modulos.html";
                 } else {
-                    alert("Erro ao salvar: " + error.message);
+                    alert("Erro ao salvar progresso.");
                 }
             } catch (err) {
                 alert("Erro inesperado.");
             }
         }
+        
         inicializar();
     </script>
 </body>

@@ -22,13 +22,15 @@
         .container { max-width: 900px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
         h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
         
-        .dica-box { background: #e7f3ff; border-left: 5px solid var(--azul-claro); padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .dica-box { background: #e8f5e9; border-left: 5px solid var(--verde); padding: 20px; margin: 20px 0; border-radius: 8px; }
 
         .peça-card { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 40px; padding: 25px; border-left: 5px solid var(--azul-claro); background: #f9f9f9; border-radius: 8px; }
         .peça-card img { max-width: 100%; height: auto; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .peça-info h3 { margin: 0 0 10px 0; color: var(--azul-claro); font-size: 1.3rem; }
+        
+        .instrucao-detalhe { background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.95rem; margin-top: 10px; }
 
-        .area-final { text-align: center; margin-top: 50px; padding: 40px; border-top: 2px dashed #ccc; background: #fffcf0; border-radius: 0 0 12px 12px; }
+        .area-final { text-align: center; margin-top: 50px; padding: 40px; border-top: 2px dashed #ccc; background: #f0fff4; border-radius: 0 0 12px 12px; }
         .btn-quiz { background: var(--azul-escuro); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
         .btn-concluir { background: var(--verde); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; display: none; }
 
@@ -47,37 +49,45 @@
 
     <div class="container">
         <h1>Módulo 10: Fans e Fluxo de Ar</h1>
-        <p>As ventoinhas do gabinete não servem apenas para "soprar ar". Elas precisam criar um caminho organizado para o ar frio entrar e o ar quente sair.</p>
+        <p>As ventoinhas não servem apenas para enfeitar. Elas criam um caminho organizado para o ar frio entrar e o ar quente sair, mantendo a vida útil dos seus componentes.</p>
 
         <div class="dica-box">
-            <h3>🌬️ Pressão Positiva vs Negativa</h3>
-            <p>O ideal é ter um equilíbrio. O ar frio deve entrar pela <strong>frente e baixo</strong>, e o ar quente deve sair por <strong>trás e cima</strong>, já que o ar quente é mais leve e sobe naturalmente.</p>
+            <h3>🌬️ A Física do Calor</h3>
+            <p>O ar quente é mais leve e sobe naturalmente. Por isso, a regra de ouro é: <strong>Ar frio entra pela frente/baixo</strong> e o <strong>Ar quente sai por trás/cima</strong>.</p>
         </div>
-        
 
         <div class="secao-tecnica">
             <div class="peça-card">
                 <img src="../img/fan-direction.webp" alt="Direção do fluxo de ar na ventoinha">
                 <div class="peça-info">
-                    <h3>1. Para onde o ar sopra?</h3>
-                    <p>Quase toda ventoinha tem setas na lateral indicando o giro e o fluxo. Regra geral: o lado "bonito" (com a marca) puxa o ar, e o lado com a "grade/suporte" solta o ar.</p>
+                    <h3>1. Para onde o ar vai?</h3>
+                    <p>Muitos iniciantes montam as ventoinhas invertidas, o que "abafa" o PC.</p>
+                    <div class="instrucao-detalhe">
+                        <strong>O Truque Visual:</strong> Quase toda fan puxa o ar pelo lado "limpo" (onde você vê apenas as hélices) e solta o ar pelo lado que tem a "grade" ou suporte de plástico. Se tiver dúvida, procure setinhas gravadas no plástico lateral da fan.
+                    </div>
                 </div>
             </div>
             
 
             <div class="peça-card">
-                <img src="../img/fan-install.webp" alt="Instalação de ventoinha">
+                <img src="../img/fan-install.webp" alt="Instalação de ventoinha no gabinete">
                 <div class="peça-info">
-                    <h3>2. Fixação no Gabinete</h3>
-                    <p>Use parafusos de rosca grossa. Certifique-se de que a ventoinha está firme para evitar vibrações que causam barulho chato de "zunido" durante o uso.</p>
+                    <h3>2. Fixação e Vibração</h3>
+                    <p>Ventoinhas mal presas causam ruídos de vibração irritantes (o famoso "zunido").</p>
+                    <div class="instrucao-detalhe">
+                        <strong>Dica:</strong> Use os parafusos de rosca grossa que acompanham o gabinete. Aperte em "X" (como nos pneus de um carro) para garantir que a fan fique perfeitamente plana contra a chapa de metal.
+                    </div>
                 </div>
             </div>
 
             <div class="peça-card">
                 <img src="../img/sys-fan-header.webp" alt="Conector SYS_FAN na placa-mãe">
                 <div class="peça-info">
-                    <h3>3. Ligando na Energia</h3>
-                    <p>Conecte os cabos nos headers identificados como <strong>SYS_FAN</strong> ou <strong>CHA_FAN</strong> na placa-mãe. Se você tiver muitas ventoinhas, use uma controladora ou um cabo "Splitter".</p>
+                    <h3>3. Ligando os fios (SYS_FAN)</h3>
+                    <p>Para a fan girar, ela precisa de energia da placa-mãe ou de uma controladora.</p>
+                    <div class="instrucao-detalhe">
+                        <strong>Onde ligar:</strong> Procure pinos identificados como <strong>SYS_FAN</strong> ou <strong>CHA_FAN</strong>. Eles possuem uma guia de plástico que impede o encaixe errado. Mesmo que sua fan tenha 3 pinos e o conector tenha 4, a guia mostrará o lado certo de encaixar.
+                    </div>
                 </div>
             </div>
             
@@ -85,15 +95,15 @@
 
         <div class="area-final">
             <div id="status-aprovacao">
-                <h3>O fluxo de ar está correto?</h3>
-                <p>Responda o quiz sobre refrigeração para liberar este módulo.</p>
+                <h3>O PC está pronto para respirar?</h3>
+                <p>Responda o quiz sobre refrigeração para liberar a conclusão do curso de hardware.</p>
                 <button class="btn-quiz" onclick="irParaQuiz()">FAZER DESAFIO DO MÓDULO 10</button>
             </div>
 
             <div id="box-concluir" style="display:none">
-                <h3 style="color: var(--verde)">PC Refrigerado! ❄️</h3>
-                <p>Parabéns! Você completou toda a montagem física dos componentes.</p>
-                <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()">CONCLUIR MÓDULO ✅</button>
+                <h3 style="color: var(--verde)">PC Refrigerado e Montado! ❄️</h3>
+                <p>Parabéns! Você concluiu toda a montagem física dos componentes. Agora o seu hardware está pronto para ganhar vida!</p>
+                <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()">CONCLUIR MONTAGEM FÍSICA ✅</button>
             </div>
         </div>
     </div>
@@ -125,11 +135,16 @@
                     .upsert({ user_id: user.id, modulo_id: 10 }, { onConflict: 'user_id, modulo_id' });
 
                 if (!error) {
-                    alert("Módulo 10 Concluído!");
+                    alert("Montagem Física Concluída com Sucesso! Próximo passo: Software.");
                     window.location.href = "../modulos.html";
+                } else {
+                    alert("Erro ao salvar progresso.");
                 }
-            } catch (err) { alert("Erro inesperado."); }
+            } catch (err) {
+                alert("Erro inesperado.");
+            }
         }
+        
         inicializar();
     </script>
 </body>
