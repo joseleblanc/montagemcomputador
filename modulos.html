@@ -7,6 +7,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
         :root {
@@ -14,27 +15,44 @@
             --azul-claro: #0056b3;
             --amarelo: #ffcc00;
             --cinza-fundo: #f4f7f9;
-            --verde: #28a745;
+            --verde: #25d366;
             --branco: #ffffff;
         }
 
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--cinza-fundo); margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background-color: var(--azul-escuro);
+            background-image: linear-gradient(180deg, #003366 0%, #0056b3 100%);
+            background-attachment: fixed;
+            margin: 0; 
+            padding: 0; 
+            color: #333;
+        }
 
         header {
-            background-color: var(--azul-escuro);
-            color: white;
-            padding: 20px;
+            background-color: var(--branco);
+            color: var(--azul-escuro);
+            padding: 15px;
             text-align: center;
-            border-bottom: 5px solid var(--amarelo);
+            border-bottom: 4px solid var(--amarelo);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
 
+        /* Painel de Identidade do Aluno */
         .painel-topo {
-            background: var(--branco);
+            background: rgba(255, 255, 255, 0.95);
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
@@ -43,20 +61,23 @@
         }
 
         .info-aluno { flex: 1; min-width: 250px; }
+        .info-aluno h2 { color: var(--azul-escuro); font-size: 1.4rem; }
+
         .progresso-sessao { flex: 2; min-width: 300px; }
 
         .barra-fundo {
             background: #e0e0e0;
-            height: 15px;
+            height: 12px;
             border-radius: 10px;
             margin: 10px 0;
             overflow: hidden;
+            border: 1px solid #ddd;
         }
         .barra-preenchimento {
             background: var(--verde);
             height: 100%;
             width: 0%;
-            transition: width 0.8s ease;
+            transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .btn-acao {
@@ -65,10 +86,18 @@
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.3s ease;
+            text-transform: uppercase;
         }
 
-        .btn-sair { background: #ff4444; color: white; font-size: 0.8rem; margin-top: 10px; }
+        .btn-sair { 
+            background: transparent; 
+            color: #ff4444; 
+            font-size: 0.75rem; 
+            border: 1px solid #ff4444;
+            margin-top: 8px;
+        }
+        .btn-sair:hover { background: #ff4444; color: white; }
         
         .btn-certificado {
             background: #bdc3c7;
@@ -81,84 +110,119 @@
             background: var(--amarelo);
             color: var(--azul-escuro);
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(255, 204, 0, 0.4);
+            box-shadow: 0 4px 15px rgba(255, 204, 0, 0.5);
         }
+        .btn-certificado.liberado:hover { transform: scale(1.05); }
 
+        /* Grid de Módulos */
         .grid-modulos {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
         }
 
         .card-modulo {
             background: var(--branco);
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
-            border: 1px solid #ddd;
-            transition: 0.3s;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
         }
 
-        .card-modulo.bloqueado { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
-        .card-modulo:not(.bloqueado):hover { transform: translateY(-5px); border-color: var(--azul-claro); }
+        .card-modulo.bloqueado { opacity: 0.7; cursor: not-allowed; filter: grayscale(0.8); }
+        
+        .card-modulo:not(.bloqueado):hover { 
+            transform: translateY(-8px); 
+            border-color: var(--amarelo); 
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+        }
 
-        .card-banner { padding: 10px; text-align: center; background: var(--azul-claro); color: white; font-weight: bold; }
+        .card-banner { 
+            padding: 12px; 
+            text-align: center; 
+            background: var(--azul-claro); 
+            color: white; 
+            font-weight: bold; 
+            font-size: 0.9rem;
+        }
+        
         .card-modulo.concluido .card-banner { background: var(--verde); }
-        .card-corpo { padding: 15px; }
+        .card-modulo.concluido { border-color: var(--verde); }
 
+        .card-corpo { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-corpo h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: var(--azul-escuro); }
+        .card-corpo p { font-size: 0.85rem; color: #666; margin-bottom: 15px; flex-grow: 1; }
+
+        .status-aula {
+            font-weight: bold;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 51, 102, 0.85);
             z-index: 999;
             justify-content: center;
             align-items: center;
+            backdrop-filter: blur(5px);
         }
         .modal-content {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
+            padding: 35px;
+            border-radius: 15px;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
         .modal-content input {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0 20px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            display: block;
+            padding: 12px;
+            margin: 8px 0 20px 0;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
         }
+        .modal-content input:focus { border-color: var(--azul-claro); outline: none; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>TELECURSO: Montagem de Computadores</h1>
+    <h1><i class="fas fa-desktop"></i> TELECURSO <span style="font-weight: 300;">| Montagem de PC</span></h1>
 </header>
 
 <div class="container">
     <div class="painel-topo">
         <div class="info-aluno">
-            <h2 id="nome-aluno" style="margin:0">Carregando...</h2>
+            <h2 id="nome-aluno"><i class="fas fa-user-circle"></i> Aluno</h2>
             <button class="btn-acao btn-sair" onclick="sair()">Sair da Sala</button>
         </div>
 
         <div class="progresso-sessao">
-            <div style="display: flex; justify-content: space-between;">
-                <strong>Seu Progresso</strong>
-                <span id="txt-porcentagem" style="color: var(--verde); font-weight: bold;">0%</span>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <strong style="color: var(--azul-escuro)">Seu Progresso</strong>
+                <span id="txt-porcentagem" style="color: var(--verde); font-weight: bold; font-size: 1.2rem;">0%</span>
             </div>
             <div class="barra-fundo">
                 <div id="barra-progresso" class="barra-preenchimento"></div>
             </div>
-            <small>Conclua todas as aulas para liberar o diploma.</small>
+            <small style="color: #666;"><i class="fas fa-info-circle"></i> Conclua todas as aulas para liberar o diploma.</small>
         </div>
 
         <div>
             <button id="btn-certificado" class="btn-acao btn-certificado" onclick="abrirModal()">
-                EMITIR CERTIFICADO
+                <i class="fas fa-certificate"></i> EMITIR CERTIFICADO
             </button>
         </div>
     </div>
@@ -168,26 +232,27 @@
 
 <div id="modal-dados" class="modal">
     <div class="modal-content">
-        <h2 style="margin-top:0; color: var(--azul-escuro)">Dados do Diploma</h2>
-        <p style="font-size: 0.9rem; color: #666;">Confirme seus dados para a emissão do PDF oficial.</p>
+        <h2 style="margin-top:0; color: var(--azul-escuro)"><i class="fas fa-id-card"></i> Dados do Diploma</h2>
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 25px;">Confirme seus dados para a emissão do PDF oficial.</p>
         
-        <label>Nome Completo:</label>
-        <input type="text" id="input-nome" placeholder="Ex: João da Silva">
+        <label><b>Nome Completo:</b></label>
+        <input type="text" id="input-nome" placeholder="Como aparecerá no certificado">
         
-        <label>CPF:</label>
+        <label><b>CPF:</b></label>
         <input type="text" id="input-cpf" placeholder="000.000.000-00">
         
-        <label>Data de Nascimento:</label>
+        <label><b>Data de Nascimento:</b></label>
         <input type="date" id="input-nasc">
         
-        <button class="btn-acao" style="background: var(--verde); color:white; width: 100%;" onclick="gerarPDF()">
-            GERAR E BAIXAR AGORA
+        <button class="btn-acao" style="background: var(--verde); color:white; width: 100%; margin-top: 10px;" onclick="gerarPDF()">
+            <i class="fas fa-download"></i> GERAR E BAIXAR AGORA
         </button>
-        <button style="background:none; border:none; width:100%; margin-top:10px; cursor:pointer;" onclick="fecharModal()">Cancelar</button>
+        <button style="background:none; border:none; width:100%; margin-top:15px; cursor:pointer; color: #999;" onclick="fecharModal()">Voltar</button>
     </div>
 </div>
 
 <script>
+    // Mesma lógica de conexão e funções que você já possui
     const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -213,7 +278,7 @@
     async function inicializar() {
         const { data: { user } } = await _supabase.auth.getUser();
         if (!user) { window.location.href = "index.html"; return; }
-        document.getElementById('nome-aluno').innerText = `Olá, ${user.email.split('@')[0]}!`;
+        document.getElementById('nome-aluno').innerHTML = `<i class="fas fa-user-circle"></i> Olá, ${user.email.split('@')[0]}!`;
         
         const { data: progresso } = await _supabase.from('progresso_alunos').select('modulo_id').eq('user_id', user.id);
         const concluidos = progresso ? progresso.map(p => p.modulo_id) : [];
@@ -225,7 +290,7 @@
         if(pct === 100) {
             const btn = document.getElementById('btn-certificado');
             btn.classList.add('liberado');
-            btn.innerText = "⭐ EMITIR CERTIFICADO";
+            btn.innerHTML = "<i class='fas fa-star'></i> EMITIR CERTIFICADO";
         }
         renderizar(concluidos);
     }
@@ -234,7 +299,6 @@
         const grid = document.getElementById('grid-modulos');
         grid.innerHTML = modulos.map((m, i) => {
             const isConcluido = concluidos.includes(m.id);
-            // Módulo 0 sempre aberto. Os demais dependem do ID anterior concluído.
             const isBloqueado = m.id !== 0 && !concluidos.includes(m.id - 1);
             
             return `
@@ -243,9 +307,10 @@
                     <div class="card-banner">MÓDULO ${String(m.id).padStart(2, '0')}</div>
                     <div class="card-corpo">
                         <h3>${m.t}</h3>
-                        <p style="font-size:0.85rem; color:#666">${m.d}</p>
-                        <span style="font-weight:bold; font-size:0.8rem; color:${isConcluido ? 'var(--verde)' : (isBloqueado ? '#888' : 'var(--azul-claro)')}">
-                            ${isConcluido ? '✅ CONCLUÍDO' : (isBloqueado ? '🔒 BLOQUEADO' : 'FAZER AULA →')}
+                        <p>${m.d}</p>
+                        <span class="status-aula" style="color:${isConcluido ? 'var(--verde)' : (isBloqueado ? '#888' : 'var(--azul-claro)')}">
+                            <i class="fas ${isConcluido ? 'fa-check-circle' : (isBloqueado ? 'fa-lock' : 'fa-play-circle')}"></i>
+                            ${isConcluido ? 'CONCLUÍDO' : (isBloqueado ? 'BLOQUEADO' : 'FAZER AULA →')}
                         </span>
                     </div>
                 </div>`;
@@ -265,9 +330,10 @@
         const cpf = document.getElementById('input-cpf').value;
         const nasc = document.getElementById('input-nasc').value;
 
-        if(!nome || !cpf || !nasc) return alert("Preencha tudo!");
+        if(!nome || !cpf || !nasc) return alert("Por favor, preencha todos os campos para o certificado.");
 
         const doc = new jsPDF({ orientation: "landscape" });
+        // Estilo básico de certificado
         doc.setDrawColor(0, 51, 102); doc.setLineWidth(10); doc.rect(5, 5, 287, 200);
         doc.setFont("helvetica", "bold"); doc.setFontSize(40);
         doc.text("CERTIFICADO DE CONCLUSÃO", 148, 50, { align: "center" });
@@ -276,23 +342,18 @@
         doc.text(nome.toUpperCase(), 148, 105, { align: "center" });
         doc.setTextColor(0); doc.setFontSize(16);
         doc.text("Concluiu com sucesso o curso técnico de", 148, 130, { align: "center" });
-        doc.setFont("helvetica", "bold");
         doc.text("MONTAGEM E MANUTENÇÃO DE COMPUTADORES", 148, 140, { align: "center" });
-        doc.setFont("helvetica", "normal"); doc.setFontSize(12);
-        doc.text(`CPF: ${cpf} | Data de Nascimento: ${nasc.split('-').reverse().join('/')}`, 148, 155, { align: "center" });
-        doc.setFont("courier", "italic"); doc.setFontSize(22); doc.setTextColor(0, 51, 102);
-        doc.text("José Estevão de Araujo Campos", 148, 175, { align: "center" });
-        doc.setDrawColor(255, 204, 0); doc.setLineWidth(0.5); doc.line(100, 178, 196, 178);
-        doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(0);
-        doc.text("TELECURSO: MONTAGEM DE PC | INSTRUTOR RESPONSÁVEL", 148, 185, { align: "center" });
-        doc.setFont("helvetica", "normal");
-        doc.text(`Emitido em: ${new Date().toLocaleDateString()}`, 148, 192, { align: "center" });
-        doc.save(`Certificado_${nome.replace(" ","_")}.pdf`);
+        doc.setFontSize(12);
+        doc.text(`CPF: ${cpf} | Nascimento: ${nasc.split('-').reverse().join('/')}`, 148, 155, { align: "center" });
+        doc.save(`Certificado_Telecurso_${nome.replace(" ","_")}.pdf`);
         fecharModal();
     }
 
     async function sair() { await _supabase.auth.signOut(); window.location.href = "index.html"; }
     inicializar();
+
+
+    
 </script>
 
 </body>
