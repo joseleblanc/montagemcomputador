@@ -347,30 +347,117 @@
         }).join('');
     }
 
-    function abrirModal() {
-        if(document.getElementById('btn-certificado').classList.contains('liberado')) {
-            document.getElementById('modal-dados').style.display = 'flex';
-        } else {
-            alert("O certificado exige aprovação na Prova Final (Nota 70+).");
-        }
+function abrirModal() {
+    if(document.getElementById('btn-certificado').classList.contains('liberado')) {
+        document.getElementById('modal-dados').style.display = 'flex';
+    } else {
+        alert("O certificado exige aprovação na Prova Final (Nota 70+).");
+    }
+}
+
+function fecharModal() { 
+    document.getElementById('modal-dados').style.display = 'none'; 
+}
+
+async function gerarPDF() {
+    const { jsPDF } = window.jspdf;
+    
+    // Captura dos dados (IDs sincronizados com seu HTML)
+    const nome = document.getElementById('input-nome').value;
+    const cpf = document.getElementById('input-cpf').value;
+    const nascimento = document.getElementById('input-nasc').value;
+
+    if(!nome || !cpf || !nascimento) {
+        return alert("Por favor, preencha todos os campos.");
     }
 
-    function fecharModal() { document.getElementById('modal-dados').style.display = 'none'; }
+    // Formatação da data (Brasil)
+    const dataNascFormatada = nascimento.split('-').reverse().join('/');
+    const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
-    async function gerarPDF() {
-        const { jsPDF } = window.jspdf;
-        const nome = document.getElementById('input-nome').value;
-        if(!nome || !document.getElementById('input-cpf').value) return alert("Preencha os dados.");
-        const doc = new jsPDF({ orientation: "landscape" });
-        doc.setFontSize(30); doc.text("CERTIFICADO DE CONCLUSÃO", 148, 50, { align: "center" });
-        doc.setFontSize(20); doc.text(nome.toUpperCase(), 148, 100, { align: "center" });
-        doc.setFontSize(14); doc.text("Curso de Montagem e Manutenção de Computadores", 148, 130, { align: "center" });
-        doc.save(`Certificado_${nome}.pdf`);
-        fecharModal();
-    }
+    // --- PALETA DE CORES PREMIUM ---
+    const azulMarinho = [0, 32, 63];
+    const dourado = [184, 134, 11];
 
-    async function sair() { await _supabase.auth.signOut(); window.location.href = "index.html"; }
-    inicializar();
+    // 1. MOLDURAS (BORDAS)
+    doc.setDrawColor(azulMarinho[0], azulMarinho[1], azulMarinho[2]);
+    doc.setLineWidth(1);
+    doc.rect(5, 5, 287, 200); // Borda externa fina
+
+    doc.setDrawColor(dourado[0], dourado[1], dourado[2]);
+    doc.setLineWidth(0.8);
+    doc.rect(10, 10, 277, 190); // Moldura principal
+    doc.setLineWidth(0.2);
+    doc.rect(12, 12, 273, 186); // Detalhe interno
+
+    // 2. CABEÇALHO
+    doc.setFont("times", "bold");
+    doc.setFontSize(42);
+    doc.setTextColor(azulMarinho[0], azulMarinho[1], azulMarinho[2]);
+    doc.text("CERTIFICADO", 148, 45, { align: "center" });
+    
+    doc.setFontSize(14);
+    doc.setFont("times", "italic");
+    doc.setTextColor(100, 100, 100);
+    doc.text("Conclusão de Treinamento Técnico", 148, 55, { align: "center" });
+
+    doc.setDrawColor(dourado[0], dourado[1], dourado[2]);
+    doc.line(100, 60, 196, 60); // Linha decorativa central
+
+    // 3. TEXTO CENTRAL
+    doc.setFont("times", "normal");
+    doc.setFontSize(19);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Certificamos para os devidos fins que", 148, 85, { align: "center" });
+
+    // Nome do Aluno (Destaque máximo)
+    doc.setFont("times", "bolditalic");
+    doc.setFontSize(34);
+    doc.setTextColor(azulMarinho[0], azulMarinho[1], azulMarinho[2]);
+    doc.text(nome.toUpperCase(), 148, 105, { align: "center" });
+
+    // Dados Complementares
+    doc.setFont("times", "normal");
+    doc.setFontSize(14);
+    doc.setTextColor(80, 80, 80);
+    doc.text(`inscrito sob o CPF nº ${cpf}, nascido em ${dataNascFormatada},`, 148, 118, { align: "center" });
+    doc.text("concluiu com aproveitamento satisfatório o treinamento de", 148, 128, { align: "center" });
+
+    // Título do Curso
+    doc.setFont("times", "bold");
+    doc.setFontSize(24);
+    doc.setTextColor(dourado[0], dourado[1], dourado[2]);
+    doc.text("MONTAGEM E MANUTENÇÃO DE COMPUTADORES", 148, 148, { align: "center" });
+
+    // 4. SELO DE AUTENTICIDADE (Simulado no centro inferior)
+    doc.setDrawColor(dourado[0], dourado[1], dourado[2]);
+    doc.setFillColor(255, 255, 245);
+    doc.circle(148, 172, 12, 'FD');
+    doc.setFontSize(7);
+    doc.setTextColor(dourado[0], dourado[1], dourado[2]);
+    doc.text("EXCELÊNCIA", 148, 171, { align: "center" });
+    doc.text("TÉCNICA", 148, 174, { align: "center" });
+
+    // 5. RODAPÉ (Apenas a Data)
+    const dataHoje = new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+    
+    doc.setFont("times", "normal");
+    doc.setFontSize(12);
+    doc.setTextColor(60, 60, 60);
+    doc.text(`Emitido em ${dataHoje}`, 148, 192, { align: "center" });
+
+    // 6. DOWNLOAD E FECHAMENTO
+    doc.save(`Certificado_${nome.replace(/\s+/g, '_')}.pdf`);
+    fecharModal();
+}
+
+async function sair() { 
+    await _supabase.auth.signOut(); 
+    window.location.href = "index.html"; 
+}
+
+// Inicializa as funções do sistema
+inicializar();
 </script>
 </body>
 </html>
