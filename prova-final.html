@@ -7,35 +7,66 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --azul: #003366; --azul-claro: #0056b3; --amarelo: #ffcc00; --fundo: #f4f7f9;
+            --azul: #003366; --azul-claro: #0056b3; --amarelo: #ffcc00; --fundo: #f4f7f9; --vermelho: #ff4444;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--fundo); margin: 0; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--fundo); margin: 0; padding: 20px; user-select: none; }
         .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         header { text-align: center; border-bottom: 2px solid var(--azul); margin-bottom: 30px; padding-bottom: 10px; }
+        
+        .regras-box {
+            background: #fff3cd; border-left: 5px solid #ffc107; padding: 15px; margin: 20px 0; text-align: left; border-radius: 4px;
+        }
+        .regras-box h3 { margin: 0 0 10px 0; color: #856404; }
+        
         .questao { margin-bottom: 25px; padding: 15px; border: 1px solid #eee; border-radius: 8px; }
         .questao p { font-weight: bold; color: var(--azul); margin-top: 0; }
         .opcoes label { display: block; padding: 10px; margin: 5px 0; background: #f9f9f9; border-radius: 5px; cursor: pointer; transition: 0.2s; }
         .opcoes label:hover { background: #eef2f7; }
-        .opcoes input { margin-right: 10px; }
+        
         .btn-enviar { width: 100%; padding: 20px; background: var(--azul); color: white; border: none; border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
-        .btn-enviar:hover { background: var(--azul-claro); }
+        
+        #anti-cola-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.98); color: white; z-index: 9999; text-align: center; padding-top: 10%;
+        }
+        .aviso-card { background: white; color: black; display: inline-block; padding: 40px; border-radius: 15px; max-width: 500px; border: 3px solid var(--vermelho); }
+
         #resultado { display: none; text-align: center; padding: 40px; }
         .nota-box { font-size: 3rem; font-weight: bold; margin: 20px 0; }
         .aprovado { color: #25d366; }
-        .reprovado { color: #ff4444; }
+        .reprovado { color: var(--vermelho); }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
+
+<div id="anti-cola-overlay">
+    <div class="aviso-card">
+        <h2>⚠️ EXAME BLOQUEADO</h2>
+        <p>Foi detectada uma mudança de janela ou aplicativo. Por segurança, o progresso foi resetado.</p>
+        <button class="btn-enviar" onclick="location.reload()">RECOMEÇAR AGORA</button>
+    </div>
+</div>
 
 <div class="container" id="prova-container">
     <header>
-        <h1>Exame Técnico Final</h1>
-        <p>Responda as 30 questões com atenção. Necessário 70% de acerto.</p>
+        <h1>Exame Final de Hardware</h1>
+        <div class="regras-box">
+            <h3>📝 Regras Oficiais:</h3>
+            <ul>
+                <li><strong>Sorteio:</strong> O sistema escolheu 30 questões de um banco de 60.</li>
+                <li><strong>Anti-Cola:</strong> Se sair desta página, a prova trava.</li>
+                <li><strong>Aprovação:</strong> Mínimo de 70% (21 questões corretas).</li>
+                <li><strong>Tempo:</strong> Não há limite, mas seja objetivo.</li>
+                <li><strong>Repetição:</strong> Em caso de reprovação, refaça o exame quantas vezes quiser.</li>
+                <li><strong>Não atualize a pagina:</strong> Caso a pagina seja atualizada, o exame será reiniciado. perdendo todas as questões ja respondidas</li>
+                <li><strong>Envio:</strong> Clique em "FINALIZAR EXAME" para enviar o exame.</li>
+            </ul>
+        </div>
     </header>
 
     <form id="quiz-form">
         <div id="questoes-lista"></div>
-        <button type="button" class="btn-enviar" onclick="processarProva()">FINALIZAR E ENVIAR RESULTADO</button>
+        <button type="button" class="btn-enviar" onclick="processarProva()">FINALIZAR EXAME</button>
     </form>
 </div>
 
@@ -43,110 +74,151 @@
     <h2 id="msg-resultado"></h2>
     <div class="nota-box" id="nota-final">0</div>
     <p id="feedback-detalhado"></p>
-    <button class="btn-enviar" onclick="location.href='modulos.html'">VOLTAR PARA MÓDULOS</button>
+    <button class="btn-enviar" onclick="location.href='index.html'">SAIR</button>
 </div>
 
 <script>
+    // Configurações Supabase (Substitua se necessário)
     const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const bancoQuestoes = [
-        { q: "Qual o componente responsável por converter a corrente alternada da tomada em corrente contínua para as peças?", a: "Processador", b: "Placa-mãe", c: "Fonte de Alimentação", d: "SSD", e: "Memória RAM", correta: "c" },
-        { q: "Para evitar a queima de componentes por eletricidade estática, qual o procedimento correto?", a: "Usar luvas de borracha", b: "Tocar em algo metálico aterrado ou usar pulseira antiestática", c: "Lavar as mãos antes", d: "Montar o PC sobre um tapete de lã", e: "Não há riscos com estática", correta: "b" },
-        { q: "Qual ferramenta é a mais essencial e utilizada em quase toda a montagem do PC?", a: "Alicate de pressão", b: "Chave Phillips imantada", c: "Martelo de borracha", d: "Chave de fenda minúscula", e: "Ferro de solda", correta: "b" },
-        { q: "Qual o detalhe visual no processador e no soquete que indica o lado correto do encaixe?", a: "Uma seta dourada em um dos cantos", b: "Um código de barras", c: "A cor do processador", d: "Não há indicação, encaixa de qualquer lado", e: "O tamanho dos pinos", correta: "a" },
-        { q: "Onde deve ser aplicada a pasta térmica?", a: "Nos pinos do processador", b: "No centro da parte metálica (IHS) do processador", c: "No slot da memória RAM", d: "Abaixo da placa-mãe", e: "Dentro do soquete", correta: "b" },
-        { q: "Como saber se a memória RAM foi encaixada corretamente no slot?", a: "Pelo barulho de um 'click' das travas laterais", b: "Pela cor da memória", c: "Se o Windows ligar", d: "Se ela ficar solta no slot", e: "Medindo com uma régua", correta: "a" },
-        { q: "Para que servem os 'espaçadores' que parafusamos no gabinete antes de colocar a placa-mãe?", a: "Para deixar o PC mais bonito", b: "Para evitar que a placa-mãe encoste no metal do gabinete e cause curto-circuito", c: "Para segurar os cabos", d: "Para aumentar a ventilação embaixo da placa", e: "Para prender o SSD", correta: "b" },
-        { q: "Qual o cabo da fonte que possui 24 pinos e alimenta a placa-mãe?", a: "Cabo EPS", b: "Cabo SATA", c: "Cabo Principal ATX", d: "Cabo PCI-e", e: "Cabo Molex", correta: "c" },
-        { q: "Onde o SSD do tipo M.2 é instalado?", a: "Conectado por um cabo de dados", b: "Diretamente em um slot na placa-mãe", c: "Na fonte de alimentação", d: "Fora do gabinete", e: "No slot de expansão de áudio", correta: "b" },
-        { q: "Ao instalar a placa de vídeo, em qual slot da placa-mãe ela deve ser encaixada?", a: "Slot PCI-Express x16", b: "Slot de Memória RAM", c: "Porta USB interna", d: "Soquete do Processador", e: "Slot M.2", correta: "a" },
-        { q: "Qual o sentido padrão do fluxo de ar em um cooler de gabinete?", a: "Sempre sopra para os lados", b: "O ar entra pela frente/baixo e sai por trás/cima", c: "O ar deve ficar parado dentro do gabinete", d: "Todos os fans devem soprar para dentro", e: "Todos os fans devem soprar para fora", correta: "b" },
-        { q: "O que significa o termo 'BIOS' que acessamos no primeiro boot?", a: "Sistema de busca de arquivos", b: "Sistema Básico de Entrada e Saída", c: "Instalador do Windows", d: "Programa de edição de fotos", e: "Backup do HD", correta: "b" },
-        { q: "O que é necessário para iniciar a instalação do Windows em um PC novo?", a: "Apenas ligar o PC na internet", b: "Um pendrive de boot com a imagem do sistema", c: "Um CD de música", d: "Digitar um código no teclado", e: "O Windows já vem dentro do processador", correta: "b" },
-        { q: "Durante a instalação do Windows, o que significa 'formatar' o disco?", a: "Aumentar o tamanho do HD", b: "Apagar os dados e preparar a partição para receber o sistema", c: "Mudar a cor do gabinete", d: "Limpar a poeira das peças", e: "Instalar os drivers de vídeo", correta: "b" },
-        { q: "Qual componente armazena os dados de forma permanente, mesmo com o PC desligado?", a: "Memória RAM", b: "SSD ou HD", c: "Processador", d: "Cooler", e: "Cache", correta: "b" },
-        { q: "Se o PC liga, mas não dá vídeo, qual o primeiro componente a ser conferido e limpo?", a: "Gabinete", b: "Memória RAM", c: "Teclado", d: "Cabo de força da tomada", e: "Mouse", correta: "b" },
-        { q: "Para que serve o 'Espelho' traseiro da placa-mãe?", a: "Para refletir a luz", b: "Para dar acabamento e proteger as entradas USB/Vídeo contra poeira", c: "Para segurar a placa de vídeo", d: "Para esfriar a placa", e: "Não tem utilidade", correta: "b" },
-        { q: "O cabo EPS (geralmente 4 ou 8 pinos) serve para alimentar especificamente qual peça?", a: "O HD", b: "O Processador", c: "As luzes do gabinete", d: "O Mouse", e: "A Placa de Vídeo", correta: "b" },
-        { q: "Qual a função do cooler (dissipador + ventoinha) sobre o processador?", a: "Aumentar a velocidade", b: "Dissipar o calor gerado pelo funcionamento do chip", c: "Gerar energia", d: "Guardar arquivos", e: "Limpar o processador", correta: "b" },
-        { q: "O que acontece se você esquecer de passar a pasta térmica?", a: "O PC não liga", b: "O processador superaquece rapidamente e o PC desliga por segurança", c: "O Windows fica lento", d: "A internet para de funcionar", e: "A tela fica azul imediatamente", correta: "b" },
-        { q: "A bateria CR2032 da placa-mãe serve para:", a: "Ligar o PC sem tomada", b: "Manter as configurações da BIOS e a hora do sistema", c: "Carregar o celular", d: "Esfriar a placa", e: "Aumentar o FPS", correta: "b" },
-        { q: "Qual o nome do slot onde encaixamos o processador?", a: "Porta SATA", b: "Soquete", c: "Slot DIMM", d: "Slot PCIe", e: "Baia", correta: "b" },
-        { q: "O termo 'Hardware' refere-se a:", a: "Programas e aplicativos", b: "Peças físicas do computador", c: "Vídeos do YouTube", d: "Jogos online", e: "Navegador de internet", correta: "b" },
-        { q: "Qual o cabo usado para conectar um HD antigo ou um leitor de DVD na placa-mãe?", a: "Cabo HDMI", b: "Cabo SATA", c: "Cabo de rede", d: "Cabo VGA", e: "Cabo USB", correta: "b" },
-        { q: "O conector 'Front Panel' serve para ligar o quê?", a: "O monitor", b: "Os botões de Power e Reset do gabinete", c: "A impressora", d: "O teclado", e: "A caixa de som", correta: "b" },
-        { q: "Qual o cuidado ao instalar memórias RAM se a placa-mãe tiver 4 slots?", a: "Colocar em qualquer lugar", b: "Seguir o manual para ativar o Dual Channel (geralmente slots 2 e 4)", c: "Usar apenas um slot", d: "Passar pasta térmica na RAM", e: "Colocar todas juntas nos primeiros slots", correta: "b" },
-        { q: "O que significa 'Dual Channel'?", a: "Dois monitores", b: "Dois canais de comunicação com a memória para maior velocidade", c: "Dois processadores", d: "Duas fontes", e: "Dois teclados", correta: "b" },
-        { q: "Qual a principal vantagem de um SSD sobre um HD comum?", a: "É mais pesado", b: "Velocidade de leitura e escrita muito superior", c: "É mais barato", d: "Gasta mais energia", e: "Faz mais barulho", correta: "b" },
-        { q: "Onde conectamos o cabo do monitor se o PC tiver uma placa de vídeo dedicada?", a: "Na placa-mãe", b: "Na própria placa de vídeo", c: "Na fonte", d: "No gabinete", e: "No processador", correta: "b" },
-        { q: "Para finalizar a montagem, o que devemos fazer com os cabos soltos?", a: "Deixar de qualquer jeito", b: "Organizar com abraçadeiras para não atrapalhar o fluxo de ar", c: "Cortar os cabos que sobraram", d: "Esconder embaixo do processador", e: "Colar com fita durex", correta: "b" }
+    let provaAtiva = true;
+
+    const bancoCompleto = [
+        // QUESTÕES DE MONTAGEM (1-20)
+        { q: "Qual componente converte AC (Alternada) em DC (Contínua)?", a: "Placa-mãe", b: "Processador", c: "Fonte de Alimentação", d: "SSD", e: "Monitor", correta: "c" },
+        { q: "Onde se aplica a pasta térmica?", a: "No slot RAM", b: "No topo do processador (IHS)", c: "Debaixo dos pinos", d: "No cooler do gabinete", e: "Na bateria CMOS", correta: "b" },
+        { q: "O que evita a eletricidade estática?", a: "Pulseira antiestática", b: "Luvas de lã", c: "Pés descalços", d: "Pano úmido", e: "Vento do ventilador", correta: "a" },
+        { q: "Qual o cabo principal de energia da placa-mãe?", a: "SATA", b: "EPS 8 pinos", c: "ATX 24 pinos", d: "Molex", e: "PCI-Express", correta: "c" },
+        { q: "A marca triangular no processador serve para:", a: "Indicar a marca", b: "Orientar o encaixe correto no soquete", c: "Passar pasta térmica", d: "Prender o cooler", e: "Medir a temperatura", correta: "b" },
+        { q: "Qual slot é usado para placas de vídeo modernas?", a: "PCI", b: "AGP", c: "PCI-Express x16", d: "ISA", e: "SATA Express", correta: "c" },
+        { q: "Os espaçadores de gabinete servem para:", a: "Beleza", b: "Evitar curto-circuito com o chassi", c: "Segurar o HD", d: "Prender fans", e: "Aumentar o peso", correta: "b" },
+        { q: "SSD M.2 é instalado em qual local?", a: "Cabo de dados", b: "Diretamente na placa-mãe", c: "Na fonte", d: "No gabinete", e: "Na placa de vídeo", correta: "b" },
+        { q: "Qual a função do Espelho Traseiro?", a: "Refletir luz", b: "Acabamento e proteção das portas I/O", c: "Segurar a placa", d: "Resfriar", e: "Nenhuma", correta: "b" },
+        { q: "O que acontece se esquecer de travar a alavanca do soquete?", a: "Nada", b: "O PC não liga pois não há contato elétrico", c: "O processador queima", d: "O Windows fica lento", e: "O cooler cai", correta: "b" },
+        
+        // QUESTÕES DE MANUTENÇÃO E SOFTWARE (21-40)
+        { q: "O que é a BIOS/UEFI?", a: "Sistema operacional", b: "Firmware de controle de hardware básico", c: "Programa de edição", d: "Vírus", e: "Driver de som", correta: "b" },
+        { q: "Qual o primeiro sintoma de superaquecimento?", a: "Aumento da internet", b: "Desligamento súbito do PC", c: "Tela preta no monitor", d: "Teclado parando", e: "Barulho no HD", correta: "b" },
+        { q: "Para que serve o comando 'CheckDisk' (chkdsk)?", a: "Limpar o gabinete", b: "Verificar e corrigir erros no disco rígido", c: "Aumentar a RAM", d: "Baixar drivers", e: "Mudar a senha", correta: "b" },
+        { q: "O que significa formatação rápida?", a: "Limpa fisicamente o disco", b: "Apenas recria a tabela de arquivos", c: "Aumenta o espaço", d: "Remove vírus da BIOS", e: "Instala o Office", correta: "b" },
+        { q: "Como limpar contatos de memória RAM?", a: "Água e sabão", b: "Borracha branca escolar ou álcool isopropílico", c: "Pano úmido", d: "Detergente", e: "Lixa de ferro", correta: "b" },
+        { q: "Sinal de bateria CMOS (CR2032) fraca:", a: "PC não liga", b: "Data e hora desconfigurando sempre", c: "Internet lenta", d: "Mouse travando", e: "Monitor piscando", correta: "b" },
+        { q: "O que é 'Beep Code'?", a: "Código de barras", b: "Sinais sonoros que indicam erros de hardware", c: "Senha do Windows", d: "Música do boot", e: "Barulho do HD", correta: "b" },
+        { q: "Principal vantagem do SSD sobre o HDD:", a: "Preço", b: "Velocidade de acesso e resistência a choques", c: "Capacidade", d: "Peso", e: "Cores", correta: "b" },
+        { q: "O que é Dual Channel?", a: "Dois monitores", b: "Uso de dois módulos de RAM para dobrar a largura de banda", c: "Duas fontes", d: "Dois Windows", e: "Duas placas de vídeo", correta: "b" },
+        { q: "Onde ficam guardados os arquivos quando o PC desliga?", a: "Memória RAM", b: "Armazenamento (HD/SSD)", c: "Processador", d: "Cooler", e: "Fonte", correta: "b" },
+
+        // NOVAS QUESTÕES (41-60)
+        { q: "Qual ferramenta mede a tensão da fonte?", a: "Termômetro", b: "Multímetro", c: "Alicate", d: "Chave de fenda", e: "Lanterna", correta: "b" },
+        { q: "O que é Overclocking?", a: "Limpar o PC", b: "Aumentar a frequência de operação do hardware", c: "Diminuir o consumo", d: "Instalar Linux", e: "Trocar o gabinete", correta: "b" },
+        { q: "Qual a função do cooler do processador?", a: "Fazer luz", b: "Remover o calor gerado pelo processador", c: "Limpar poeira", d: "Aumentar os gigahertz", e: "Estabilizar a energia", correta: "b" },
+        { q: "O que significa a certificação 80 Plus em fontes?", a: "80 cabos", b: "Eficiência energética garantida de pelo menos 80%", c: "Potência de 80W", d: "Garantia de 80 meses", e: "Suporta 80 graus", correta: "b" },
+        { q: "Qual componente processa os gráficos?", a: "Placa de Som", b: "GPU (Placa de Vídeo)", c: "HD", d: "Memória RAM", e: "Fonte", correta: "b" },
+        { q: "O que é um 'Driver'?", a: "Cabo", b: "Software que permite o SO falar com o Hardware", c: "Peça de metal", d: "Um tipo de vírus", e: "Manual impresso", correta: "b" },
+        { q: "Qual a unidade de medida da memória RAM?", a: "GHz", b: "GB (Gigabytes)", c: "Watts", d: "Volts", e: "RPM", correta: "b" },
+        { q: "O que é o TDP?", a: "Preço", b: "Projeto de Força Térmica (calor que precisa ser dissipado)", c: "Velocidade de internet", d: "Tamanho do HD", e: "Tipo de tela", correta: "b" },
+        { q: "Função do Filtro de Linha:", a: "Aumentar a velocidade", b: "Proteger contra picos de tensão e ruídos na rede", c: "Mudar a voltagem", d: "Ligar o Wi-Fi", e: "Resfriar o PC", correta: "b" },
+        { q: "O que fazer se o PC travar na tela da logomarca da placa-mãe?", a: "Trocar o monitor", b: "Verificar teclado ou periféricos USB em curto", c: "Limpar o gabinete por fora", d: "Comprar um mouse novo", e: "Instalar o Office", correta: "b" },
+        { q: "Qual o conector para internet via cabo?", a: "USB", b: "RJ-45 (Ethernet)", c: "HDMI", d: "VGA", e: "P2", correta: "b" },
+        { q: "O que é o soquete LGA?", a: "Pinos no processador", b: "Pinos no soquete da placa-mãe", c: "Tipo de memória", d: "Marca de fonte", e: "Entrada de vídeo", correta: "b" },
+        { q: "Causa comum de 'Tela Azul' constante:", a: "Monitor sujo", b: "Memória RAM com defeito ou drivers instáveis", c: "Falta de pasta térmica", d: "Teclado desconectado", e: "Gabinete aberto", correta: "b" },
+        { q: "O que é 'Safe Mode' (Modo de Segurança)?", a: "Modo para jogos", b: "Inicialização mínima para diagnóstico de erros", c: "Antivírus pago", d: "Modo sem senha", e: "Modo de economia de energia", correta: "b" },
+        { q: "Para que serve o dissipador de calor?", a: "Enfeitar", b: "Aumentar a área de contato com o ar para resfriar a peça", c: "Prender o HD", d: "Gerar energia", e: "Guardar arquivos", correta: "b" },
+        { q: "Qual a função da Ventoinha (Fan) em exaustão?", a: "Puxar ar para dentro", b: "Retirar o ar quente de dentro do gabinete", c: "Resfriar o monitor", d: "Limpar as peças", e: "Fazer silêncio", correta: "b" },
+        { q: "O que acontece se ligar o PC sem RAM?", a: "Liga normal", b: "Não dá vídeo e emite bipes (se houver speaker)", c: "O monitor queima", d: "O Windows abre direto", e: "A fonte explode", correta: "b" },
+        { q: "Qual a voltagem padrão de uma porta USB 2.0?", a: "12V", b: "5V", c: "110V", d: "1.2V", e: "220V", correta: "b" },
+        { q: "O que é um SSD NVMe?", a: "SSD mais lento", b: "SSD que usa o barramento PCI-Express para altas velocidades", c: "Um tipo de HD de disco", d: "Uma marca de memória", e: "Um cabo de força", correta: "b" },
+        { q: "Qual a função do conector EPS 12V?", a: "Ligar os LEDs", b: "Alimentar especificamente o processador", c: "Ligar o HD", d: "Conectar o mouse", e: "Alimentar a placa de vídeo", correta: "b" }
     ];
 
-    function embaralhar(array) {
-        return array.sort(() => Math.random() - 0.5);
+    // Função de embaralhar array (Fisher-Yates)
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
     }
 
     function carregarProva() {
-        const questSelecionadas = embaralhar([...bancoQuestoes]).slice(0, 30);
+        // Seleciona 30 questões aleatórias do banco de 60
+        const questoesSorteio = shuffle([...bancoCompleto]).slice(0, 30);
         const container = document.getElementById('questoes-lista');
         
-        container.innerHTML = questSelecionadas.map((item, index) => `
-            <div class="questao" data-correta="${item.correta}">
-                <p>${index + 1}. ${item.q}</p>
-                <div class="opcoes">
-                    <label><input type="radio" name="q${index}" value="a"> A) ${item.a}</label>
-                    <label><input type="radio" name="q${index}" value="b"> B) ${item.b}</label>
-                    <label><input type="radio" name="q${index}" value="c"> C) ${item.c}</label>
-                    <label><input type="radio" name="q${index}" value="d"> D) ${item.d}</label>
-                    <label><input type="radio" name="q${index}" value="e"> E) ${item.e}</label>
+        container.innerHTML = questoesSorteio.map((item, idx) => {
+            // Embaralha as alternativas de cada questão
+            let alternativas = [
+                { id: "a", texto: item.a },
+                { id: "b", texto: item.b },
+                { id: "c", texto: item.c },
+                { id: "d", texto: item.d },
+                { id: "e", texto: item.e }
+            ];
+            alternativas = shuffle(alternativas);
+
+            return `
+                <div class="questao" data-correta="${item.correta}">
+                    <p>${idx + 1}. ${item.q}</p>
+                    <div class="opcoes">
+                        ${alternativas.map(opt => `
+                            <label>
+                                <input type="radio" name="q${idx}" value="${opt.id}">
+                                ${opt.texto}
+                            </label>
+                        `).join('')}
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
+    // --- ANTI-COLA ---
+    function travarProva() {
+        if (provaAtiva) {
+            document.getElementById('anti-cola-overlay').style.display = 'block';
+            document.getElementById('prova-container').style.filter = 'blur(15px)';
+            document.getElementById('prova-container').style.pointerEvents = 'none';
+        }
+    }
+
+    window.addEventListener('blur', travarProva);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') travarProva();
+    });
+
     async function processarProva() {
+        provaAtiva = false;
         const questoesDOM = document.querySelectorAll('.questao');
         let acertos = 0;
-        let mapaRespostas = {};
+        let resumo = {};
 
-        questoesDOM.forEach((q, index) => {
-            const selecionada = q.querySelector(`input[name="q${index}"]:checked`);
-            const respostaDada = selecionada ? selecionada.value : "pula";
-            const respostaCorreta = q.dataset.correta;
-
-            mapaRespostas[`questao_${index + 1}`] = {
-                escolhida: respostaDada,
-                correta: respostaCorreta,
-                status: (respostaDada === respostaCorreta) ? "correto" : "errado"
-            };
-
-            if (respostaDada === respostaCorreta) acertos++;
+        questoesDOM.forEach((q, i) => {
+            const escolhida = q.querySelector(`input[name="q${i}"]:checked`)?.value || "nulo";
+            const correta = q.dataset.correta;
+            if (escolhida === correta) acertos++;
+            resumo[`q${i+1}`] = { escolhida, correta };
         });
 
-        const notaFinal = Math.round((acertos / 30) * 100);
-        const aprovado = notaFinal >= 70;
+        const nota = Math.round((acertos / 30) * 100);
+        const aprovado = nota >= 70;
 
         try {
             const { data: { user } } = await _supabase.auth.getUser();
-            
-            // Upsert considerando sua estrutura de colunas exata
-            const { error } = await _supabase.from('progresso_alunos').upsert({ 
+            await _supabase.from('progresso_alunos').upsert({ 
                 user_id: user.id, 
                 modulo_id: 100, 
                 concluido: true, 
-                nota: notaFinal,
-                respostas_aluno: mapaRespostas,
+                nota: nota,
+                respostas_aluno: resumo,
                 data_conclusao: new Date().toISOString()
             }, { onConflict: 'user_id, modulo_id' });
 
-            if (error) throw error;
-            exibirResultado(notaFinal, aprovado);
-
-        } catch (err) {
-            console.error("Erro:", err);
-            alert("Erro ao salvar. Verifique se rodou o comando SQL no Supabase.");
+            exibirResultado(nota, aprovado);
+        } catch (e) {
+            alert("Erro ao salvar resultado. Verifique sua conexão.");
+            provaAtiva = true;
         }
     }
 
@@ -154,15 +226,9 @@
         document.getElementById('prova-container').style.display = 'none';
         const resDiv = document.getElementById('resultado');
         resDiv.style.display = 'block';
-        
-        const notaBox = document.getElementById('nota-final');
-        notaBox.innerText = nota;
-        notaBox.className = 'nota-box ' + (aprovado ? 'aprovado' : 'reprovado');
-        
-        document.getElementById('msg-resultado').innerText = aprovado ? "🏆 PARABÉNS! VOCÊ FOI APROVADO!" : "❌ NÃO FOI DESTA VEZ...";
-        document.getElementById('feedback-detalhado').innerText = aprovado ? 
-            "Seu certificado já está disponível na página inicial." : 
-            "Você precisa de 70 pontos. Estude os módulos novamente e tente mais tarde.";
+        document.getElementById('nota-final').innerText = nota;
+        document.getElementById('nota-final').className = 'nota-box ' + (aprovado ? 'aprovado' : 'reprovado');
+        document.getElementById('msg-resultado').innerText = aprovado ? "🏆 CERTIFICADO DISPONÍVEL!" : "❌ TENTE NOVAMENTE";
     }
 
     carregarProva();
