@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Instrutor | Telecurso</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root { --primary: #003366; --accent: #ffcc00; --danger: #e63946; --success: #22c55e; --bg: #f1f5f9; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #1e293b; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .admin-card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 25px; border-top: 5px solid var(--primary); }
+        .section-title { display: flex; align-items: center; gap: 10px; font-size: 1.2rem; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; font-weight: bold; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; color: #64748b; }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; font-size: 16px; }
+        .btn { border: none; padding: 15px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .status-box { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header style="text-align:center; margin-bottom:30px;">
+        <h1>Painel de Controle <span style="font-weight: 300;">Instrutor</span></h1>
+    </header>
+
+    <div class="admin-card" style="border-top-color: #64748b;">
+        <div class="section-title"><i class="fas fa-tools"></i> Estado do Sistema</div>
+        <div class="status-box">
+            <div>
+                <strong id="status-label">Carregando status...</strong>
+                <p style="margin:5px 0 0 0; font-size:12px; color:#64748b;">Bloqueia o acesso de todos os alunos aos módulos.</p>
+            </div>
+            <button id="btn-manutencao" class="btn" style="width:auto; min-width:160px;" onclick="toggleManutencao()">VERIFICANDO...</button>
+        </div>
+    </div>
+
+    <div class="admin-card">
+        <div class="section-title"><i class="fas fa-video"></i> Configuração da Aula Ao Vivo</div>
+        <label>Link da Transmissão</label>
+        <input type="text" id="link_aula">
+        <label>Horário da Aula</label>
+        <input type="text" id="horario_aula">
+        <label>Recado da Sala</label>
+        <textarea id="recado_aula" rows="2"></textarea>
+        <button class="btn btn-primary" onclick="salvarAula()"><i class="fas fa-save"></i> ATUALIZAR SALA AO VIVO</button>
+    </div>
+
+    <div class="admin-card" style="border-top-color: var(--danger);">
+        <div class="section-title" style="color: var(--danger);"><i class="fas fa-bullhorn"></i> Aviso Global (Barra de Módulos)</div>
+        <label>Texto do Alerta</label>
+        <textarea id="aviso_global" rows="3" placeholder="Digite o recado que aparecerá no topo dos módulos..."></textarea>
+        <button class="btn btn-primary" style="background: var(--danger);" onclick="salvarAviso()"><i class="fas fa-paper-plane"></i> DISPARAR AVISO</button>
+        <button class="btn" style="background: #64748b; color:white; margin-top:10px;" onclick="limparAviso()"><i class="fas fa-eraser"></i> APAGAR AVISO ATUAL</button>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let emManutencao = false;
+
+    async function carregarTudo() {
+        const { data } = await _supabase.from('configuracoes').select('*');
+        if (data) {
+            document.getElementById('link_aula').value = data.find(c => c.chave === 'link_aula_ao_vivo')?.valor || "";
+            document.getElementById('horario_aula').value = data.find(c => c.chave === 'horario_aula')?.valor || "";
+            document.getElementById('recado_aula').value = data.find(c => c.chave === 'recado_aula')?.valor || "";
+            document.getElementById('aviso_global').value = data.find(c => c.chave === 'recado_geral_modulos')?.valor || "";
+            
+            emManutencao = data.find(c => c.chave === 'modo_manutencao')?.valor === "true";
+            atualizarUI();
+        }
+    }
+
+    function atualizarUI() {
+        const btn = document.getElementById('btn-manutencao');
+        const label = document.getElementById('status-label');
+        btn.innerText = emManutencao ? "DESATIVAR" : "ATIVAR MANUTENÇÃO";
+        btn.style.background = emManutencao ? "var(--danger)" : "#64748b";
+        label.innerText = emManutencao ? "O sistema está em MANUTENÇÃO" : "O sistema está ONLINE";
+        label.style.color = emManutencao ? "var(--danger)" : "var(--success)";
+    }
+
+    async function toggleManutencao() {
+        emManutencao = !emManutencao;
+        await _supabase.from('configuracoes').update({ valor: emManutencao.toString() }).eq('chave', 'modo_manutencao');
+        atualizarUI();
+    }
+
+    async function salvarAula() {
+        const updates = [
+            { k: 'link_aula_ao_vivo', v: document.getElementById('link_aula').value },
+            { k: 'horario_aula', v: document.getElementById('horario_aula').value },
+            { k: 'recado_aula', v: document.getElementById('recado_aula').value }
+        ];
+        for (const item of updates) {
+            await _supabase.from('configuracoes').update({ valor: item.v }).eq('chave', item.k);
+        }
+        alert("Sala atualizada!");
+    }
+
+    async function salvarAviso() {
+        const texto = document.getElementById('aviso_global').value;
+        await _supabase.from('configuracoes').update({ valor: texto }).eq('chave', 'recado_geral_modulos');
+        alert("Aviso disparado!");
+    }
+
+    async function limparAviso() {
+        await _supabase.from('configuracoes').update({ valor: "" }).eq('chave', 'recado_geral_modulos');
+        document.getElementById('aviso_global').value = "";
+        alert("Aviso removido!");
+    }
+
+    carregarTudo();
+</script>
+</body>
+</html>

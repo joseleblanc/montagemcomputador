@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula ao Vivo | Telecurso</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root { --primary: #ffcc00; --bg: #020617; --card: rgba(30, 41, 59, 0.7); }
+        body { font-family: 'Segoe UI', sans-serif; background: radial-gradient(circle at top, #0f172a, #020617); color: white; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .main-card { background: var(--card); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .live-badge { display: inline-flex; align-items: center; background: rgba(34, 197, 94, 0.2); color: #4ade80; padding: 5px 15px; border-radius: 50px; font-size: 12px; font-weight: bold; margin-bottom: 20px; border: 1px solid #14532d; }
+        .dot { height: 8px; width: 8px; background: #22c55e; border-radius: 50%; margin-right: 8px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .info-box { background: rgba(15, 23, 42, 0.6); border-radius: 15px; padding: 20px; text-align: left; margin: 25px 0; border-left: 4px solid var(--primary); }
+        .info-box label { font-size: 11px; color: var(--primary); font-weight: bold; text-transform: uppercase; }
+        .info-box p { margin: 5px 0 15px 0; color: #e2e8f0; font-size: 15px; }
+        .btn-join { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; padding: 20px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; width: 100%; cursor: pointer; transition: 0.3s; }
+        .btn-join:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3); }
+    </style>
+</head>
+<body>
+
+    <div class="main-card">
+        <div id="badge-live" class="live-badge" style="display:none;"><span class="dot"></span> EM TRANSMISSÃO</div>
+        <h1 style="margin:0 0 10px 0;">Telecurso <span style="color:var(--primary)">Ao Vivo</span></h1>
+        
+        <div class="info-box">
+            <label><i class="fas fa-clock"></i> Horário Previsto</label>
+            <p id="txt-horario">Sincronizando...</p>
+            
+            <label><i class="fas fa-comment-dots"></i> Recado do Instrutor</label>
+            <p id="txt-recado" style="margin-bottom:0">Buscando avisos...</p>
+        </div>
+
+        <button class="btn-join" onclick="irParaAula()"><i class="fas fa-play"></i> ACESSAR AGORA</button>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let linkAula = "";
+
+        async function carregarDados() {
+            const { data } = await _supabase.from('configuracoes').select('*');
+            if (data) {
+                linkAula = data.find(c => c.chave === 'link_aula_ao_vivo')?.valor;
+                document.getElementById('txt-horario').innerText = data.find(c => c.chave === 'horario_aula')?.valor || "A definir";
+                document.getElementById('txt-recado').innerText = data.find(c => c.chave === 'recado_aula')?.valor || "Sem avisos.";
+                if(linkAula) document.getElementById('badge-live').style.display = 'inline-flex';
+            }
+        }
+        function irParaAula() { if(linkAula) window.open(linkAula, '_blank'); else alert("Aguardando o professor."); }
+        carregarDados();
+        setInterval(carregarDados, 30000); // Atualiza a cada 30 segundos
+    </script>
+</body>
+</html>
