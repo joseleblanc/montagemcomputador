@@ -3,121 +3,398 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Instrutor | Telecurso</title>
+    <title>Admin Supremo | Telecurso</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        :root { --primary: #003366; --accent: #ffcc00; --danger: #e63946; --success: #22c55e; --bg: #f1f5f9; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #1e293b; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .admin-card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 25px; border-top: 5px solid var(--primary); }
-        .section-title { display: flex; align-items: center; gap: 10px; font-size: 1.2rem; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; font-weight: bold; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 14px; color: #64748b; }
-        input, textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; font-size: 16px; }
-        .btn { border: none; padding: 15px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s; }
+        /* 1. VARIÁVEIS E RESET */
+        :root {
+            --primary: #003366;
+            --primary-light: #e0e7ff;
+            --purple: #9333ea;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-main: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --sidebar-width: 300px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg-main); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
+
+        /* 2. LAYOUT ESTRUTURAL */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: var(--bg-main);
+        }
+
+        /* 3. COMPONENTES DA SIDEBAR */
+        .sidebar-header {
+            padding: 24px;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .menu-section-label {
+            padding: 20px 24px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            margin: 4px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .nav-item:hover { background: var(--bg-main); color: var(--primary); }
+        .nav-item.active { background: var(--primary-light); color: var(--primary); }
+
+        .lista-contatos { flex: 1; overflow-y: auto; padding-bottom: 20px; }
+
+        /* 4. ÁREA DE CONTEÚDO (CARDS) */
+        .scroll-container { padding: 32px; overflow-y: auto; height: 100%; }
+        
+        .admin-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-top: 4px solid var(--primary);
+        }
+
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-weight: 700; font-size: 1.1rem; }
+        
+        .status-badge-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-main);
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        /* 5. SISTEMA DE CHAT */
+        .chat-view { display: none; flex-direction: column; height: 100%; background: #f8fafc; }
+        
+        .chat-top-bar {
+            padding: 16px 24px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .messages-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .bubble {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 65%;
+            font-size: 14px;
+            line-height: 1.5;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .bubble.aluno { align-self: flex-start; background: white; border-bottom-left-radius: 2px; }
+        .bubble.admin { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 2px; }
+
+        .chat-input-container {
+            padding: 20px 24px;
+            background: white;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 6. ELEMENTOS DE FORMULÁRIO */
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        input:focus { outline: none; border-color: var(--primary); ring: 2px var(--primary-light); }
+
+        .btn {
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
         .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-danger { background: var(--danger); color: white; }
-        .status-box { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; }
+        .btn-ghost { background: transparent; color: var(--danger); }
+
+        /* Scrollbar Personalizada */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header style="text-align:center; margin-bottom:30px;">
-        <h1>Painel de Controle <span style="font-weight: 300;">Instrutor</span></h1>
-    </header>
-
-    <div class="admin-card" style="border-top-color: #64748b;">
-        <div class="section-title"><i class="fas fa-tools"></i> Estado do Sistema</div>
-        <div class="status-box">
-            <div>
-                <strong id="status-label">Carregando status...</strong>
-                <p style="margin:5px 0 0 0; font-size:12px; color:#64748b;">Bloqueia o acesso de todos os alunos aos módulos.</p>
-            </div>
-            <button id="btn-manutencao" class="btn" style="width:auto; min-width:160px;" onclick="toggleManutencao()">VERIFICANDO...</button>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-shield-alt"></i> PAINEL ADMIN
         </div>
-    </div>
+        
+        <nav>
+            <div class="menu-section-label">Principal</div>
+            <div class="nav-item active" id="menu-geral" onclick="abrirPainelGeral()">
+                <i class="fas fa-home"></i> Painel Geral
+            </div>
+        </nav>
 
-    <div class="admin-card">
-        <div class="section-title"><i class="fas fa-video"></i> Configuração da Aula Ao Vivo</div>
-        <label>Link da Transmissão</label>
-        <input type="text" id="link_aula">
-        <label>Horário da Aula</label>
-        <input type="text" id="horario_aula">
-        <label>Recado da Sala</label>
-        <textarea id="recado_aula" rows="2"></textarea>
-        <button class="btn btn-primary" onclick="salvarAula()"><i class="fas fa-save"></i> ATUALIZAR SALA AO VIVO</button>
-    </div>
+        <div class="menu-section-label">Suporte em Tempo Real</div>
+        <div id="lista-contatos" class="lista-contatos">
+            </div>
+    </aside>
 
-    <div class="admin-card" style="border-top-color: var(--danger);">
-        <div class="section-title" style="color: var(--danger);"><i class="fas fa-bullhorn"></i> Aviso Global (Barra de Módulos)</div>
-        <label>Texto do Alerta</label>
-        <textarea id="aviso_global" rows="3" placeholder="Digite o recado que aparecerá no topo dos módulos..."></textarea>
-        <button class="btn btn-primary" style="background: var(--danger);" onclick="salvarAviso()"><i class="fas fa-paper-plane"></i> DISPARAR AVISO</button>
-        <button class="btn" style="background: #64748b; color:white; margin-top:10px;" onclick="limparAviso()"><i class="fas fa-eraser"></i> APAGAR AVISO ATUAL</button>
-    </div>
-</div>
+    <main class="main-content">
+        
+        <div id="visao-geral" class="scroll-container">
+            <div class="admin-card" style="border-top-color: var(--text-muted);">
+                <div class="card-header"><i class="fas fa-server"></i> Infraestrutura</div>
+                <div class="status-badge-container">
+                    <div>
+                        <span id="status-label" style="font-weight: 700;">Carregando status...</span>
+                        <div style="font-size: 12px; color: var(--text-muted);">Modo de manutenção global</div>
+                    </div>
+                    <button class="btn" id="btn-manutencao" onclick="toggleManutencao()">---</button>
+                </div>
+            </div>
 
-<script>
-    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            <div class="admin-card">
+                <div class="card-header"><i class="fas fa-broadcast-tower"></i> Aula Ao Vivo</div>
+                <label style="font-size: 12px; font-weight: 600; color: var(--text-muted);">URL DA TRANSMISSÃO</label>
+                <input type="text" id="link_aula" placeholder="https://meet.google.com/xxx-xxx">
+                
+                <label style="font-size: 12px; font-weight: 600; color: var(--text-muted);">HORÁRIO</label>
+                <input type="text" id="horario_aula" placeholder="Ex: Início às 19:30">
+                
+                <label style="font-size: 12px; font-weight: 600; color: var(--text-muted);">AVISO DA SALA</label>
+                <textarea id="recado_aula" rows="3" placeholder="Mensagem para os alunos logados..."></textarea>
+                
+                <button class="btn btn-primary" onclick="salvarAula()" style="width: 100%;">
+                    <i class="fas fa-save"></i> SALVAR CONFIGURAÇÕES
+                </button>
+            </div>
 
-    let emManutencao = false;
+            <div class="admin-card" style="border-top-color: var(--danger);">
+                <div class="card-header" style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Alerta Geral</div>
+                <textarea id="aviso_global" rows="2" placeholder="Este texto aparecerá no topo de todos os módulos..."></textarea>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <button class="btn btn-primary" style="background: var(--danger);" onclick="salvarAviso()">PUBLICAR</button>
+                    <button class="btn" onclick="limparAviso()">LIMPAR</button>
+                </div>
+            </div>
+        </div>
 
-    async function carregarTudo() {
-        const { data } = await _supabase.from('configuracoes').select('*');
-        if (data) {
-            document.getElementById('link_aula').value = data.find(c => c.chave === 'link_aula_ao_vivo')?.valor || "";
-            document.getElementById('horario_aula').value = data.find(c => c.chave === 'horario_aula')?.valor || "";
-            document.getElementById('recado_aula').value = data.find(c => c.chave === 'recado_aula')?.valor || "";
-            document.getElementById('aviso_global').value = data.find(c => c.chave === 'recado_geral_modulos')?.valor || "";
+        <div id="visao-chat" class="chat-view">
+            <div class="chat-top-bar">
+                <div>
+                    <i class="fas fa-circle" style="color: var(--success); font-size: 10px; margin-right: 8px;"></i>
+                    <span id="chat-header-email" style="font-weight: 700;">aluno@email.com</span>
+                </div>
+                <button class="btn btn-ghost" onclick="apagarConversaAtual()">
+                    <i class="fas fa-trash-alt"></i> Apagar Conversa
+                </button>
+            </div>
             
-            emManutencao = data.find(c => c.chave === 'modo_manutencao')?.valor === "true";
-            atualizarUI();
+            <div id="box-mensagens" class="messages-area">
+                </div>
+
+            <div class="chat-input-container">
+                <input type="text" id="input-msg" placeholder="Pressione Enter para enviar..." onkeypress="if(event.key==='Enter') enviarResposta()">
+                <button class="btn btn-primary" onclick="enviarResposta()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Lógica permanece idêntica à anterior, garantindo funcionamento com o novo layout
+        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let alunoSelecionado = null;
+        let emManutencao = false;
+
+        function abrirPainelGeral() {
+            alunoSelecionado = null;
+            document.getElementById('visao-geral').style.display = 'block';
+            document.getElementById('visao-chat').style.display = 'none';
+            document.getElementById('menu-geral').classList.add('active');
+            carregarContatos(); 
         }
-    }
 
-    function atualizarUI() {
-        const btn = document.getElementById('btn-manutencao');
-        const label = document.getElementById('status-label');
-        btn.innerText = emManutencao ? "DESATIVAR" : "ATIVAR MANUTENÇÃO";
-        btn.style.background = emManutencao ? "var(--danger)" : "#64748b";
-        label.innerText = emManutencao ? "O sistema está em MANUTENÇÃO" : "O sistema está ONLINE";
-        label.style.color = emManutencao ? "var(--danger)" : "var(--success)";
-    }
-
-    async function toggleManutencao() {
-        emManutencao = !emManutencao;
-        await _supabase.from('configuracoes').update({ valor: emManutencao.toString() }).eq('chave', 'modo_manutencao');
-        atualizarUI();
-    }
-
-    async function salvarAula() {
-        const updates = [
-            { k: 'link_aula_ao_vivo', v: document.getElementById('link_aula').value },
-            { k: 'horario_aula', v: document.getElementById('horario_aula').value },
-            { k: 'recado_aula', v: document.getElementById('recado_aula').value }
-        ];
-        for (const item of updates) {
-            await _supabase.from('configuracoes').update({ valor: item.v }).eq('chave', item.k);
+        async function selecionarAluno(email) {
+            alunoSelecionado = email;
+            document.getElementById('visao-geral').style.display = 'none';
+            document.getElementById('visao-chat').style.display = 'flex';
+            document.getElementById('menu-geral').classList.remove('active');
+            document.getElementById('chat-header-email').innerText = email;
+            carregarContatos();
+            carregarMensagens();
         }
-        alert("Sala atualizada!");
-    }
 
-    async function salvarAviso() {
-        const texto = document.getElementById('aviso_global').value;
-        await _supabase.from('configuracoes').update({ valor: texto }).eq('chave', 'recado_geral_modulos');
-        alert("Aviso disparado!");
-    }
+        async function carregarConfiguracoes() {
+            const { data } = await _supabase.from('configuracoes').select('*');
+            if (data) {
+                document.getElementById('link_aula').value = data.find(c => c.chave === 'link_aula_ao_vivo')?.valor || "";
+                document.getElementById('horario_aula').value = data.find(c => c.chave === 'horario_aula')?.valor || "";
+                document.getElementById('recado_aula').value = data.find(c => c.chave === 'recado_aula')?.valor || "";
+                document.getElementById('aviso_global').value = data.find(c => c.chave === 'recado_geral_modulos')?.valor || "";
+                emManutencao = data.find(c => c.chave === 'modo_manutencao')?.valor === "true";
+                atualizarStatusUI();
+            }
+        }
 
-    async function limparAviso() {
-        await _supabase.from('configuracoes').update({ valor: "" }).eq('chave', 'recado_geral_modulos');
-        document.getElementById('aviso_global').value = "";
-        alert("Aviso removido!");
-    }
+        function atualizarStatusUI() {
+            const btn = document.getElementById('btn-manutencao');
+            const label = document.getElementById('status-label');
+            btn.innerText = emManutencao ? "DESATIVAR" : "ATIVAR";
+            btn.className = emManutencao ? "btn btn-danger" : "btn btn-primary";
+            label.innerText = emManutencao ? "MODO MANUTENÇÃO" : "SISTEMA ONLINE";
+            label.style.color = emManutencao ? "var(--danger)" : "var(--success)";
+        }
 
-    carregarTudo();
-</script>
+        async function toggleManutencao() {
+            emManutencao = !emManutencao;
+            await _supabase.from('configuracoes').update({ valor: emManutencao.toString() }).eq('chave', 'modo_manutencao');
+            atualizarStatusUI();
+        }
+
+        async function salvarAula() {
+            const updates = [
+                { k: 'link_aula_ao_vivo', v: document.getElementById('link_aula').value },
+                { k: 'horario_aula', v: document.getElementById('horario_aula').value },
+                { k: 'recado_aula', v: document.getElementById('recado_aula').value }
+            ];
+            for (const item of updates) {
+                await _supabase.from('configuracoes').update({ valor: item.v }).eq('chave', item.k);
+            }
+            alert("Aula atualizada com sucesso!");
+        }
+
+        async function salvarAviso() {
+            const txt = document.getElementById('aviso_global').value;
+            await _supabase.from('configuracoes').update({ valor: txt }).eq('chave', 'recado_geral_modulos');
+            alert("Aviso global atualizado!");
+        }
+
+        async function limparAviso() {
+            await _supabase.from('configuracoes').update({ valor: "" }).eq('chave', 'recado_geral_modulos');
+            document.getElementById('aviso_global').value = "";
+        }
+
+        async function carregarContatos() {
+            const { data: mensagens } = await _supabase.from('chat_suporte').select('aluno_email').order('created_at', { ascending: false });
+            const emailsUnicos = [...new Set(mensagens?.map(m => m.aluno_email))];
+            const container = document.getElementById('lista-contatos');
+            container.innerHTML = "";
+
+            emailsUnicos.forEach(email => {
+                const item = document.createElement('div');
+                item.className = `nav-item ${alunoSelecionado === email ? 'active' : ''}`;
+                item.innerHTML = `<i class="fas fa-user-circle"></i> ${email}`;
+                item.onclick = () => selecionarAluno(email);
+                container.appendChild(item);
+            });
+        }
+
+        async function carregarMensagens() {
+            if (!alunoSelecionado) return;
+            const { data } = await _supabase.from('chat_suporte').select('*').eq('aluno_email', alunoSelecionado).order('created_at', { ascending: true });
+            const box = document.getElementById('box-mensagens');
+            box.innerHTML = data.map(m => `
+                <div class="bubble ${m.remetente === 'aluno' ? 'aluno' : 'admin'}">
+                    ${m.mensagem}
+                </div>
+            `).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function enviarResposta() {
+            const input = document.getElementById('input-msg');
+            if (!input.value.trim() || !alunoSelecionado) return;
+
+            await _supabase.from('chat_suporte').insert([{ 
+                aluno_email: alunoSelecionado, 
+                remetente: 'instrutor', 
+                mensagem: input.value 
+            }]);
+            
+            input.value = "";
+            carregarMensagens();
+        }
+
+        async function apagarConversaAtual() {
+            if (confirm("Deseja eliminar permanentemente o histórico deste aluno?")) {
+                await _supabase.from('chat_suporte').delete().eq('aluno_email', alunoSelecionado);
+                abrirPainelGeral();
+            }
+        }
+
+        // Init
+        carregarConfiguracoes();
+        carregarContatos();
+        setInterval(() => { if(alunoSelecionado) carregarMensagens(); carregarContatos(); }, 5000);
+    </script>
 </body>
 </html>

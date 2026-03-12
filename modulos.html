@@ -204,6 +204,31 @@
             max-width: 450px;
         }
         .modal-content input { width: 100%; padding: 12px; margin: 8px 0 20px 0; border: 2px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+
+        /* WIDGET SUPORTE FLUTUANTE */
+        #suporte-flutuante { position: fixed; bottom: 25px; right: 25px; z-index: 9999; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        .btn-ajuda { 
+            width: 60px; height: 60px; background: var(--azul-escuro); color: white; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.3s; border: none;
+        }
+        .btn-ajuda:hover { transform: scale(1.1); }
+
+        .painel-suporte { 
+            display: none; position: absolute; bottom: 80px; right: 0; width: 320px; 
+            background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+            overflow: hidden; border: 1px solid #e2e8f0; animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header-suporte { background: var(--azul-escuro); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .corpo-suporte { padding: 15px; }
+        
+        .input-suporte { width: 100%; border: 2px solid #f1f5f9; border-radius: 8px; padding: 10px; margin-bottom: 15px; box-sizing: border-box; font-size: 14px; }
+        .btn-enviar { width: 100%; background: var(--verde); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-enviar:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -250,6 +275,25 @@
     </div>
 
     <div class="grid-modulos" id="grid-modulos"></div>
+</div>
+
+<!-- WIDGET SUPORTE FLUTUANTE -->
+<div id="suporte-flutuante">
+    <div id="painel-duvida" class="painel-suporte">
+        <div class="header-suporte">
+            <span><i class="fas fa-comment-dots"></i> Suporte ao Aluno</span>
+            <i class="fas fa-times" onclick="toggleDuvida()" style="cursor:pointer;"></i>
+        </div>
+        <div class="corpo-suporte">
+            <div id="chat-box-aluno" style="height:200px; overflow-y:auto; margin-bottom:10px; border-bottom:1px solid #eee;"></div>
+            <textarea id="txt-pergunta" class="input-suporte" rows="3" placeholder="Digite sua mensagem..." style="resize: none;"></textarea>
+            <button id="btn-enviar-duvida" onclick="enviarDuvidaParaSupabase()" class="btn-enviar">ENVIAR</button>
+        </div>
+    </div>
+
+    <button class="btn-ajuda" onclick="toggleDuvida()" title="Dúvidas?">
+        <i class="fas fa-question"></i>
+    </button>
 </div>
 
 <div id="modal-dados" class="modal">
@@ -493,6 +537,56 @@ async function gerarPDF() {
     doc.save(`Certificado_${nome.replace(/\s+/g, '_')}.pdf`);
     fecharModal();
 }
+
+    async function toggleDuvida() {
+        const painel = document.getElementById('painel-duvida');
+        if (painel.style.display === 'none' || painel.style.display === '') {
+            painel.style.display = 'block';
+            carregarHistoricoAluno();
+        } else {
+            painel.style.display = 'none';
+        }
+    }
+
+    async function carregarHistoricoAluno() {
+        const userEmail = localStorage.getItem('user_email') || "aluno@teste.com";
+        const { data: chat } = await _supabase
+            .from('chat_suporte')
+            .select('*')
+            .eq('aluno_email', userEmail)
+            .order('created_at', { ascending: true });
+
+        const corpo = document.querySelector('.corpo-suporte');
+        // Criar uma div para as mensagens se não existir
+        let chatBox = document.getElementById('chat-box-aluno');
+        if (!chatBox) {
+            corpo.innerHTML = `<div id="chat-box-aluno" style="height:200px; overflow-y:auto; margin-bottom:10px; border-bottom:1px solid #eee;"></div>` + corpo.innerHTML;
+            chatBox = document.getElementById('chat-box-aluno');
+        }
+
+        chatBox.innerHTML = chat.map(m => `
+            <div style="text-align: ${m.remetente === 'aluno' ? 'right' : 'left'}; margin-bottom: 8px;">
+                <span style="display:inline-block; padding:8px; border-radius:8px; background:${m.remetente === 'aluno' ? '#dcf8c6' : '#f1f5f9'}; font-size:13px;">
+                    ${m.mensagem}
+                </span>
+            </div>
+        `).join('');
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function enviarDuvidaParaSupabase() {
+        const msg = document.getElementById('txt-pergunta').value;
+        const userEmail = localStorage.getItem('user_email') || "aluno@teste.com";
+
+        if (!msg.trim()) return;
+
+        await _supabase.from('chat_suporte').insert([
+            { aluno_email: userEmail, remetente: 'aluno', mensagem: msg }
+        ]);
+
+        document.getElementById('txt-pergunta').value = "";
+        carregarHistoricoAluno();
+    }
 
     async function sair() { await _supabase.auth.signOut(); window.location.href = "index.html"; }
 
