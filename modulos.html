@@ -281,18 +281,28 @@
 <div id="suporte-flutuante">
     <div id="painel-duvida" class="painel-suporte">
         <div class="header-suporte">
-            <span><i class="fas fa-comment-dots"></i> Suporte ao Aluno</span>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <span><i class="fas fa-comment-dots"></i> Suporte ao Aluno</span>
+                <div style="display:flex; align-items:center; gap:10px; font-size:12px; color:#f1f5f9;">
+                    <span style="background: rgba(255,255,255,0.15); padding: 3px 8px; border-radius: 6px;" id="ticket-info">Ticket: -</span>
+                    <span id="ticket-status" style="background: rgba(255,255,255,0.15); padding: 3px 8px; border-radius: 6px;">Status: aguardando</span>
+                </div>
+            </div>
             <i class="fas fa-times" onclick="toggleDuvida()" style="cursor:pointer;"></i>
         </div>
         <div class="corpo-suporte">
             <div id="chat-box-aluno" style="height:200px; overflow-y:auto; margin-bottom:10px; border-bottom:1px solid #eee;"></div>
             <textarea id="txt-pergunta" class="input-suporte" rows="3" placeholder="Digite sua mensagem..." style="resize: none;"></textarea>
-            <button id="btn-enviar-duvida" onclick="enviarDuvidaParaSupabase()" class="btn-enviar">ENVIAR</button>
+            <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                <button id="btn-enviar-duvida" onclick="enviarDuvidaParaSupabase()" class="btn-enviar">ENVIAR</button>
+                <button id="btn-excluir-ticket" onclick="excluirTicketAluno()" class="btn-enviar" style="background:#ef4444;">EXCLUIR TICKET</button>
+            </div>
         </div>
     </div>
 
-    <button class="btn-ajuda" onclick="toggleDuvida()" title="Dúvidas?">
+    <button class="btn-ajuda" onclick="toggleDuvida()" title="Dúvidas?" style="position:relative;">
         <i class="fas fa-question"></i>
+        <span id="badge-novas-mensagens" style="display:none; position:absolute; top:-8px; right:-8px; background:#ef4444; color:white; border-radius:50%; width:20px; height:20px; font-size:12px; line-height:20px; text-align:center; font-weight:bold;"></span>
     </button>
 </div>
 
@@ -364,9 +374,12 @@
         }
 
         // --- LÓGICA ORIGINAL DE USUÁRIO E PROGRESSO ---
-        const { data: { user } } = await _supabase.auth.getUser();
-        if (!user) { window.location.href = "index.html"; return; }
-        
+        const { data: userData, error: userError } = await _supabase.auth.getUser();
+        const user = userData?.user;
+        if (userError || !user) { window.location.href = "index.html"; return; }
+
+        localStorage.setItem('user_email', user.email);
+
         document.getElementById('nome-aluno').innerHTML = `<i class="fas fa-user-circle"></i> Olá, ${user.email.split('@')[0]}!`;
         
         const { data: progresso } = await _supabase.from('progresso_alunos').select('*').eq('user_id', user.id);
@@ -388,6 +401,7 @@
         }
         
         renderizar(concluidos, registroProva ? registroProva.nota : null);
+        await atualizarBadgeNovasMensagens();
     }
 
     function renderizar(concluidos, nota) {
@@ -548,23 +562,150 @@ async function gerarPDF() {
         }
     }
 
+    function iniciarRealtimeModulos() {
+        try {
+            _supabase.channel('realtime-chat-modulos')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_suporte' }, payload => {
+                    const userEmail = localStorage.getItem('user_email') || 'aluno@teste.com';
+                    const ticketAluno = gerarTicketAluno(userEmail);
+                    const novo = payload.new;
+                    if (novo.ticket === ticketAluno || novo.aluno_email === userEmail) {
+                        carregarHistoricoAluno();
+                    }
+                    atualizarBadgeNovasMensagens();
+                })
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_suporte' }, payload => {
+                    atualizarBadgeNovasMensagens();
+                    const userEmail = localStorage.getItem('user_email') || 'aluno@teste.com';
+                    const ticketAluno = gerarTicketAluno(userEmail);
+                    const upd = payload.new;
+                    if (upd.ticket === ticketAluno || upd.aluno_email === userEmail) {
+                        carregarHistoricoAluno();
+                    }
+                })
+                .subscribe();
+        } catch (e) {
+            console.warn('Realtime Modulos não disponível:', e);
+        }
+    }
+
+    function gerarTicketAluno(email) {
+        // ticket determinístico por email (mesmo aluno sempre recebe mesmo ticket)
+        const base = [...email].reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        const num = 10 + (base % 890); // 0010-0899
+        return `TICKET-${String(num).padStart(4, '0')}`;
+    }
+
+    async function atualizarBadgeNovasMensagens() {
+        const userEmail = localStorage.getItem('user_email') || "aluno@teste.com";
+        const ticketAluno = gerarTicketAluno(userEmail);
+
+        let count = 0;
+        const { data: ticketRow, error } = await _supabase
+            .from('chat_suporte')
+            .select('conversation')
+            .eq('ticket', ticketAluno)
+            .single();
+
+        if (!error && ticketRow && Array.isArray(ticketRow.conversation)) {
+            count = ticketRow.conversation.filter(msg => msg.remetente !== 'aluno' && !msg.lida).length;
+        } else {
+            // fallback antigo modelo (linhas individuais)
+            const { data, error: oldError } = await _supabase
+                .from('chat_suporte')
+                .select('id')
+                .eq('ticket', ticketAluno)
+                .neq('remetente', 'aluno')
+                .eq('lida', false);
+            count = (!oldError && data) ? data.length : 0;
+        }
+
+        const contadorElement = document.getElementById('badge-novas-mensagens');
+        if (count > 0) {
+            contadorElement.innerText = count;
+            contadorElement.style.display = 'inline-flex';
+        } else {
+            contadorElement.style.display = 'none';
+        }
+    }
+
+    function atualizarTicketLabel(ticket, status) {
+        document.getElementById('ticket-info').innerText = `Ticket: ${ticket}`;
+        document.getElementById('ticket-status').innerText = `Status: ${status}`;
+
+        const statusColor = {
+            aguardando: '#ef4444',
+            'em-atendimento': '#f59e0b',
+            concluido: '#16a34a',
+            'nao-atendido': '#7c3aed'
+        }[status] || '#6b7280';
+
+        document.getElementById('ticket-status').style.background = statusColor;
+        document.getElementById('ticket-status').style.color = 'white';
+    }
+
     async function carregarHistoricoAluno() {
         const userEmail = localStorage.getItem('user_email') || "aluno@teste.com";
-        const { data: chat } = await _supabase
+        const ticketAluno = gerarTicketAluno(userEmail);
+
+        const { data: ticketRow, error } = await _supabase
             .from('chat_suporte')
             .select('*')
-            .eq('aluno_email', userEmail)
-            .order('created_at', { ascending: true });
+            .eq('ticket', ticketAluno)
+            .single();
+
+        let chat = [];
+
+        if (!error && ticketRow && Array.isArray(ticketRow.conversation)) {
+            chat = ticketRow.conversation;
+
+            // marcar como lido apenas as mensagens do instrutor
+            const updatedConversation = chat.map(msg => msg.remetente !== 'aluno' ? { ...msg, lida: true } : msg);
+            await _supabase
+                .from('chat_suporte')
+                .update({ conversation: updatedConversation, lida: true, status: ticketRow.status || 'aguardando' })
+                .eq('ticket', ticketAluno);
+
+            chat = updatedConversation;
+        } else {
+            // suporte ao modelo antigo
+            let response = await _supabase
+                .from('chat_suporte')
+                .select('*')
+                .or(`ticket.eq.${ticketAluno},aluno_email.eq.${userEmail}`)
+                .order('created_at', { ascending: true });
+
+            if (response.error) {
+                console.warn('Consulta com ticket falhou, fallback para email:', response.error);
+                const fallback = await _supabase
+                    .from('chat_suporte')
+                    .select('*')
+                    .eq('aluno_email', userEmail)
+                    .order('created_at', { ascending: true });
+                chat = fallback.data || [];
+            } else {
+                chat = response.data || [];
+            }
+
+            // atualizar flag lida para mensagens do instrutor nesse modelo
+            await _supabase
+                .from('chat_suporte')
+                .update({ lida: true })
+                .eq('ticket', ticketAluno)
+                .neq('remetente', 'aluno');
+        }
+
+        const statusTicket = (ticketRow && ticketRow.status) ? ticketRow.status : 'aguardando';
+        atualizarTicketLabel(ticketAluno, statusTicket);
 
         const corpo = document.querySelector('.corpo-suporte');
-        // Criar uma div para as mensagens se não existir
         let chatBox = document.getElementById('chat-box-aluno');
         if (!chatBox) {
             corpo.innerHTML = `<div id="chat-box-aluno" style="height:200px; overflow-y:auto; margin-bottom:10px; border-bottom:1px solid #eee;"></div>` + corpo.innerHTML;
             chatBox = document.getElementById('chat-box-aluno');
         }
 
-        chatBox.innerHTML = chat.map(m => `
+        chatBox.innerHTML = (chat || []).map(m => `
             <div style="text-align: ${m.remetente === 'aluno' ? 'right' : 'left'}; margin-bottom: 8px;">
                 <span style="display:inline-block; padding:8px; border-radius:8px; background:${m.remetente === 'aluno' ? '#dcf8c6' : '#f1f5f9'}; font-size:13px;">
                     ${m.mensagem}
@@ -572,27 +713,91 @@ async function gerarPDF() {
             </div>
         `).join('');
         chatBox.scrollTop = chatBox.scrollHeight;
+
+        await atualizarBadgeNovasMensagens();
     }
 
     async function enviarDuvidaParaSupabase() {
         const msg = document.getElementById('txt-pergunta').value;
         const userEmail = localStorage.getItem('user_email') || "aluno@teste.com";
-
         if (!msg.trim()) return;
 
-        await _supabase.from('chat_suporte').insert([
-            { aluno_email: userEmail, remetente: 'aluno', mensagem: msg }
-        ]);
+        const ticketAluno = gerarTicketAluno(userEmail);
+        const now = new Date().toISOString();
+        const mensagemObj = { remetente: 'aluno', mensagem: msg, created_at: now, lida: false };
+
+        const { data: existing, error } = await _supabase
+            .from('chat_suporte')
+            .select('*')
+            .eq('ticket', ticketAluno)
+            .single();
+
+        if (error || !existing) {
+            // Criar novo ticket com conversa
+            const insert = await _supabase.from('chat_suporte').insert([{ ticket: ticketAluno, aluno_email: userEmail, status: 'aguardando', conversation: [mensagemObj], lida: false }]);
+            if (insert.error) {
+                console.error('Não foi possível enviar a mensagem:', insert.error);
+                alert('Erro ao enviar a mensagem. Tente novamente.');
+                return;
+            }
+        } else if (existing.conversation && Array.isArray(existing.conversation)) {
+            const novaConversa = [...existing.conversation, mensagemObj];
+            const update = await _supabase.from('chat_suporte').update({ conversation: novaConversa, status: existing.status || 'aguardando', lida: false }).eq('ticket', ticketAluno);
+            if (update.error) {
+                console.error('Não foi possível atualizar a mensagem:', update.error);
+                alert('Erro ao enviar a mensagem. Tente novamente.');
+                return;
+            }
+        } else {
+            // fallback: migrar modelo antigo para conversa única
+            let baseConversation = [];
+            if (existing.mensagem) {
+                baseConversation.push({ remetente: existing.remetente || 'aluno', mensagem: existing.mensagem, created_at: existing.created_at || now, lida: existing.lida || false });
+            }
+            const novaConversa = [...baseConversation, mensagemObj];
+            const upsert = await _supabase.from('chat_suporte').upsert({ ticket: ticketAluno, aluno_email: userEmail, status: existing.status || 'aguardando', conversation: novaConversa, lida: false }, { onConflict: 'ticket' });
+            if (upsert.error) {
+                console.error('Não foi possível enviar a mensagem:', upsert.error);
+                alert('Erro ao enviar a mensagem. Tente novamente.');
+                return;
+            }
+        }
 
         document.getElementById('txt-pergunta').value = "";
         carregarHistoricoAluno();
+        await atualizarBadgeNovasMensagens();
+    }
+
+    async function excluirTicketAluno() {
+        const userEmail = localStorage.getItem('user_email') || "aluno@teste.com";
+        const ticketAluno = gerarTicketAluno(userEmail);
+        if (!confirm(`Tem certeza de que deseja excluir o ticket ${ticketAluno}? Esta ação não pode ser desfeita.`)) return;
+
+        const { error } = await _supabase.from('chat_suporte').delete().eq('ticket', ticketAluno);
+        if (error) {
+            console.error('Erro ao excluir ticket:', error);
+            alert('Não foi possível excluir o ticket. Tente novamente.');
+            return;
+        }
+
+        document.getElementById('txt-pergunta').value = "";
+        carregarHistoricoAluno();
+        await atualizarBadgeNovasMensagens();
+        alert('Ticket excluído com sucesso.');
     }
 
     async function sair() { await _supabase.auth.signOut(); window.location.href = "index.html"; }
 
     inicializar();
-    // Verifica atualizações do professor (manutenção/avisos) a cada 60 segundos
-    setInterval(inicializar, 60000);
+    iniciarRealtimeModulos();
+
+    // Verifica atualizações do professor (manutenção/avisos) e notificações a cada 3 segundos
+    setInterval(() => {
+        inicializar();
+        atualizarBadgeNovasMensagens();
+        const painel = document.getElementById('painel-duvida');
+        if (painel.style.display === 'block') carregarHistoricoAluno();
+    }, 3000);
 </script>
 </body>
 </html>
