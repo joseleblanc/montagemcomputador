@@ -5,7 +5,7 @@
     <title>Nova Senha | Telecurso</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: sans-serif; background: #003366; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #003366; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .card { background: white; padding: 30px; border-radius: 8px; width: 320px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: #ffcc00; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; color: #003366; }
@@ -14,35 +14,49 @@
 </head>
 <body>
     <div class="card">
-        <h2 style="color:#0056b3">Nova Senha</h2>
-        <p style="font-size: 0.8rem; color:#666">Crie uma nova senha de no mínimo 6 dígitos.</p>
-        <input type="password" id="nova-senha" placeholder="Digite a nova senha">
-        <button onclick="confirmarTroca()">SALVAR SENHA</button>
+        <h2 style="color:#0056b3">Criar Nova Senha</h2>
+        <p style="font-size: 0.8rem; color:#666">Digite sua nova senha abaixo para concluir o reset.</p>
+        <input type="password" id="nova-senha" placeholder="Mínimo 6 caracteres">
+        <button id="btn-salvar" onclick="confirmarTroca()">ATUALIZAR SENHA AGORA</button>
         <div id="status"></div>
     </div>
 
     <script>
+        // Use EXATAMENTE as mesmas credenciais do seu index.html
         const _supabase = supabase.createClient('https://ityqcemfbdzgsfmyisqc.supabase.co', 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA');
 
         async function confirmarTroca() {
             const senha = document.getElementById('nova-senha').value;
             const status = document.getElementById('status');
+            const btn = document.getElementById('btn-salvar');
 
             if (senha.length < 6) {
-                status.innerText = "Mínimo de 6 caracteres.";
+                status.innerText = "A senha deve ter pelo menos 6 dígitos.";
                 status.style.color = "red";
                 return;
             }
 
+            btn.disabled = true;
+            btn.innerText = "Processando...";
+
+            // Este comando salva a senha no banco de autenticação do Supabase
             const { error } = await _supabase.auth.updateUser({ password: senha });
 
             if (error) {
-                status.innerText = "Erro: " + error.message;
+                status.innerText = "Erro ao resetar: " + error.message;
                 status.style.color = "red";
+                btn.disabled = false;
+                btn.innerText = "ATUALIZAR SENHA AGORA";
             } else {
-                status.innerText = "Sucesso! Voltando ao início...";
+                status.innerText = "Senha alterada com sucesso!";
                 status.style.color = "green";
-                setTimeout(() => window.location.href = 'index.html', 2000);
+                
+                // Limpa a sessão para garantir que ele precise logar com a nova senha
+                await _supabase.auth.signOut();
+
+                setTimeout(() => {
+                    window.location.href = 'index.html?reset=success';
+                }, 2000);
             }
         }
     </script>
