@@ -43,7 +43,7 @@
         .admin-card { background: var(--bg-card); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid var(--primary); }
         .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-weight: 700; font-size: 1.1rem; }
 
-        /* BARRA DE PESQUISA */
+        /* BARRA DE PESQUISA (LUPA) */
         .search-container { position: relative; margin-bottom: 20px; }
         .search-container input { padding-left: 40px; margin-bottom: 0; width: 100%; border: 2px solid var(--border); }
         .search-container i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
@@ -56,13 +56,17 @@
 
         .btn-trash { background: #fee2e2; color: var(--danger); border: none; padding: 8px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
         .btn-trash:hover { background: var(--danger); color: white; }
-        
-        .btn-email { background: #e0f2fe; color: #0369a1; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-        .btn-email:hover { background: #0369a1; color: white; }
 
         .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
         .status-aprovado { background: #dcfce7; color: #16a34a; }
         .status-bloqueado { background: #fee2e2; color: #dc2626; }
+
+        /* FORMULÁRIOS */
+        label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; font-size: 14px; outline: none; }
+        .btn { border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
 
         /* CHAT VIEW */
         .chat-view, .alunos-view { display: none; flex-direction: column; height: 100%; background: #f8fafc; }
@@ -105,11 +109,32 @@
                 <textarea id="recado_aula" rows="2" placeholder="Mensagem para os alunos..."></textarea>
                 <button class="btn btn-primary" onclick="salvarAula()" style="width: 100%;"><i class="fas fa-save"></i> ATUALIZAR AULA</button>
             </div>
+
+            <div class="admin-card" style="border-top-color: var(--danger);">
+                <div class="card-header" style="color: var(--danger);"><i class="fas fa-bullhorn"></i> Alerta Global</div>
+                <label>Texto do Banner (Aparece no topo dos módulos)</label>
+                <textarea id="aviso_global" rows="2" placeholder="Aviso importante para todos os alunos..."></textarea>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button class="btn btn-danger" onclick="salvarAviso()">PUBLICAR</button>
+                    <button class="btn" style="background: #e2e8f0;" onclick="limparAviso()">LIMPAR</button>
+                </div>
+            </div>
+
+            <div class="admin-card" style="border-top-color: var(--warning);">
+                <div class="card-header"><i class="fas fa-server"></i> Infraestrutura</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-main); padding: 15px; border-radius: 8px;">
+                    <div>
+                        <span id="status-label" style="font-weight: 800;">Verificando...</span>
+                        <div style="font-size: 12px; color: var(--text-muted);">Controle de acesso ao site</div>
+                    </div>
+                    <button class="btn" id="btn-manutencao" onclick="toggleManutencao()">AGUARDE</button>
+                </div>
+            </div>
         </div>
         
         <div id="visao-alunos" class="alunos-view scroll-container">
             <div class="admin-card" style="border-top-color: var(--purple);">
-                <div class="card-header"><i class="fas fa-user-graduate"></i> Gestão de Alunos</div>
+                <div class="card-header"><i class="fas fa-user-graduate"></i> Gestão de Acessos</div>
                 
                 <div class="search-container">
                     <i class="fas fa-search"></i>
@@ -123,7 +148,6 @@
                                 <th style="width: 50px;">Excluir</th>
                                 <th>Aluno (Email)</th>
                                 <th>Status</th>
-                                <th>Segurança</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -149,7 +173,8 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let alunoSelecionado = null;
-        let todosAlunos = []; 
+        let emManutencao = false;
+        let todosAlunos = []; // Cache para a pesquisa funcionar rápido
 
         function exibirTela(id, elemento) {
             document.getElementById('visao-geral').style.display = 'none';
@@ -161,9 +186,56 @@
             if(id === 'visao-alunos') carregarAlunos();
         }
 
+        // --- FUNÇÕES DE AULA E AVISO ---
+        async function carregarConfiguracoes() {
+            const { data } = await _supabase.from('configuracoes').select('*');
+            if (data) {
+                document.getElementById('link_aula').value = data.find(c => c.chave === 'link_aula_ao_vivo')?.valor || "";
+                document.getElementById('horario_aula').value = data.find(c => c.chave === 'horario_aula')?.valor || "";
+                document.getElementById('recado_aula').value = data.find(c => c.chave === 'recado_aula')?.valor || "";
+                document.getElementById('aviso_global').value = data.find(c => c.chave === 'recado_geral_modulos')?.valor || "";
+                emManutencao = data.find(c => c.chave === 'modo_manutencao')?.valor === "true";
+                atualizarInterfaceManutencao();
+            }
+        }
+
+        async function salvarAula() {
+            await _supabase.from('configuracoes').update({ valor: document.getElementById('link_aula').value }).eq('chave', 'link_aula_ao_vivo');
+            await _supabase.from('configuracoes').update({ valor: document.getElementById('horario_aula').value }).eq('chave', 'horario_aula');
+            await _supabase.from('configuracoes').update({ valor: document.getElementById('recado_aula').value }).eq('chave', 'recado_aula');
+            alert("Aula Atualizada!");
+        }
+
+        async function salvarAviso() {
+            await _supabase.from('configuracoes').update({ valor: document.getElementById('aviso_global').value }).eq('chave', 'recado_geral_modulos');
+            alert("Aviso Global Publicado!");
+        }
+
+        async function limparAviso() {
+            await _supabase.from('configuracoes').update({ valor: "" }).eq('chave', 'recado_geral_modulos');
+            document.getElementById('aviso_global').value = "";
+            alert("Aviso removido!");
+        }
+
+        async function toggleManutencao() {
+            emManutencao = !emManutencao;
+            await _supabase.from('configuracoes').update({ valor: emManutencao.toString() }).eq('chave', 'modo_manutencao');
+            atualizarInterfaceManutencao();
+        }
+
+        function atualizarInterfaceManutencao() {
+            const btn = document.getElementById('btn-manutencao');
+            const label = document.getElementById('status-label');
+            btn.innerText = emManutencao ? "DESATIVAR" : "ATIVAR";
+            btn.className = emManutencao ? "btn btn-danger" : "btn btn-primary";
+            label.innerText = emManutencao ? "MODO MANUTENÇÃO ATIVO" : "SISTEMA OPERACIONAL";
+            label.style.color = emManutencao ? "var(--danger)" : "var(--success)";
+        }
+
+        // --- GESTÃO DE ALUNOS COM LUPA ---
         async function carregarAlunos() {
             const { data } = await _supabase.from('perfil_alunos').select('*');
-            todosAlunos = data ? [...data].reverse() : [];
+            todosAlunos = data ? [...data].reverse() : []; // Inverte para novos no topo
             renderizarTabela(todosAlunos);
         }
 
@@ -175,33 +247,14 @@
                     <td><b>${aluno.email}</b></td>
                     <td><span class="status-badge status-${aluno.status}">${aluno.status}</span></td>
                     <td>
-                        <button class="btn-email" onclick="enviarResetSenha('${aluno.email}')">
-                            <i class="fas fa-envelope-open-text"></i> Enviar Reset
-                        </button>
-                    </td>
-                    <td>
                         <select onchange="atualizarStatusAluno('${aluno.email}', this.value)" style="margin:0; padding:5px;">
-                            <option value="">Status...</option>
+                            <option value="">Alterar...</option>
                             <option value="aprovado">Aprovar</option>
                             <option value="bloqueado">Bloquear</option>
                         </select>
                     </td>
                 </tr>
             `).join('');
-        }
-
-        async function enviarResetSenha(email) {
-            if (confirm(`Deseja enviar um link de recuperação de senha para ${email}?`)) {
-                const { error } = await _supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: 'https://seusite.com/redefinir-senha.html', // Altere para a sua URL de redefinição
-                });
-
-                if (error) {
-                    alert("Erro ao enviar e-mail: " + error.message);
-                } else {
-                    alert("E-mail de recuperação enviado com sucesso para o aluno!");
-                }
-            }
         }
 
         function filtrarAlunos() {
@@ -223,8 +276,43 @@
             carregarAlunos();
         }
 
+        // --- CHAT ---
+        async function carregarContatos() {
+            const { data } = await _supabase.from('chat_suporte').select('aluno_email').order('created_at', { ascending: false });
+            const unicos = [...new Set(data?.map(m => m.aluno_email))];
+            const lista = document.getElementById('lista-contatos');
+            lista.innerHTML = unicos.map(email => `
+                <div class="nav-item" onclick="abrirChat('${email}')"><i class="fas fa-comment"></i> ${email}</div>
+            `).join('');
+        }
+
+        function abrirChat(email) {
+            alunoSelecionado = email;
+            exibirTela('visao-chat', null);
+            carregarMensagens();
+        }
+
+        async function carregarMensagens() {
+            if(!alunoSelecionado) return;
+            const { data } = await _supabase.from('chat_suporte').select('*').eq('aluno_email', alunoSelecionado).order('created_at', { ascending: true });
+            const box = document.getElementById('box-mensagens');
+            box.innerHTML = data.map(m => `<div class="bubble ${m.remetente === 'aluno' ? 'aluno' : 'admin'}">${m.mensagem}</div>`).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function enviarMensagem() {
+            const input = document.getElementById('input-msg');
+            if(!input.value.trim()) return;
+            await _supabase.from('chat_suporte').insert([{ aluno_email: alunoSelecionado, remetente: 'instrutor', mensagem: input.value }]);
+            input.value = "";
+            carregarMensagens();
+        }
+
         // INIT
-        carregarAlunos();
+        carregarConfiguracoes();
+        carregarContatos();
+        setInterval(() => { if(alunoSelecionado) carregarMensagens(); carregarContatos(); }, 5000);
+
     </script>
 </body>
 </html>

@@ -4,28 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acesso | Telecurso Montagem de PC</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             background-color: #003366; 
             background-image: linear-gradient(180deg, #003366 0%, #0056b3 100%);
-            display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
         }
+
         .login-container {
-            background: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            width: 100%; max-width: 400px; text-align: center;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
         }
-        .logo-area h1 { color: #0056b3; margin: 0; font-size: 1.8rem; text-transform: uppercase; border-bottom: 3px solid #ffcc00; display: inline-block; margin-bottom: 10px; }
-        .logo-area p { font-size: 0.9rem; color: #666; margin-bottom: 30px; font-weight: bold; }
-        .form-group { text-align: left; margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; color: #444; }
-        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: transform 0.1s; margin-bottom: 10px; }
-        #btn-principal { background-color: #ffcc00; color: #003366; }
-        #btn-toggle { background-color: #f0f0f0; color: #555; font-size: 0.9rem; border: 1px solid #ddd; }
-        .forgot-link { display: block; margin-top: 10px; font-size: 0.85rem; color: #0056b3; text-decoration: none; cursor: pointer; text-align: right; }
-        #mensagem-status { margin-top: 20px; padding: 10px; border-radius: 4px; display: none; font-size: 0.9rem; font-weight: bold; }
+
+        .logo-area h1 {
+            color: #0056b3;
+            margin: 0;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            border-bottom: 3px solid #ffcc00; 
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .logo-area p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+            margin-bottom: 10px;
+        }
+
+        /* Botão Principal Amarelo */
+        #btn-principal {
+            background-color: #ffcc00;
+            color: #003366;
+        }
+
+        /* Botão de Alternância (Antigo de Matrícula) */
+        #btn-toggle {
+            background-color: #f0f0f0;
+            color: #555;
+            font-size: 0.9rem;
+            border: 1px solid #ddd;
+        }
+
+        .btn:active { transform: scale(0.98); }
+
+        #mensagem-status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
         .erro { background-color: #f8d7da; color: #721c24; display: block !important; }
         .sucesso { background-color: #d4edda; color: #155724; display: block !important; }
     </style>
@@ -43,20 +120,22 @@
             <input type="email" id="email" placeholder="exemplo@email.com">
         </div>
 
-        <div id="campo-senha" class="form-group">
+        <div class="form-group">
             <label for="senha">Senha de Acesso</label>
             <input type="password" id="senha" placeholder="••••••••">
-            <a class="forgot-link" onclick="enviarEmailRecuperacao()">Esqueci minha senha</a>
         </div>
 
         <button id="btn-principal" class="btn">ENTRAR NA SALA DE AULA</button>
+        
         <button id="btn-toggle" class="btn" onclick="alternarModo()">NÃO TENHO CONTA (CADASTRAR)</button>
 
         <div id="mensagem-status"></div>
     </div>
 
     <script>
-        const _supabase = supabase.createClient('https://ityqcemfbdzgsfmyisqc.supabase.co', 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA');
+        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let modoCadastro = false;
 
@@ -65,28 +144,15 @@
             const subtitle = document.getElementById('auth-subtitle');
             const btnPrincipal = document.getElementById('btn-principal');
             const btnToggle = document.getElementById('btn-toggle');
-            
-            subtitle.innerText = modoCadastro ? "CRIAR NOVA CONTA" : "Montagem e Manutenção de computadores";
-            btnPrincipal.innerText = modoCadastro ? "FINALIZAR CADASTRO" : "ENTRAR NA SALA DE AULA";
-            btnToggle.innerText = modoCadastro ? "JÁ TENHO CONTA (LOGAR)" : "NÃO TENHO CONTA (CADASTRAR)";
-        }
 
-        async function enviarEmailRecuperacao() {
-            const email = document.getElementById('email').value;
-            if (!email) {
-                exibirMensagem("Digite seu e-mail acima para receber o link.", "erro");
-                return;
-            }
-
-            // O redirecionamento aponta para a página redefinir-senha.html que você criará
-            const { error } = await _supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + '/redefinir-senha.html',
-            });
-
-            if (error) {
-                exibirMensagem("Erro: " + error.message, "erro");
+            if (modoCadastro) {
+                subtitle.innerText = "CRIAR NOVA CONTA";
+                btnPrincipal.innerText = "FINALIZAR CADASTRO";
+                btnToggle.innerText = "JÁ TENHO CONTA (LOGAR)";
             } else {
-                exibirMensagem("E-mail de recuperação enviado!", "sucesso");
+                subtitle.innerText = "Montagem e Manutenção de computadores";
+                btnPrincipal.innerText = "ENTRAR NA SALA DE AULA";
+                btnToggle.innerText = "NÃO TENHO CONTA (CADASTRAR)";
             }
         }
 
@@ -99,23 +165,39 @@
                 return;
             }
 
+            document.getElementById('btn-principal').disabled = true;
+
             if (modoCadastro) {
-                const { error } = await _supabase.auth.signUp({ email, password });
-                if (error) exibirMensagem(error.message, "erro");
-                else {
-                    await _supabase.from('perfil_alunos').insert([{ email, status: 'pendente' }]);
-                    exibirMensagem("Cadastrado! Aguarde aprovação.", "sucesso");
+                const { data, error } = await _supabase.auth.signUp({ email, password });
+                if (error) {
+                    exibirMensagem("Erro: " + error.message, "erro");
+                } else {
+                    await _supabase.from('perfil_alunos').insert([{ email: email, status: 'pendente' }]); 
+                    exibirMensagem("Cadastro realizado! Aguarde a aprovação do admin.", "sucesso");
                 }
             } else {
-                const { data: perfil } = await _supabase.from('perfil_alunos').select('status').eq('email', email).single();
+                // Verifica se o aluno está aprovado antes de logar
+                const { data: perfil, error: errPerfil } = await _supabase
+                    .from('perfil_alunos')
+                    .select('status')
+                    .eq('email', email)
+                    .single();
+
                 if (!perfil || perfil.status !== 'aprovado') {
-                    exibirMensagem("Conta pendente de aprovação.", "erro");
+                    exibirMensagem("Acesso negado: Conta pendente de aprovação.", "erro");
+                    document.getElementById('btn-principal').disabled = false;
                     return;
                 }
+
                 const { error } = await _supabase.auth.signInWithPassword({ email, password });
-                if (error) exibirMensagem("Dados incorretos.", "erro");
-                else window.location.href = "modulos.html";
+                if (error) {
+                    exibirMensagem("Erro: E-mail ou senha incorretos.", "erro");
+                } else {
+                    exibirMensagem("Acesso autorizado! Entrando...", "sucesso");
+                    setTimeout(() => window.location.href = "modulos.html", 1000);
+                }
             }
+            document.getElementById('btn-principal').disabled = false;
         }
 
         function exibirMensagem(texto, tipo) {
@@ -126,6 +208,10 @@
         }
 
         document.getElementById('btn-principal').addEventListener('click', gerenciarAcesso);
+        
+        document.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') gerenciarAcesso();
+        });
     </script>
 </body>
 </html>
