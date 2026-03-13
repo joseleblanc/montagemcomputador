@@ -7,57 +7,72 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #003366; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .card { background: white; padding: 30px; border-radius: 8px; width: 320px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #ffcc00; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; color: #003366; }
-        #status { margin-top: 15px; font-weight: bold; font-size: 0.9rem; }
+        h2 { color: #0056b3; margin-bottom: 10px; }
+        p { font-size: 0.85rem; color: #666; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #ffcc00; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; color: #003366; margin-top: 10px; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #status { margin-top: 15px; font-weight: bold; font-size: 0.9rem; min-height: 1.2em; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2 style="color:#0056b3">Criar Nova Senha</h2>
-        <p style="font-size: 0.8rem; color:#666">Digite sua nova senha abaixo para concluir o reset.</p>
-        <input type="password" id="nova-senha" placeholder="Mínimo 6 caracteres">
-        <button id="btn-salvar" onclick="confirmarTroca()">ATUALIZAR SENHA AGORA</button>
+        <h2>Definir Nova Senha</h2>
+        <p>Confirme seu e-mail e escolha uma nova senha para recuperar o acesso.</p>
+        
+        <input type="email" id="email-confirmacao" placeholder="Confirme seu e-mail">
+        <input type="password" id="nova-senha" placeholder="Nova senha (min. 6 dígitos)">
+        
+        <button id="btn-salvar" onclick="confirmarTroca()">ATUALIZAR SENHA</button>
+        
         <div id="status"></div>
     </div>
 
     <script>
-        // Use EXATAMENTE as mesmas credenciais do seu index.html
+        // Substitua pelas suas credenciais reais se forem diferentes
         const _supabase = supabase.createClient('https://ityqcemfbdzgsfmyisqc.supabase.co', 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA');
 
         async function confirmarTroca() {
+            const email = document.getElementById('email-confirmacao').value;
             const senha = document.getElementById('nova-senha').value;
             const status = document.getElementById('status');
             const btn = document.getElementById('btn-salvar');
 
-            if (senha.length < 6) {
-                status.innerText = "A senha deve ter pelo menos 6 dígitos.";
-                status.style.color = "red";
+            if (!email || senha.length < 6) {
+                exibirMsg("Preencha o e-mail e uma senha de 6 dígitos.", "red");
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "Processando...";
+            status.innerText = "Processando...";
 
-            // Este comando salva a senha no banco de autenticação do Supabase
+            // 1. Tenta atualizar a senha diretamente
+            // O Supabase tentará usar o token que está na URL automaticamente
             const { error } = await _supabase.auth.updateUser({ password: senha });
 
             if (error) {
-                status.innerText = "Erro ao resetar: " + error.message;
-                status.style.color = "red";
+                if (error.message.includes("session missing") || error.message.includes("expired")) {
+                    exibirMsg("Sessão expirada. Peça um novo link no login.", "red");
+                } else {
+                    exibirMsg("Erro: " + error.message, "red");
+                }
                 btn.disabled = false;
-                btn.innerText = "ATUALIZAR SENHA AGORA";
             } else {
-                status.innerText = "Senha alterada com sucesso!";
-                status.style.color = "green";
+                exibirMsg("Senha alterada com sucesso!", "green");
                 
-                // Limpa a sessão para garantir que ele precise logar com a nova senha
+                // Limpa sessões antigas
                 await _supabase.auth.signOut();
 
                 setTimeout(() => {
-                    window.location.href = 'index.html?reset=success';
-                }, 2000);
+                    window.location.href = 'index.html';
+                }, 2500);
             }
+        }
+
+        function exibirMsg(texto, cor) {
+            const status = document.getElementById('status');
+            status.innerText = texto;
+            status.style.color = cor;
         }
     </script>
 </body>
