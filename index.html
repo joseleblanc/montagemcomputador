@@ -3,135 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Telecurso Montagem de PC</title>
-    <link rel="icon" type="image/png" href="favicon.png">
+    <title>Acesso | Telecurso Montagem de PC</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
-        /* Estilos Globais */
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #003366; /* Azul clássico Telecurso */
+            background-color: #003366; 
             background-image: linear-gradient(180deg, #003366 0%, #0056b3 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            color: #333;
+            display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #333;
         }
-
-        /* Card de Login */
         .login-container {
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
+            background: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            width: 100%; max-width: 400px; text-align: center;
         }
-
-        .logo-area h1 {
-            color: #0056b3;
-            margin: 0;
-            font-size: 1.8rem;
-            text-transform: uppercase;
-            border-bottom: 3px solid #ffcc00; /* Detalhe em amarelo */
-            display: inline-block;
-            margin-bottom: 10px;
-        }
-
-        .logo-area p {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        /* Formulário */
-        .form-group {
-            text-align: left;
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #444;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #0056b3;
-        }
-
-        /* Botões */
-        .btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.1s, background 0.3s;
-            margin-bottom: 10px;
-        }
-
-        #btn-entrar {
-            background-color: #ffcc00;
-            color: #003366;
-        }
-
-        #btn-entrar:hover {
-            background-color: #e6b800;
-        }
-
-        #btn-matricular {
-            background-color: #25d366; /* Cor do WhatsApp */
-            color: white;
-            font-size: 0.9rem;
-        }
-
-        #btn-matricular:hover {
-            background-color: #1eb954;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Mensagens */
-        #mensagem-status {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-            display: none;
-            font-size: 0.9rem;
-        }
-
-        .erro {
-            background-color: #f8d7da;
-            color: #721c24;
-            display: block !important;
-        }
-
-        .sucesso {
-            background-color: #d4edda;
-            color: #155724;
-            display: block !important;
-        }
+        .logo-area h1 { color: #0056b3; margin: 0; font-size: 1.8rem; text-transform: uppercase; border-bottom: 3px solid #ffcc00; display: inline-block; margin-bottom: 10px; }
+        .logo-area p { font-size: 0.9rem; color: #666; margin-bottom: 30px; font-weight: bold; }
+        .form-group { text-align: left; margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #444; }
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: transform 0.1s; margin-bottom: 10px; }
+        #btn-principal { background-color: #ffcc00; color: #003366; }
+        #btn-toggle { background-color: #f0f0f0; color: #555; font-size: 0.9rem; border: 1px solid #ddd; }
+        .forgot-link { display: block; margin-top: 10px; font-size: 0.85rem; color: #0056b3; text-decoration: none; cursor: pointer; text-align: right; }
+        #mensagem-status { margin-top: 20px; padding: 10px; border-radius: 4px; display: none; font-size: 0.9rem; font-weight: bold; }
+        .erro { background-color: #f8d7da; color: #721c24; display: block !important; }
+        .sucesso { background-color: #d4edda; color: #155724; display: block !important; }
     </style>
 </head>
 <body>
@@ -139,7 +35,7 @@
     <div class="login-container">
         <div class="logo-area">
             <h1>TELECURSO</h1>
-            <p>Montagem e Manutenção de computadores</p>
+            <p id="auth-subtitle">Montagem e Manutenção de computadores</p>
         </div>
 
         <div class="form-group">
@@ -147,84 +43,89 @@
             <input type="email" id="email" placeholder="exemplo@email.com">
         </div>
 
-        <div class="form-group">
+        <div id="campo-senha" class="form-group">
             <label for="senha">Senha de Acesso</label>
             <input type="password" id="senha" placeholder="••••••••">
+            <a class="forgot-link" onclick="enviarEmailRecuperacao()">Esqueci minha senha</a>
         </div>
 
-        <button id="btn-entrar" class="btn">ENTRAR NA SALA DE AULA</button>
-        
-        <button id="btn-matricular" class="btn">QUERO ME MATRICULAR</button>
+        <button id="btn-principal" class="btn">ENTRAR NA SALA DE AULA</button>
+        <button id="btn-toggle" class="btn" onclick="alternarModo()">NÃO TENHO CONTA (CADASTRAR)</button>
 
         <div id="mensagem-status"></div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO SUPABASE
-        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const _supabase = supabase.createClient('https://ityqcemfbdzgsfmyisqc.supabase.co', 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA');
 
-        // ELEMENTOS DA TELA
-        const btnEntrar = document.getElementById('btn-entrar');
-        const btnMatricular = document.getElementById('btn-matricular');
-        const campoEmail = document.getElementById('email');
-        const campoSenha = document.getElementById('senha');
-        const statusDiv = document.getElementById('mensagem-status');
+        let modoCadastro = false;
 
-        // FUNÇÃO DE LOGIN
-        async function realizarLogin() {
-            const email = campoEmail.value;
-            const password = campoSenha.value;
+        function alternarModo() {
+            modoCadastro = !modoCadastro;
+            const subtitle = document.getElementById('auth-subtitle');
+            const btnPrincipal = document.getElementById('btn-principal');
+            const btnToggle = document.getElementById('btn-toggle');
+            
+            subtitle.innerText = modoCadastro ? "CRIAR NOVA CONTA" : "Montagem e Manutenção de computadores";
+            btnPrincipal.innerText = modoCadastro ? "FINALIZAR CADASTRO" : "ENTRAR NA SALA DE AULA";
+            btnToggle.innerText = modoCadastro ? "JÁ TENHO CONTA (LOGAR)" : "NÃO TENHO CONTA (CADASTRAR)";
+        }
 
-            if(!email || !password) {
-                exibirMensagem("Por favor, preencha todos os campos.", "erro");
+        async function enviarEmailRecuperacao() {
+            const email = document.getElementById('email').value;
+            if (!email) {
+                exibirMensagem("Digite seu e-mail acima para receber o link.", "erro");
                 return;
             }
 
-            btnEntrar.innerText = "VERIFICANDO...";
-            btnEntrar.disabled = true;
-
-            const { data, error } = await _supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
+            // O redirecionamento aponta para a página redefinir-senha.html que você criará
+            const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + '/redefinir-senha.html',
             });
 
             if (error) {
                 exibirMensagem("Erro: " + error.message, "erro");
-                btnEntrar.innerText = "ENTRAR NA SALA DE AULA";
-                btnEntrar.disabled = false;
             } else {
-                exibirMensagem("Acesso autorizado! Entrando...", "sucesso");
-                setTimeout(() => {
-                    window.location.href = "modulos.html"; 
-                }, 1000);
+                exibirMensagem("E-mail de recuperação enviado!", "sucesso");
             }
         }
 
-        // FUNÇÃO MATRICULAR (WHATSAPP)
-        function matricularNoCurso() {
-            const telefone = "5544988068858"; // SUBSTITUA PELO SEU NÚMERO
-            const mensagem = "Olá! Gostaria de me matricular no Telecurso de Montagem de PC. Como devo proceder?";
-            const url = `https://wa.me/${telefone}?text=${encodeURIComponent(mensagem)}`;
-            window.open(url, '_blank');
+        async function gerenciarAcesso() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('senha').value;
+
+            if (!email || !password) {
+                exibirMensagem("Preencha todos os campos.", "erro");
+                return;
+            }
+
+            if (modoCadastro) {
+                const { error } = await _supabase.auth.signUp({ email, password });
+                if (error) exibirMensagem(error.message, "erro");
+                else {
+                    await _supabase.from('perfil_alunos').insert([{ email, status: 'pendente' }]);
+                    exibirMensagem("Cadastrado! Aguarde aprovação.", "sucesso");
+                }
+            } else {
+                const { data: perfil } = await _supabase.from('perfil_alunos').select('status').eq('email', email).single();
+                if (!perfil || perfil.status !== 'aprovado') {
+                    exibirMensagem("Conta pendente de aprovação.", "erro");
+                    return;
+                }
+                const { error } = await _supabase.auth.signInWithPassword({ email, password });
+                if (error) exibirMensagem("Dados incorretos.", "erro");
+                else window.location.href = "modulos.html";
+            }
         }
 
-        // FUNÇÃO AUXILIAR DE MENSAGEM
         function exibirMensagem(texto, tipo) {
+            const statusDiv = document.getElementById('mensagem-status');
             statusDiv.innerText = texto;
-            statusDiv.className = tipo; // 'erro' ou 'sucesso'
+            statusDiv.className = tipo;
             statusDiv.style.display = "block";
         }
 
-        // EVENTOS
-        btnEntrar.addEventListener('click', realizarLogin);
-        btnMatricular.addEventListener('click', matricularNoCurso);
-        
-        document.addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') realizarLogin();
-        });
+        document.getElementById('btn-principal').addEventListener('click', gerenciarAcesso);
     </script>
-
 </body>
 </html>
