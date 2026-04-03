@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificado | Telecurso Montagem de PC</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        :root { --azul: #003366; --amarelo: #ffcc00; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--azul); color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .container { background: white; color: #333; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.4); max-width: 500px; width: 90%; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--amarelo); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .btn-ready { background: var(--amarelo); color: var(--azul); border: none; padding: 15px 30px; font-weight: bold; border-radius: 10px; cursor: pointer; display: none; width: 100%; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="app">
+        <div id="loading-area">
+            <h2>Processando seu Certificado...</h2>
+            <div class="loader"></div>
+            <p>Estamos validando seus dados no sistema.</p>
+        </div>
+
+        <div id="ready-area" style="display:none;">
+            <i class="fas fa-check-circle" style="color: #22c55e; font-size: 4rem;"></i>
+            <h2>Tudo Pronto!</h2>
+            <p id="msg-aluno"></p>
+
+            <div id="dados-usuario" style="display:flex; flex-direction:column; gap:10px; margin:15px 0; text-align:left;">
+                <label>Nome completo</label>
+                <input id="input-nome" type="text" placeholder="Nome completo" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;" />
+                <label>CPF</label>
+                <input id="input-cpf" type="text" placeholder="000.000.000-00" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;" />
+                <label>Data de Nascimento</label>
+                <input id="input-nasc" type="date" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;" />
+                <button class="btn-ready" id="btn-confirmar" onclick="confirmarDados()" style="background:#22c55e; color:white; display:block;">CONFIRMAR DADOS</button>
+            </div>
+
+            <button class="btn-ready" id="btn-download" onclick="gerarPDF()" style="display:none;">
+                <i class="fas fa-file-download"></i> BAIXAR MEU CERTIFICADO
+            </button>
+        </div>
+
+        <div id="qrcode-box" style="display:none;"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let dadosAluno = null;
+
+        async function prepararDados() {
+            const { data: { user } } = await _supabase.auth.getUser();
+            if (!user) { window.location.href = 'index.html'; return; }
+
+            // Busca nome e validação da prova
+            const { data: perfil } = await _supabase.from('perfil_alunos').select('nome_completo').eq('id', user.id).single();
+            const { data: prova } = await _supabase.from('progresso_alunos').select('nota').eq('user_id', user.id).eq('modulo_id', 100).single();
+
+            if (!prova || prova.nota < 70) {
+                alert("Você ainda não possui nota suficiente para o certificado.");
+                window.location.href = 'modulos.html';
+                return;
+            }
+
+            dadosAluno = {
+                nome: perfil?.nome_completo || "Aluno do Telecurso",
+                id: user.id,
+                nota: prova.nota
+            };
+
+            // Não gerar imediatamente: aguarda confirmação dos dados do usuário
+            document.getElementById('loading-area').style.display = 'none';
+            document.getElementById('ready-area').style.display = 'block';
+            document.getElementById('btn-download').style.display = 'none';
+            document.getElementById('qrcode-box').style.display = 'none';
+
+            document.getElementById('input-nome').value = dadosAluno.nome;
+            document.getElementById('input-cpf').value = '';
+            document.getElementById('input-nasc').value = '';
+
+            document.getElementById('msg-aluno').innerText = `${dadosAluno.nome}, confirme seu Nome, CPF e Data de Nascimento para emitir o certificado.`;
+        }
+
+        function confirmarDados() {
+            const nome = document.getElementById('input-nome').value.trim();
+            const cpf = document.getElementById('input-cpf').value.trim();
+            const nasc = document.getElementById('input-nasc').value;
+
+            if (!nome || !cpf || !nasc) {
+                alert('Preencha Nome, CPF e Data de Nascimento.');
+                return;
+            }
+
+            const cpfLimpo = cpf.replace(/[\.\-\s]/g, '');
+            if (!/^\d{11}$/.test(cpfLimpo)) {
+                alert('CPF inválido. Use apenas números ou formato 000.000.000-00.');
+                return;
+            }
+
+            dadosAluno.nome = nome;
+            dadosAluno.cpf = cpfLimpo;
+            dadosAluno.nasc = nasc;
+
+            const urlVerificacao = `joseleblanc.github.io/montagemcomputador/verific.html?id=${encodeURIComponent(dadosAluno.id)}&nome=${encodeURIComponent(nome)}&cpf=${encodeURIComponent(cpfLimpo)}&nasc=${encodeURIComponent(nasc)}`;
+
+            document.getElementById('qrcode-box').innerHTML = '';
+            new QRCode(document.getElementById('qrcode-box'), { text: urlVerificacao, width: 150, height: 150 });
+
+            document.getElementById('qrcode-box').style.display = 'block';
+            document.getElementById('btn-download').style.display = 'block';
+            document.getElementById('btn-confirmar').style.display = 'none';
+            document.getElementById('msg-aluno').innerText = `${dadosAluno.nome}, dados confirmados. Agora clique em Baixar certificado.`;
+        }
+
+        function gerarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
+            const qrContainer = document.getElementById("qrcode-box");
+            let qrImage;
+            const imgTag = qrContainer.querySelector("img");
+            const canvasTag = qrContainer.querySelector("canvas");
+            if (imgTag) {
+                qrImage = imgTag.src;
+            } else if (canvasTag) {
+                qrImage = canvasTag.toDataURL('image/png');
+            } else {
+                qrImage = null;
+            }
+
+            // Design Básico (Personalize com suas cores Amarelo e Azul)
+            doc.setFillColor(0, 51, 102); // Azul
+            doc.rect(0, 0, 297, 210, 'F');
+            
+            doc.setDrawColor(255, 204, 0); // Amarelo
+            doc.setLineWidth(10);
+            doc.rect(5, 5, 287, 200);
+
+            doc.setTextColor(255, 204, 0);
+            doc.setFontSize(45);
+            doc.text("CERTIFICADO DE CONCLUSÃO", 148.5, 60, { align: 'center' });
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.text("Certificamos com honra que", 148.5, 90, { align: 'center' });
+            
+            doc.setFontSize(32);
+            doc.text(dadosAluno.nome.toUpperCase(), 148.5, 115, { align: 'center' });
+
+            doc.setFontSize(18);
+            doc.text("concluiu com êxito o Telecurso Montagem de PC", 148.5, 140, { align: 'center' });
+
+            doc.setFontSize(14);
+            doc.text(`CPF: ${dadosAluno.cpf.slice(0,3)}.${dadosAluno.cpf.slice(3,6)}.${dadosAluno.cpf.slice(6,9)}-${dadosAluno.cpf.slice(9,11)} | Nasc: ${dadosAluno.nasc}`, 148.5, 155, { align: 'center' });
+            
+            // Rodapé com QR Code
+            if (qrImage) {
+                doc.addImage(qrImage, 'PNG', 245, 155, 35, 35);
+                doc.setFontSize(9);
+                doc.text("Autenticidade garantida via QR Code", 262, 195, { align: 'center' });
+            } else {
+                doc.setFontSize(9);
+                doc.text("QRCODE indisponível para este navegador", 262, 195, { align: 'center' });
+            }
+
+            doc.save(`Certificado_Telecurso_${dadosAluno.nome.replace(/\s+/g, '_')}.pdf`);
+        }
+
+        prepararDados();
+    </script>
+</body>
+</html>
