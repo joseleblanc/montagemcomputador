@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Validação de Certificado | Telecurso Montagem de PC</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
         body { 
             margin:0; 
@@ -101,6 +102,16 @@
         <div class="footer-note">
             Verificação processada em: <span id="current-date"></span>
         </div>
+        
+        <button id="scan-btn" style="background: #38bdf8; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 20px;">
+            <i class="fas fa-qrcode"></i> Escanear QR Code do Certificado
+        </button>
+        
+        <div id="scanner" style="display: none; margin-top: 20px;">
+            <video id="video" width="300" height="200" style="border: 1px solid #ccc;"></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+            <p style="color: #b9bbbe; font-size: 12px;">Posicione o QR code do certificado na câmera.</p>
+        </div>
     </div>
 
     <script>
@@ -134,6 +145,78 @@
             `;
             document.getElementById('data-container').style.borderLeftColor = '#f43f5e';
             document.getElementById('res-id').innerText = 'ERRO DE VALIDAÇÃO';
+        }
+
+        // QR Code Scanner
+        const scanBtn = document.getElementById('scan-btn');
+        const scanner = document.getElementById('scanner');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let stream = null;
+
+        scanBtn.addEventListener('click', async () => {
+            scanner.style.display = 'block';
+            scanBtn.style.display = 'none';
+            
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                video.srcObject = stream;
+                video.play();
+                scanQRCode();
+            } catch (err) {
+                alert('Erro ao acessar a câmera: ' + err.message);
+                scanner.style.display = 'none';
+                scanBtn.style.display = 'block';
+            }
+        });
+
+        function scanQRCode() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                
+                if (code) {
+                    // Parar a câmera
+                    stream.getTracks().forEach(track => track.stop());
+                    scanner.style.display = 'none';
+                    
+                    // Processar o QR code
+                    const url = code.data;
+                    const urlObj = new URL(url);
+                    const params = urlObj.searchParams;
+                    
+                    const id = params.get('id');
+                    const nome = params.get('nome');
+                    const cpf = params.get('cpf');
+                    const nasc = params.get('nasc');
+                    
+                    if (id) {
+                        // Preencher os dados
+                        document.getElementById('res-id').innerText = id;
+                        document.getElementById('res-nome').innerText = nome || 'Não Informado';
+                        document.getElementById('res-cpf').innerText = cpf || 'Não Informado';
+                        document.getElementById('res-nasc').innerText = nasc || 'Não Informado';
+                        
+                        // Alterar para sucesso
+                        document.getElementById('status').className = 'status-icon success';
+                        document.getElementById('status').innerHTML = '<i class="fas fa-check-circle"></i>';
+                        document.getElementById('title').innerText = 'Certificado de Conclusão Autêntico';
+                        document.getElementById('letter').innerHTML = `
+                            <p>A coordenação do <strong>Telecurso Montagem de PC</strong> valida, por meio deste canal oficial, que o portador deste documento completou satisfatoriamente todos os módulos da nossa formação técnica.</p>
+                            <p>Este certificado atesta que o aluno demonstrou plena competência em diagnósticos de hardware, arquitetura de sistemas e montagem avançada de computadores, cumprindo a carga horária e os requisitos avaliativos exigidos pela instituição.</p>
+                        `;
+                        document.getElementById('data-container').style.borderLeftColor = '#38bdf8';
+                    } else {
+                        alert('QR Code inválido. Tente novamente.');
+                        scanBtn.style.display = 'block';
+                    }
+                }
+            }
+            requestAnimationFrame(scanQRCode);
         }
     </script>
 </body>
