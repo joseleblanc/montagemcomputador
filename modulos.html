@@ -714,14 +714,24 @@ async function verificarLiberacaoCertificado() {
     btn.style.pointerEvents = 'none';
     btn.innerHTML = '<i class="fas fa-certificate"></i> Certificado bloqueado';
 
-    const { data: prova, error } = await _supabase
+    // Verificar prova final
+    const { data: prova, error: provaError } = await _supabase
         .from('progresso_alunos')
         .select('nota, concluido')
         .eq('user_id', user.id)
         .eq('modulo_id', 100)
         .single();
 
-    if (!error && prova && prova.concluido && prova.nota >= 70) {
+    // Verificar presença na aula ao vivo
+    const { data: presenca, error: presencaError } = await _supabase
+        .from('chamadas_aula')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1);
+
+    console.log('Verificação certificado:', { prova, presenca, provaError, presencaError });
+
+    if (!provaError && prova && prova.concluido && prova.nota >= 70 && !presencaError && presenca && presenca.length > 0) {
         btn.disabled = false;
         btn.classList.add('liberado');
         btn.style.cursor = 'pointer';
@@ -733,6 +743,14 @@ async function verificarLiberacaoCertificado() {
         };
 
         document.getElementById('status-prova-topo').innerHTML += ' <strong style="color:var(--verde);">(Certificado liberado)</strong>';
+    } else {
+        let motivo = '';
+        if (provaError || !prova || !prova.concluido || prova.nota < 70) {
+            motivo = 'Prova final não aprovada';
+        } else if (presencaError || !presenca || presenca.length === 0) {
+            motivo = 'Presença na aula ao vivo não confirmada';
+        }
+        document.getElementById('status-prova-topo').innerHTML += ` <strong style="color:var(--vermelho);">(${motivo})</strong>`;
     }
 }
 

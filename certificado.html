@@ -91,10 +91,17 @@
 
             const { data: perfil } = await _supabase.from('perfil_alunos').select('nome_completo').eq('id', user.id).single();
             const { data: prova } = await _supabase.from('progresso_alunos').select('nota').eq('user_id', user.id).eq('modulo_id', 100).single();
+            const { data: presenca } = await _supabase.from('chamadas_aula').select('id').eq('user_id', user.id).limit(1);
 
             if (!prova || prova.nota < 70) {
                 alert("Você ainda não possui nota suficiente para o certificado.");
                 window.location.href = 'modulos.html';
+                return;
+            }
+
+            if (!presenca || presenca.length === 0) {
+                alert("Você precisa confirmar presença em pelo menos uma aula ao vivo para obter o certificado.");
+                window.location.href = 'aula-viva.html';
                 return;
             }
 

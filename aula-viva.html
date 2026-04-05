@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root { --primary: #ffcc00; --bg: #020617; --card: rgba(30, 41, 59, 0.7); }
-        body { font-family: 'Segoe UI', sans-serif; background: radial-gradient(circle at top, #0f172a, #020617); color: white; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        body { font-family: 'Segoe UI', sans-serif; background: radial-gradient(circle at top, #0f172a, #020617); color: white; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .container { display: flex; flex-direction: column; gap: 20px; max-width: 1000px; width: 100%; }
+        .main-card { background: var(--card); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; width: 100%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         .main-card { background: var(--card); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         .live-badge { display: inline-flex; align-items: center; background: rgba(34, 197, 94, 0.2); color: #4ade80; padding: 5px 15px; border-radius: 50px; font-size: 12px; font-weight: bold; margin-bottom: 20px; border: 1px solid #14532d; }
         .dot { height: 8px; width: 8px; background: #22c55e; border-radius: 50%; margin-right: 8px; animation: pulse 1.5s infinite; }
@@ -22,19 +24,30 @@
 </head>
 <body>
 
-    <div class="main-card">
-        <div id="badge-live" class="live-badge" style="display:none;"><span class="dot"></span> EM TRANSMISSÃO</div>
-        <h1 style="margin:0 0 10px 0;">Telecurso <span style="color:var(--primary)">Ao Vivo</span></h1>
-        
-        <div class="info-box">
-            <label><i class="fas fa-clock"></i> Horário Previsto</label>
-            <p id="txt-horario">Sincronizando...</p>
+<body>
+
+    <div class="container">
+        <div class="main-card" id="tela-principal">
+            <div id="badge-live" class="live-badge" style="display:none;"><span class="dot"></span> EM TRANSMISSÃO</div>
+            <h1 style="margin:0 0 10px 0;">Telecurso <span style="color:var(--primary)">Ao Vivo</span></h1>
             
-            <label><i class="fas fa-comment-dots"></i> Recado do Instrutor</label>
-            <p id="txt-recado" style="margin-bottom:0">Buscando avisos...</p>
+            <div class="info-box">
+                <label><i class="fas fa-clock"></i> Horário Previsto</label>
+                <p id="txt-horario">Sincronizando...</p>
+                
+                <label><i class="fas fa-comment-dots"></i> Recado do Instrutor</label>
+                <p id="txt-recado" style="margin-bottom:0">Buscando avisos...</p>
+            </div>
+
+            <button class="btn-join" onclick="irParaAula()"><i class="fas fa-play"></i> ACESSAR AGORA</button>
         </div>
 
-        <button class="btn-join" onclick="irParaAula()"><i class="fas fa-play"></i> ACESSAR AGORA</button>
+        <div class="main-card" id="tela-chamada" style="display: none;">
+            <h1 style="margin:0 0 10px 0;">Preencher <span style="color:var(--primary)">Chamada</span></h1>
+            <p style="margin: 20px 0; color: #e2e8f0;">Confirme sua presença na aula ao vivo para liberar o certificado.</p>
+            <button class="btn-join" onclick="confirmarPresenca()" id="btn-confirmar-presenca"><i class="fas fa-check"></i> CONFIRMAR PRESENÇA</button>
+            <p id="msg-confirmacao" style="margin-top: 20px; color: var(--primary); display: none;">Presença confirmada com sucesso!</p>
+        </div>
     </div>
 
     <script>
@@ -42,6 +55,7 @@
         const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let linkAula = "";
+        let chamadaAtiva = false;
 
         async function carregarDados() {
             const { data } = await _supabase.from('configuracoes').select('*');
@@ -49,12 +63,91 @@
                 linkAula = data.find(c => c.chave === 'link_aula_ao_vivo')?.valor;
                 document.getElementById('txt-horario').innerText = data.find(c => c.chave === 'horario_aula')?.valor || "A definir";
                 document.getElementById('txt-recado').innerText = data.find(c => c.chave === 'recado_aula')?.valor || "Sem avisos.";
+                chamadaAtiva = data.find(c => c.chave === 'chamada_ativa')?.valor === "true";
+                atualizarInterface();
                 if(linkAula) document.getElementById('badge-live').style.display = 'inline-flex';
             }
         }
+
+        function atualizarInterface() {
+            // Sempre mostra a tela principal
+            document.getElementById('tela-principal').style.display = 'block';
+            
+            // Mostra a tela de chamada apenas se estiver ativa
+            if (chamadaAtiva) {
+                document.getElementById('tela-chamada').style.display = 'block';
+            } else {
+                document.getElementById('tela-chamada').style.display = 'none';
+            }
+        }
+
         function irParaAula() { if(linkAula) window.open(linkAula, '_blank'); else alert("Aguardando o professor."); }
+
+        async function confirmarPresenca() {
+            const { data: { user } } = await _supabase.auth.getUser();
+
+            if (!user) {
+                alert("Você precisa estar logado para confirmar presença.");
+                return;
+            }
+
+            // Verificar se já confirmou presença hoje
+            const hoje = new Date().toISOString().split('T')[0];
+            const { data: presencas } = await _supabase.from('chamadas_aula').select('*').eq('user_id', user.id).eq('data', hoje);
+
+            if (presencas && presencas.length > 0) {
+                alert("Você já confirmou presença hoje.");
+                return;
+            }
+
+            // Registrar presença
+            const { error } = await _supabase.from('chamadas_aula').insert([{
+                user_id: user.id,
+                data: hoje,
+                timestamp: new Date().toISOString(),
+                confirmado: true
+            }]);
+
+            if (error) {
+                console.error('Erro ao registrar presença:', error);
+                alert("Erro ao confirmar presença. Tente novamente.");
+            } else {
+                document.getElementById('btn-confirmar-presenca').style.display = 'none';
+                document.getElementById('msg-confirmacao').style.display = 'block';
+                alert("Presença confirmada com sucesso!");
+            }
+        }
         carregarDados();
-        setInterval(carregarDados, 30000); // Atualiza a cada 30 segundos
+        
+        // Realtime para atualizações da chamada
+        iniciarRealtimeChamada();
+        
+        // Fallback: verifica a cada 5 minutos se realtime falhar
+        setInterval(carregarDados, 300000);
+
+        async function iniciarRealtimeChamada() {
+            try {
+                _supabase
+                    .channel('realtime-chamada')
+                    .on('postgres_changes', {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'configuracoes'
+                    }, (payload) => {
+                        console.log('Configuração atualizada:', payload);
+                        if (payload.new.chave === 'chamada_ativa') {
+                            const novaChamadaAtiva = payload.new.valor === "true";
+                            if (chamadaAtiva !== novaChamadaAtiva) {
+                                chamadaAtiva = novaChamadaAtiva;
+                                atualizarInterface();
+                            }
+                        }
+                    })
+                    .subscribe();
+            } catch (error) {
+                console.warn('Realtime não disponível:', error);
+            }
+        }
     </script>
 </body>
 </html>
