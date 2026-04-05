@@ -68,21 +68,22 @@
 
     <div class="container">
         <h1>Instalação da CPU e Gestão Térmica</h1>
-        <p>A instalação do processador é o momento de maior risco físico. Um pino dobrado pode inutilizar uma placa-mãe de alto custo instantaneamente.</p>
+        <p>A instalação do processador é o momento de maior risco físico. Um pino dobrado pode inutilizar uma placa-mãe de alto custo instantaneamente. Este módulo ensina o procedimento correto passo-a-passo.</p>
 
         <div class="pro-tip">
-            <strong>🚀 Insight Técnico:</strong> O IHS (Integrated Heat Spreader) da CPU não é perfeitamente plano. A pasta térmica existe exclusivamente para preencher as cavidades microscópicas do metal e expulsar o ar, que é um péssimo condutor de calor.
+            <strong>🚀 Fato Importante:</strong> O IHS (Integrated Heat Spreader) da CPU não é perfeitamente plano. A pasta térmica preenche as cavidades microscópicas para melhorar contato com o cooler. Sem pasta = superaquecimento em minutos. Com pasta errada = CPU queimada.
         </div>
 
         <div class="secao-tecnica">
             <div class="peça-card">
                 <img src="../img/soket-dif.jpg" alt="Soquetes LGA vs PGA">
                 <div class="peça-info">
-                    <h3>1. Arquitetura de Soquete (LGA vs PGA)</h3>
-                    <p>Identifique sua plataforma antes de começar. A manipulação muda drasticamente entre elas.</p>
+                    <h3>1. Conhecer Seu Socket - LGA vs PGA</h3>
+                    <p><b>Antes de abrir o cooler, VERIFIQUE qual tipo sua placa tem!</b> A instalação é completamente diferente.</p>
                     <div class="detalhe-tecnico">
-                        <b>LGA (Intel/AMD AM5):</b> Os pinos estão na placa-mãe. São extremamente frágeis. Nunca toque neles ou passe panos.
-                        <br><b>PGA (AMD AM4):</b> Os pinos estão na CPU. O maior risco aqui é entortá-los ao remover o cooler no futuro (sempre "gire" o cooler antes de puxar).
+                        <b>LGA (Intel & AMD AM5):</b> Os pinos estão NA PLACA-MÃE. São microscópicos e extremamente frágeis. Uma simples queda de ar pode entortá-los. Nunca, NUNCA toque neles com os dedos.<br><br>
+                        <b>PGA (AMD AM4):</b> Os pinos estão NA CPU. Menos frágeis, mas entorta ao remover cooler sem cuidado. Sempre "gire" o cooler antes de puxar.<br><br>
+                        ✓ <b>Ação:</b> Consulte o manual da sua placa-mãe em casa no timoteo um look. Se não souber, procure no site do fabricante.
                     </div>
                 </div>
             </div>
@@ -92,10 +93,18 @@
             <div class="peça-card">
                 <img src="../img/encaixecpiu.jpg" alt="Alinhamento Triângulo">
                 <div class="peça-info">
-                    <h3>2. A Orientação ZIF (Zero Insertion Force)</h3>
-                    <p>O processador possui "chaves" físicas (cortes laterais) e marcas visuais para garantir que só entre de um jeito.</p>
+                    <h3>2. O Encaixe ZIF - Alinhamento Correto</h3>
+                    <p><b>ZIF significa "Zero Insertion Force"</b> = Não use força! Se está travando, está errado.</p>
                     <div class="detalhe-tecnico">
-                        <b>Checklist de Segurança:</b> Alinhe o triângulo dourado da CPU com o triângulo no soquete. Solte a CPU suavemente; ela deve "assentar". Se houver qualquer balanço ou resistência, <b>pare imediatamente</b>.
+                        <b>Como Fazer (Passo a Passo):</b>
+                        <br>① Abra totalmente a TRAVA da socket (alavanca lateral sobe até ficar horizontal)
+                        <br>② Segure a CPU pelos lados • NUNCA pelos contatos
+                        <br>③ Procure os TRIÂNGULOS DOURADOS (um na CPU, um na socket)
+                        <br>④ Alinhe-os EXATAMENTE
+                        <br>⑤ Coloque a CPU no socket SEM FORÇA
+                        <br>⑥ Baixe a trava até travar (deve fazer "clique" automático)
+                        <br><br>
+                        ⚠️ <b>SINAL DE ERRO:</b> Se precisar forçar, ESPERE! Está posicionada errada. Levante a trava e tente novamente.
                     </div>
                 </div>
             </div>
@@ -103,11 +112,17 @@
             <div class="peça-card">
                 <img src="../img/pasta termica gota.jpg" alt="Padrões de pasta térmica">
                 <div class="peça-info">
-                    <h3>3. Dinâmica de Fluidos Térmicos</h3>
-                    <p>Quantidade excessiva isola o calor; quantidade insuficiente causa hot-spots.</p>
+                    <h3>3. Aplicando Pasta Térmica - A Quantidade Correta</h3>
+                    <p><b>Quantidade errada = temperaturas altas!</b> Pouca disserve hot-spots; muita isola o calor como um escudo.</p>
                     <div class="detalhe-tecnico">
-                        <b>Método Profissional:</b> Para CPUs modernas com múltiplos "chiplets" (como Ryzen), o método de <b>X</b> ou <b>5 pontos</b> garante cobertura total dos núcleos que não estão exatamente no centro. 
-                        <br><i>Nota: Evite espalhar com o dedo, pois a oleosidade da pele reduz a condutividade.</i>
+                        <b>Método Correto:</b>
+                        <br>• <b>Pouca quantidade:</b> Um grão de milho no CENTRO da CPU
+                        <br>• <b>Aplicar:</b> Deixe o cooler pressionar (nunca espalhe com dedo!)
+                        <br>• <b>CPUs com chiplets:</b> Se tem múltiplos núcleos separados, pinte um padrão de "X" ou "5 pontos"
+                        <br><br>
+                        ✓ <b>Quantidade ideal:</b> Quando montar cooler, a pasta deve "vazar" um pouco nas laterais. Se não vazar = pouca; se vazar demais = excessiva.
+                        <br><br>
+                        ⚠️ <b>NUNCA espalha com dedo!</b> A oleosidade torna a pasta pior e pode deixar pegadas que reduzem condutividade.
                     </div>
                 </div>
             </div>
@@ -117,10 +132,18 @@
             <div class="peça-card">
                 <img src="../img/trava cooler.jpg" alt="Ordem de parafusos">
                 <div class="peça-info">
-                    <h3>4. Pressão de Montagem e Torque</h3>
-                    <p>A montagem do cooler exige pressão equalizada para evitar que a pasta seja expulsa de um lado só.</p>
+                    <h3>4. Montando o Cooler - Pressão Uniforme</h3>
+                    <p><b>Aperto errado = pasta sai de um lado só, deixando hot-spots.</b> A placa-mãe pode ainda rachar microscopicamente.</p>
                     <div class="detalhe-tecnico">
-                        <b>Técnica em Cruz (X):</b> Aperte o parafuso superior esquerdo levemente, depois o inferior direito. Repita para os outros. Somente após todos estarem encaixados, dê o aperto final. Isso evita rachaduras microscópicas no PCB.
+                        <b>Ordem de Aperto (CRUCIAL):</b>
+                        <br><b>1.</b> Posicione cooler reto acima da CPU
+                        <br><b>2.</b> Aperte LEVEMENTE o parafuso 1 (esquerda-superior)
+                        <br><b>3.</b> Aperte LEVEMENTE o parafuso 3 (direita-inferior) - diagonal oposta!
+                        <br><b>4.</b> Agora aperte LEVEMENTE o parafuso 2 (direita-superior)
+                        <br><b>5.</b> Aperte LEVEMENTE o parafuso 4 (esquerda-inferior) - diagonal
+                        <br><b>6.</b> SOMENTE APÓS todos estarem encaixados, aperte cada um FIRME (mas não com toda força!)
+                        <br><br>
+                        ✓ Essa ordem em "X" garante pressão igual em todos os pontos. Se apertar um lado antes = risco de dano!
                     </div>
                 </div>
             </div>
@@ -128,10 +151,21 @@
             <div class="peça-card">
                 <img src="../img/conect cooler.png" alt="Header CPU_FAN">
                 <div class="peça-info">
-                    <h3>5. Monitoramento PWM (CPU_FAN)</h3>
-                    <p>O sistema precisa de feedback de rotação para gerenciar a curva de temperatura.</p>
+                    <h3>5. Conexão do Cooler - Monitoramento Crítico</h3>
+                    <p><b>Conectar no header errado = CPU superaquece silenciosamente!</b> A placa-mãe não sabe aumentar ventilação.</p>
                     <div class="detalhe-tecnico">
-                        <b>Atenção:</b> Use sempre o header <b>CPU_FAN</b> (geralmente cinza/branco). Se usar o <b>SYS_FAN</b>, a placa-mãe pode não aumentar a velocidade da ventoinha quando a CPU esquentar, causando desligamentos de emergência.
+                        <b>Passo a Passo:</b>
+                        <br>① Localize na placa-mãe: <b>CPU_FAN</b> (procure este rótulo no manual ou visualmente perto do socket)
+                        <br>② Plug do cooler tem 4-pinos tipicamente (às vezes 3)
+                        <br>③ Encare com CUIDADO (tem um pequeno clipe de segurança)
+                        <br>④ NUNCA use SYS_FAN, CHA_FAN, ou outros headers!
+                        <br><br>
+                        ⚠️ <b>MUITO IMPORTANTE:</b> Se ligar no header errado, o PC pode:
+                        <br>  • Não reconhecer velocidade do ventilador
+                        <br>  • Sistema de proteção não funciona
+                        <br>  • CPU desliga de surpresa quando quente (thermal shutdown)
+                        <br><br>
+                        ✓ <b>Teste:</b> Ligue o PC e entre em BIOS. Procure por "CPU Fan Speed" - deve mostrar RPM. Se 0 RPM = conexão solta!
                     </div>
                 </div>
             </div>
