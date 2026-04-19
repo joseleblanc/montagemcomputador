@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Ferramentas | Telecurso</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --azul-escuro: #003366;
+            --azul-claro: #0056b3;
+            --amarelo: #ffcc00;
+            --cinza-fundo: #f4f7f9;
+            --branco: #ffffff;
+            --roxo: #6c5ce7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--azul-escuro);
+            background-image: linear-gradient(180deg, #003366 0%, #0056b3 100%);
+            background-attachment: fixed;
+            margin: 0;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--branco);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--amarelo);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .voltar {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .voltar:hover { color: var(--amarelo); }
+
+        .grid-ferramentas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .card-ferramenta {
+            background: var(--branco);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .card-ferramenta:hover {
+            transform: translateY(-10px);
+            border-color: var(--amarelo);
+        }
+
+        .icone-box {
+            width: 80px;
+            height: 80px;
+            background: #f0f4f8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 35px;
+            color: var(--azul-escuro);
+            transition: 0.3s;
+        }
+
+        .card-ferramenta:hover .icone-box {
+            background: var(--amarelo);
+            color: var(--azul-escuro);
+        }
+
+        .card-ferramenta h3 {
+            margin: 10px 0;
+            color: var(--azul-escuro);
+        }
+
+        .card-ferramenta p {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .btn-abrir {
+            margin-top: auto;
+            background: var(--azul-claro);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        /* Estilo para ferramentas em breve */
+        .breve {
+            opacity: 0.7;
+            cursor: default;
+        }
+        .breve:hover { transform: none; border-color: transparent; }
+        .badge-breve {
+            background: #ddd;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 style="margin:0; color: var(--azul-escuro);">
+        <i class="fas fa-tools"></i> FERRAMENTAS DO TÉCNICO
+    </h1>
+</header>
+
+<div class="container">
+    <a href="modulos.html" class="voltar"><i class="fas fa-arrow-left"></i> Voltar para as Aulas</a>
+
+    <div class="grid-ferramentas">
+        
+        <div class="card-ferramenta" onclick="location.href='ferramentas/calculadora.html'">
+            <div class="icone-box">
+                <i class="fas fa-microchip"></i>
+            </div>
+            <h3>Calculadora de Sockets</h3>
+            <p>Descubra qual placa-mãe é compatível com seu processador Intel ou AMD.</p>
+            <span class="btn-abrir">Acessar Agora</span>
+        </div>
+
+
+<div class="card-ferramenta" onclick="location.href='ferramentas/calculadora-fonte.html'">
+    <div class="icone-box">
+        <i class="fas fa-bolt"></i>
+    </div>
+    <h3>Cálculo de Fonte (W)</h3>
+    <p>Calcule quantos Watts sua fonte precisa ter baseada nas peças escolhidas.</p>
+    <span class="btn-abrir">Acessar Agora</span>
+</div>
+    </div>
+</div>
+
+</body>
+</html>

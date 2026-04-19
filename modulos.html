@@ -229,7 +229,16 @@
         .input-suporte { width: 100%; border: 2px solid #f1f5f9; border-radius: 8px; padding: 10px; margin-bottom: 15px; box-sizing: border-box; font-size: 14px; }
         .btn-enviar { width: 100%; background: var(--verde); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-enviar:hover { opacity: 0.9; }
+    .card-modulo.ferramenta-card {
+    border: 2px dashed #6c5ce7;
+    background: #f8f7ff;
+}
+.card-modulo.ferramenta-card:hover {
+    border-style: solid;
+    box-shadow: 0 12px 30px rgba(108, 92, 231, 0.2);
+}
     </style>
+
 </head>
 <body>
 
@@ -271,6 +280,7 @@
             <button id="btn-certificado" class="btn-acao btn-certificado" disabled>
                 <i class="fas fa-certificate"></i> Certificado bloqueado
             </button>
+            
         </div>
     </div>
 
@@ -327,6 +337,7 @@
 
     const modulos = [
         { id: 999, t: "SALA DE AULA AO VIVO", d: "Entre na chamada de vídeo para aulas em tempo real e compartilhamento de tela." },
+        { id: 998, t: "FERRAMENTAS TÉCNICAS", d: "Acesse a Calculadora de Sockets e outras utilidades para sua bancada." },
         { id: 0, t: "Introdução ao Curso", d: "Boas-vindas e como aproveitar o Telecurso." },
         { id: 1, t: "Conhecendo as peças", d: "Identificação de componentes e funções." },
         { id: 2, t: "Separando ferramentas", d: "O que não pode faltar na bancada." },
@@ -405,6 +416,7 @@
         grid.innerHTML = modulos.map((m) => {
             const isProva = m.id === 100;
             const isAoVivo = m.id === 999;
+            const isFerramenta = m.id === 998;
             const isConcluido = concluidos.includes(m.id);
             const isReprovado = isProva && nota !== null && nota < 70;
             
@@ -418,6 +430,8 @@
             } else if (isProva) {
                 link = 'prova-final.html';
                 isBloqueado = !concluidos.includes(14);
+            } else if (isFerramenta) {
+                link = 'ferramentas.html';    
             } else {
                 link = `aulas/aula${m.id}.html`;
                 isBloqueado = !concluidos.includes(m.id - 1);
