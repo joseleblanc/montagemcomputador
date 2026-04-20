@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Consumo Total | Telecurso</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --azul-escuro: #003366;
+            --azul-claro: #0056b3;
+            --amarelo: #ffcc00;
+            --branco: #ffffff;
+            --cinza: #f4f7f9;
+            --roxo: #6c5ce7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--azul-escuro);
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+        }
+
+        .container {
+            background: var(--branco);
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        .header { text-align: center; border-bottom: 2px solid var(--cinza); padding-bottom: 15px; margin-bottom: 20px; }
+        .header h2 { color: var(--azul-escuro); margin: 5px 0; }
+
+        .grid-campos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .campo { margin-bottom: 15px; }
+        .campo.full { grid-column: span 2; }
+        
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #444; font-size: 0.9rem; }
+        select { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; background: white; }
+
+        .resultado-box {
+            margin-top: 25px;
+            padding: 20px;
+            background: #eef2f7;
+            border-radius: 10px;
+            border: 2px solid var(--azul-claro);
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .watts-total { font-size: 2.5rem; font-weight: bold; color: var(--azul-escuro); }
+        .sugestao-fonte { font-size: 1.2rem; font-weight: bold; color: #27ae60; margin-top: 5px; }
+
+        .btn-calc {
+            width: 100%; padding: 15px; background: var(--roxo); color: white;
+            border: none; border-radius: 10px; font-weight: bold; cursor: pointer; 
+            font-size: 1.1rem; transition: 0.3s;
+        }
+        .btn-calc:hover { background: #5849c4; transform: scale(1.02); }
+
+        .btn-voltar { display: block; text-align: center; margin-top: 20px; color: #777; text-decoration: none; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <i class="fas fa-plug" style="font-size: 40px; color: var(--amarelo);"></i>
+        <h2>Calculadora de Fonte Completa</h2>
+        <p style="color:#777; font-size: 0.8rem;">Simule o consumo total do hardware (W)</p>
+    </div>
+
+    <div class="grid-campos">
+        <div class="campo full">
+            <label><i class="fas fa-microchip"></i> Processador (CPU)</label>
+            <select id="cpu">
+                <option value="65">Entrada (i3/i5/R3/R5 - Non-K) - 65W</option>
+                <option value="125">Performance (i7/i9/R7/R9 - K/X) - 125W</option>
+                <option value="250">Entusiasta (Overclock / i9 Extreme) - 250W</option>
+            </select>
+        </div>
+
+        <div class="campo full">
+            <label><i class="fas fa-video"></i> Placa de Vídeo (GPU)</label>
+            <select id="gpu">
+                <option value="0">Vídeo Integrado (0W)</option>
+                <option value="75">Básica (GTX 1650, RX 6400) - 75W</option>
+                <option value="180">Média (RTX 3060/4060, RX 6600/7600) - 180W</option>
+                <option value="280">Alta (RTX 3080/4070Ti, RX 7800XT) - 280W</option>
+                <option value="450">Extrema (RTX 4090) - 450W</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label><i class="fas fa-memory"></i> Memória RAM</label>
+            <select id="ram">
+                <option value="5">1 Pente (5W)</option>
+                <option value="10">2 Pentes (10W)</option>
+                <option value="20">4 Pentes (20W)</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label><i class="fas fa-hdd"></i> Armazenamento</label>
+            <select id="storage">
+                <option value="5">Apenas 1 SSD NVMe (5W)</option>
+                <option value="15">SSD + 1 HD Mecânico (15W)</option>
+                <option value="30">Vários Discos (SSD/HD) (30W)</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label><i class="fas fa-fan"></i> Ventoinhas (Fans)</label>
+            <select id="fans">
+                <option value="10">Até 3 Fans (10W)</option>
+                <option value="25">6 Fans ou mais (25W)</option>
+                <option value="40">Kit Gamer RGB Full (40W)</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label><i class="fas fa-tint"></i> Water Cooler</label>
+            <select id="cooling">
+                <option value="0">Não uso (Air Cooler)</option>
+                <option value="15">Water Cooler 120/240mm (15W)</option>
+                <option value="30">Water Cooler 360mm+ (30W)</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="btn-calc" onclick="calcularTotal()">CALCULAR CONSUMO FINAL</button>
+
+    <div id="res-box" class="resultado-box">
+        <div style="font-weight: bold; color: var(--azul-claro);">CONSUMO REAL ESTIMADO</div>
+        <div class="watts-total" id="total-final">0W</div>
+        <div class="sugestao-fonte" id="fonte-sugestao">Fonte Recomendada: 0W</div>
+        <p style="font-size: 0.75rem; color: #888; margin-top: 10px;">
+            *Cálculo inclui 30% de margem de segurança e picos de transientes da GPU.
+        </p>
+    </div>
+
+</div>
+
+<script>
+    function calcularTotal() {
+        const cpu = parseInt(document.getElementById('cpu').value);
+        const gpu = parseInt(document.getElementById('gpu').value);
+        const ram = parseInt(document.getElementById('ram').value);
+        const storage = parseInt(document.getElementById('storage').value);
+        const fans = parseInt(document.getElementById('fans').value);
+        const cooling = parseInt(document.getElementById('cooling').value);
+
+        // Soma base
+        const totalBase = cpu + gpu + ram + storage + fans + cooling;
+        
+        // Placas modernas têm picos de milissegundos (transientes). 
+        // A margem de 30% protege contra desligamentos súbitos.
+        const totalComMargem = Math.ceil((totalBase * 1.3) / 50) * 50;
+
+        document.getElementById('total-final').innerText = totalBase + "W";
+        document.getElementById('fonte-sugestao').innerText = "Sugestão de Fonte: " + totalComMargem + "W";
+        
+        document.getElementById('res-box').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>

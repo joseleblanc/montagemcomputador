@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Hardware | Telecurso</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --azul-escuro: #003366;
+            --azul-claro: #0056b3;
+            --amarelo: #ffcc00;
+            --verde: #25d366;
+            --branco: #ffffff;
+            --vermelho: #ff4444;
+            --cinza: #f4f7f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--azul-escuro);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .calc-container {
+            background: var(--branco);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .header-calc { text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--cinza); padding-bottom: 15px; }
+        .header-calc h2 { color: var(--azul-escuro); margin: 10px 0; font-size: 1.8rem; }
+        
+        .instrucao { text-align: center; color: #666; margin-bottom: 20px; }
+
+        select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            background-color: white;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        select:focus { border-color: var(--azul-claro); }
+
+        .ficha-tecnica {
+            display: none;
+            margin-top: 25px;
+            background: var(--cinza);
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 6px solid var(--amarelo);
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .grid-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 8px;
+        }
+
+        .label { font-size: 0.85rem; color: #777; font-weight: bold; text-transform: uppercase; }
+        .valor { font-size: 1.1rem; color: var(--azul-escuro); font-weight: 600; margin-top: 4px; }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: white;
+            font-weight: bold;
+            margin-top: 5px;
+            width: fit-content;
+        }
+        .bg-success { background: var(--verde); }
+        .bg-danger { background: var(--vermelho); }
+
+        .btn-voltar {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            text-decoration: none;
+            color: var(--azul-claro);
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-voltar:hover { color: var(--azul-escuro); }
+
+        optgroup { font-weight: bold; color: var(--azul-claro); }
+    </style>
+</head>
+<body>
+
+<div class="calc-container">
+    <div class="header-calc">
+        <i class="fas fa-microchip" style="font-size: 50px; color: var(--amarelo);"></i>
+        <h2>Consultor de Compatibilidade</h2>
+    </div>
+
+    <p class="instrucao">Selecione um processador para ver os detalhes técnicos de montagem.</p>
+
+    <select id="cpu-select" onchange="mostrarDados()">
+        <option value="">-- Escolha o Processador --</option>
+        
+        <optgroup label="Intel - LGA 1700 (12ª a 14ª Gen)">
+            <option value="i9-14900k">Core i9-14900K</option>
+            <option value="i7-13700k">Core i7-13700K</option>
+            <option value="i5-12400f">Core i5-12400F</option>
+            <option value="i3-12100">Core i3-12100</option>
+        </optgroup>
+
+        <optgroup label="Intel - LGA 1200 (10ª e 11ª Gen)">
+            <option value="i9-11900k">Core i9-11900K</option>
+            <option value="i7-10700k">Core i7-10700K</option>
+            <option value="i5-10400">Core i5-10400</option>
+        </optgroup>
+
+        <optgroup label="Intel - LGA 1151 (8ª e 9ª Gen)">
+            <option value="i9-9900k">Core i9-9900K</option>
+            <option value="i7-8700k">Core i7-8700K</option>
+            <option value="i5-9400f">Core i5-9400F</option>
+        </optgroup>
+
+        <optgroup label="AMD - AM5 (Série 7000/8000)">
+            <option value="r9-7950x">Ryzen 9 7950X</option>
+            <option value="r7-7800x3d">Ryzen 7 7800X3D</option>
+            <option value="r5-7600x">Ryzen 5 7600X</option>
+        </optgroup>
+
+        <optgroup label="AMD - AM4 (Série 1000 a 5000)">
+            <option value="r9-5950x">Ryzen 9 5950X</option>
+            <option value="r7-5700x">Ryzen 7 5700X</option>
+            <option value="r5-5600g">Ryzen 5 5600G</option>
+            <option value="r5-3600">Ryzen 5 3600</option>
+            <option value="r3-3200g">Ryzen 3 3200G</option>
+        </optgroup>
+    </select>
+
+    <div id="ficha" class="ficha-tecnica">
+        <div class="grid-info">
+            <div class="info-item">
+                <span class="label">Soquete</span>
+                <span class="valor" id="v-soquete">-</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Tipo de Memória</span>
+                <span class="valor" id="v-ram">-</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Máximo de RAM</span>
+                <span class="valor" id="v-max">-</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Suporte Overclock</span>
+                <div id="v-oc"></div>
+            </div>
+        </div>
+        <p style="margin-top:20px; font-size: 0.8rem; color: #888;">
+            <i class="fas fa-exclamation-triangle"></i> Lembre-se: O Overclock também exige uma placa-mãe de chipset compatível (Linha Z/X/B específica).
+        </p>
+    </div>
+
+
+</div>
+
+<script>
+    const database = {
+        // INTEL 1700
+        "i9-14900k": { s: "LGA 1700", r: "DDR4 / DDR5", m: "192 GB", o: true },
+        "i7-13700k": { s: "LGA 1700", r: "DDR4 / DDR5", m: "192 GB", o: true },
+        "i5-12400f": { s: "LGA 1700", r: "DDR4 / DDR5", m: "128 GB", o: false },
+        "i3-12100":  { s: "LGA 1700", r: "DDR4 / DDR5", m: "128 GB", o: false },
+        
+        // INTEL 1200
+        "i9-11900k": { s: "LGA 1200", r: "DDR4", m: "128 GB", o: true },
+        "i7-10700k": { s: "LGA 1200", r: "DDR4", m: "128 GB", o: true },
+        "i5-10400":  { s: "LGA 1200", r: "DDR4", m: "128 GB", o: false },
+
+        // INTEL 1151
+        "i9-9900k":  { s: "LGA 1151 v2", r: "DDR4", m: "128 GB", o: true },
+        "i7-8700k":  { s: "LGA 1151 v2", r: "DDR4", m: "64 GB", o: true },
+        "i5-9400f":  { s: "LGA 1151 v2", r: "DDR4", m: "64 GB", o: false },
+
+        // AMD AM5
+        "r9-7950x":   { s: "AM5 (LGA)", r: "DDR5", m: "128 GB", o: true },
+        "r7-7800x3d": { s: "AM5 (LGA)", r: "DDR5", m: "128 GB", o: true },
+        "r5-7600x":   { s: "AM5 (LGA)", r: "DDR5", m: "128 GB", o: true },
+
+        // AMD AM4
+        "r9-5950x": { s: "AM4 (PGA)", r: "DDR4", m: "128 GB", o: true },
+        "r7-5700x": { s: "AM4 (PGA)", r: "DDR4", m: "128 GB", o: true },
+        "r5-5600g": { s: "AM4 (PGA)", r: "DDR4", m: "128 GB", o: true },
+        "r5-3600":  { s: "AM4 (PGA)", r: "DDR4", m: "128 GB", o: true },
+        "r3-3200g": { s: "AM4 (PGA)", r: "DDR4", m: "64 GB", o: true }
+    };
+
+    function mostrarDados() {
+        const id = document.getElementById('cpu-select').value;
+        const ficha = document.getElementById('ficha');
+        
+        if (id && database[id]) {
+            const info = database[id];
+            document.getElementById('v-soquete').innerText = info.s;
+            document.getElementById('v-ram').innerText = info.r;
+            document.getElementById('v-max').innerText = info.m;
+            
+            const ocBox = document.getElementById('v-oc');
+            ocBox.innerHTML = info.o 
+                ? '<span class="badge bg-success">SIM (Desbloqueado)</span>' 
+                : '<span class="badge bg-danger">NÃO (Bloqueado)</span>';
+
+            ficha.style.display = 'block';
+        } else {
+            ficha.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
