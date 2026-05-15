@@ -745,26 +745,29 @@ async function verificarLiberacaoCertificado() {
 
     console.log('Verificação certificado:', { prova, presenca, provaError, presencaError });
 
-    if (!provaError && prova && prova.concluido && prova.nota >= 70 && !presencaError && presenca && presenca.length > 0) {
-        btn.disabled = false;
-        btn.classList.add('liberado');
-        btn.style.cursor = 'pointer';
-        btn.style.pointerEvents = 'auto';
-        btn.innerHTML = '<i class="fas fa-certificate"></i> Emitir Certificado';
+const statusEl = document.getElementById('status-prova-topo');
+        const notaHtml = (prova && prova.nota != null)
+            ? `Nota da Prova: <span style="color:${prova.nota >= 70 ? 'var(--verde)' : 'var(--vermelho)'}">${prova.nota}/100</span>`
+            : '';
 
-        btn.onclick = () => {
-            window.location.href = 'certificado.html';
-        };
-
-        document.getElementById('status-prova-topo').innerHTML += ' <strong style="color:var(--verde);">(Certificado liberado)</strong>';
-    } else {
-        let motivo = '';
-        if (provaError || !prova || !prova.concluido || prova.nota < 70) {
-            motivo = 'Prova final não aprovada';
-        } else if (presencaError || !presenca || presenca.length === 0) {
-            motivo = 'Presença na aula ao vivo não confirmada';
-        }
-        document.getElementById('status-prova-topo').innerHTML += ` <strong style="color:var(--vermelho);">(${motivo})</strong>`;
+        if (!provaError && prova && prova.concluido && prova.nota >= 70 && !presencaError && presenca && presenca.length > 0) {
+            btn.disabled = false;
+            btn.classList.add('liberado');
+            btn.style.cursor = 'pointer';
+            btn.style.pointerEvents = 'auto';
+            btn.innerHTML = '<i class="fas fa-certificate"></i> Emitir Certificado';
+            btn.onclick = () => {
+                window.location.href = 'certificado.html';
+            };
+            statusEl.innerHTML = `${notaHtml} <strong style="color:var(--verde);">(Certificado liberado)</strong>`;
+        } else {
+            let motivo = '';
+            if (provaError || !prova || !prova.concluido || prova.nota < 70) {
+                motivo = 'Prova final não aprovada';
+            } else if (presencaError || !presenca || presenca.length === 0) {
+                motivo = 'Presença na aula ao vivo não confirmada';
+            }
+            statusEl.innerHTML = `${notaHtml} <strong style="color:var(--vermelho);">(${motivo})</strong>`;
     }
 }
 
