@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 14 - Preparação Final | Telecurso</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --azul-marinho: #002347;
+            --azul-royal: #0056b3;
+            --ouro: #ffcc00;
+            --sucesso: #28a745;
+            --branco: #ffffff;
+            --alerta: #e67e22;
+        }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            line-height: 1.8; 
+            padding: 40px 20px; 
+            max-width: 850px; 
+            margin: auto; 
+            background: var(--azul-marinho); 
+            color: #f4f4f4;
+        }
+        .congratulations-card { 
+            background: var(--branco); 
+            color: #333; 
+            padding: 50px; 
+            border-radius: 20px; 
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3); 
+            text-align: center;
+            border-bottom: 10px solid var(--ouro);
+        }
+        .star-icon { font-size: 60px; color: var(--ouro); margin-bottom: 20px; }
+        h1 { color: var(--azul-marinho); font-size: 2.5rem; margin-top: 0; }
+        h2 { color: var(--azul-royal); margin-top: 35px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        p { margin-bottom: 20px; text-align: left; }
+        
+        .aviso-prova {
+            background: #fff3cd;
+            border: 2px solid var(--ouro);
+            color: #856404;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .checklist-final {
+            background: #eef9f1;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: left;
+            margin: 30px 0;
+        }
+        .checklist-final ul { list-style: none; padding: 0; }
+        .checklist-final li { margin-bottom: 12px; display: flex; align-items: center; }
+        .checklist-final li::before { content: '✓'; color: var(--sucesso); font-weight: bold; margin-right: 10px; }
+
+        .btn-prova { 
+            background: var(--azul-royal); 
+            color: white; 
+            border: none; 
+            padding: 22px 40px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-size: 1.3rem; 
+            font-weight: bold;
+            width: 100%; 
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 86, 179, 0.3);
+            text-transform: uppercase;
+        }
+        .btn-prova:hover { 
+            background: var(--azul-marinho); 
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="congratulations-card">
+        <div class="star-icon">📚</div>
+        <h1>Quase lá, Técnico!</h1>
+        
+        <p>Você concluiu todos os 14 módulos teóricos e práticos do <strong>Telecurso: Montagem de Computadores</strong>. Mas, para garantir o selo de qualidade e a emissão do seu certificado, você deve enfrentar o <strong>Exame de Certificação Final</strong>.</p>
+
+        <div class="aviso-prova">
+            <strong>⚠️ Atenção sobre a Prova Final:</strong>
+            <ul>
+                <li>A prova abrange conteúdos de todos os módulos.</li>
+                <li>É necessário atingir uma nota mínima (ex: 70%) para aprovação.</li>
+                <li>Leia as questões com atenção; elas simulam problemas reais do dia a dia.</li>
+            </ul>
+        </div>
+
+        <h2>Recapitulando sua Jornada</h2>
+        <div class="checklist-final">
+            <h3>🔍 Você revisou:</h3>
+            <ul>
+                <li>Arquitetura de Processadores e Chipsets.</li>
+                <li>Instalação física de Memória RAM e Armazenamento.</li>
+                <li>Gerenciamento térmico e fluxo de ar.</li>
+                <li>Configuração de BIOS/UEFI e Particionamento.</li>
+            </ul>
+        </div>
+
+        <p>Sinta-se livre para voltar aos módulos anteriores caso queira revisar algum detalhe. Se estiver pronto, clique no botão abaixo para iniciar o exame.</p>
+
+        <button class="btn-prova" onclick="iniciarProvaFinal()">
+            INICIAR PROVA FINAL DE CERTIFICAÇÃO
+        </button>
+    </div>
+
+    <script>
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function inicializar() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) {
+            window.location.href = "../index.html";
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('aprovado') === 'true') {
+            document.getElementById('status-aprovacao').style.display = 'none';
+            document.getElementById('box-concluir').style.display = 'block';
+            document.getElementById('btn-finalizar').style.display = 'inline-block';
+        }
+    }
+
+    function irParaQuiz() {
+        // ⚠️ ATENÇÃO: Altere o final de "?modulo=1" para o número correspondente da aula
+        window.location.href = `../quiz.html?modulo=14`; 
+    }
+
+    async function concluirModulo() {
+        try {
+            // Captura o usuário logado e puxa os dados do perfil dele
+            const { data: { user }, error: userError } = await _supabase.auth.getUser();
+            
+            if (userError || !user) {
+                alert("Sessão expirada ou usuário inválido. Faça login novamente.");
+                window.location.href = "../index.html";
+                return;
+            }
+
+            // Envia todos os dados obrigatórios para salvar na tabela 'progresso_alunos'
+            const { error } = await _supabase
+                .from('progresso_alunos')
+                .upsert({ 
+                    user_id: user.id, 
+                    modulo_id: 14,           // ⚠️ ATENÇÃO: Altere este número de acordo com o módulo da aula
+                    concluido: true, 
+                    email: user.email,      // 🌟 CORREÇÃO: Preenche o email obrigatório exigido pelo banco
+                    data_conclusao: new Date().toISOString() // Preenche o horário atual no formato correto do Postgres
+                }, { 
+                    onConflict: 'user_id, modulo_id' 
+                });
+
+            if (!error) {
+                alert("Progresso salvo com sucesso!");
+                window.location.href = "../modulos.html";
+            } else {
+                console.error("Erro do Supabase:", error);
+                alert("Erro ao salvar no banco de dados: " + error.message);
+            }
+        } catch (err) {
+            console.error("Erro inesperado:", err);
+            alert("Ocorreu um erro inesperado ao salvar o progresso.");
+        }
+    }
+
+    inicializar();
+</script>
+</body>
+</html>

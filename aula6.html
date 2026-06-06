@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 6: Preparando a "Casa" do PC | Telecurso PC</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --azul-escuro: #003366;
+            --azul-claro: #0056b3;
+            --amarelo: #ffcc00;
+            --branco: #ffffff;
+            --texto: #333;
+            --verde: #28a745;
+            --vermelho: #dc3545;
+            --cinza-claro: #f4f7f6;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #e9ecef; margin: 0; color: var(--texto); line-height: 1.6; }
+        .navbar { background: var(--azul-escuro); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .btn-voltar { color: white; text-decoration: none; font-weight: bold; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 5px; }
+
+        .container { max-width: 950px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
+        
+        .alerta-box { background: #fff5f5; border-left: 6px solid var(--vermelho); padding: 25px; margin: 25px 0; border-radius: 8px; }
+        .alerta-box h3 { color: var(--vermelho); margin-top: 0; display: flex; align-items: center; gap: 10px; }
+
+        .guia-iniciante { background: #e7f3ff; border-radius: 8px; padding: 20px; margin-bottom: 30px; border: 1px solid #b6d4fe; }
+
+        .secao-tecnica { margin-top: 30px; }
+        .peça-card { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 25px; 
+            margin-bottom: 45px; 
+            padding: 30px; 
+            border-left: 5px solid var(--azul-claro); 
+            background: var(--cinza-claro); 
+            border-radius: 0 12px 12px 0;
+        }
+        
+        .peça-card img {
+            max-width: 100%; 
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .peça-info h3 { margin: 0 0 15px 0; color: var(--azul-escuro); font-size: 1.4rem; }
+        .dica-ouro { background: #fff; padding: 12px; border-radius: 6px; font-size: 0.9rem; border: 1px solid #ddd; margin-top: 15px; }
+
+        .area-final { text-align: center; margin-top: 50px; padding: 45px; border-top: 2px dashed #ccc; background: #fdfae6; border-radius: 12px; }
+        .btn-quiz { background: var(--azul-escuro); color: white; padding: 20px 40px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
+        .btn-quiz:hover { background: var(--azul-claro); transform: translateY(-2px); }
+
+        @media (min-width: 768px) {
+            .peça-card { flex-direction: row; align-items: flex-start; }
+            .peça-card img { width: 250px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="../modulos.html" class="btn-voltar">← Voltar</a>
+        <span>Módulo 6: Integração no Gabinete - Telecurso PC</span>
+    </nav>
+
+    <div class="container">
+        <h1>Módulo 6: Instalando a Placa-Mãe no Gabinete</h1>
+        
+        <div class="guia-iniciante">
+            <strong>Dica de Iniciante:</strong> Antes de colocar a placa no gabinete, verifique se o <b>processador e as memórias</b> já estão instalados nela (como vimos nas aulas 4 e 5). É muito mais fácil fazer isso "do lado de fora"!
+        </div>
+
+        <div class="alerta-box">
+            <h3>⚠️ PERIGO DE CURTO-CIRCUITO</h3>
+            <p>O gabinete é de metal. A parte de baixo da placa-mãe tem centenas de pontos de solda elétricos. Se eles tocarem diretamente no metal do gabinete, a placa irá <b>queimar</b> na primeira vez que você ligar. Por isso, os <b>espaçadores</b> são obrigatórios.</p>
+        </div>
+
+        <div class="secao-tecnica">
+            <div class="peça-card">
+                <img src="../img/espelho placa.webp" alt="Instalação do Espelho Traseiro I/O">
+                <div class="peça-info">
+                    <h3>1. O "Quebra-Cabeça" do Espelho (I/O Shield)</h3>
+                    <p><b>Sem ele, os conectores traseiros não ficam alinhados corretamente.</b> Por isso, instale primeiro.</p>
+                    <div class="dica-ouro">
+                        <b>Passo a passo:</b>
+                        <br>① Segure o espelho com as abas dobradas para dentro.
+                        <br>② Insira o lado fino do espelho no topo do gabinete.
+                        <br>③ Pressione os quatro cantos até ouvir o estalo.
+                        <br>④ Verifique se não há borda solta e se ele está bem alinhado.
+                        <br><br>
+                        ⚠️ Se não encaixar, retire e tente novamente. Forçar pode deformar o espelho e impedir a instalação da placa-mãe.
+                    </div>
+                </div>
+            </div>
+
+            
+
+            <div class="peça-card">
+                <img src="../img/espacador placa.webp" alt="Parafusos espaçadores standoffs">
+                <div class="peça-info">
+                    <h3>2. Os Pilares (Espaçadores)</h3>
+                    <p><b>Sem espaçadores, a placa-mãe encosta no metal e pode fazer curto.</b> Eles são obrigatórios.</p>
+                    <div class="dica-ouro">
+                        <b>Passo a passo:</b>
+                        <br>① Coloque a placa-mãe no gabinete sem parafusos para ver quais furos alinham.
+                        <br>② Instale os espaçadores apenas nesses pontos.
+                        <br>③ Aperte cada espaçador até ficar firme, mas não aperte demais.
+                        <br>④ Nunca use dois espaçadores no mesmo furo.
+                        <br><br>
+                        ✓ Se a placa ficar com folga, o ponto não tem suporte ou está instalado no lugar errado.
+                    </div>
+                </div>
+            </div>
+
+            <div class="peça-card">
+                <img src="../img/posicao placa mae.jpg" alt="Colocando a placa mãe no gabinete">
+                <div class="peça-info">
+                    <h3>3. Encaixe Diagonal Suave</h3>
+                    <p><b>Não force a placa inteira de uma vez.</b> Posicione primeiro o retângulo de conexões traseiras e depois abaixe a placa lentamente.</p>
+                    <div class="dica-ouro">
+                        <b>Passo a passo:</b>
+                        <br>① Incline a placa-mãe levemente e encaixe o conector traseiro no I/O shield.
+                        <br>② Abaixe a placa para que ela encoste nos espaçadores.
+                        <br>③ Verifique se todos os conectores traseiros saem limpos pelo espelho.
+                        <br>④ Se algo ficar torto, levante e repita. Não força.
+                    </div>
+                </div>
+            </div>
+
+            
+
+            <div class="peça-card">
+                <img src="../img/parafuso placa.webp" alt="Identificação de parafusos de PC">
+                <div class="peça-info">
+                    <h3>4. Escolhendo o Parafuso Certo</h3>
+                    <p><b>O parafuso certo encaixa fácil.</b> Se você precisa forçar, pare e troque.</p>
+                    <div class="dica-ouro">
+                        <b>Passo a passo:</b>
+                        <br>① Separe os parafusos do gabinete: fina rosca para a placa-mãe, rosca grossa para HD e fonte.
+                        <br>② Use o parafuso de rosca fina nos espaçadores.
+                        <br>③ Rosqueie à mão até sentir resistência leve.
+                        <br>④ Aperte firme, mas sem exagero.
+                        <br><br>
+                        ⚠️ Se o parafuso não entrar naturalmente, você está usando o tipo errado.
+                    </div>
+                </div>
+            </div>
+
+            
+
+        </div>
+
+        <div class="area-final">
+            <div id="status-aprovacao">
+                <h3>Pronto para o Check-up?</h3>
+                <p>Verificar o alinhamento agora evita que você tenha que desmontar tudo depois. Responda o quiz para concluir.</p>
+                <button class="btn-quiz" onclick="irParaQuiz()">DESAFIO DO GABINETE</button>
+            </div>
+
+            <div id="box-concluir" style="display:none">
+                <h3 style="color: var(--verde)">Montagem Estrutural Concluída! 🏠</h3>
+                <p>A placa-mãe está segura. No próximo módulo, vamos dar vida a ela com a Fonte de Alimentação.</p>
+                <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()" style="display:inline-block">SALVAR MEU PROGRESSO ✅</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function inicializar() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) {
+            window.location.href = "../index.html";
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('aprovado') === 'true') {
+            document.getElementById('status-aprovacao').style.display = 'none';
+            document.getElementById('box-concluir').style.display = 'block';
+            document.getElementById('btn-finalizar').style.display = 'inline-block';
+        }
+    }
+
+    function irParaQuiz() {
+        // ⚠️ ATENÇÃO: Altere o final de "?modulo=1" para o número correspondente da aula
+        window.location.href = `../quiz.html?modulo=6`; 
+    }
+
+    async function concluirModulo() {
+        try {
+            // Captura o usuário logado e puxa os dados do perfil dele
+            const { data: { user }, error: userError } = await _supabase.auth.getUser();
+            
+            if (userError || !user) {
+                alert("Sessão expirada ou usuário inválido. Faça login novamente.");
+                window.location.href = "../index.html";
+                return;
+            }
+
+            // Envia todos os dados obrigatórios para salvar na tabela 'progresso_alunos'
+            const { error } = await _supabase
+                .from('progresso_alunos')
+                .upsert({ 
+                    user_id: user.id, 
+                    modulo_id: 6,           // ⚠️ ATENÇÃO: Altere este número de acordo com o módulo da aula
+                    concluido: true, 
+                    email: user.email,      // 🌟 CORREÇÃO: Preenche o email obrigatório exigido pelo banco
+                    data_conclusao: new Date().toISOString() // Preenche o horário atual no formato correto do Postgres
+                }, { 
+                    onConflict: 'user_id, modulo_id' 
+                });
+
+            if (!error) {
+                alert("Progresso salvo com sucesso!");
+                window.location.href = "../modulos.html";
+            } else {
+                console.error("Erro do Supabase:", error);
+                alert("Erro ao salvar no banco de dados: " + error.message);
+            }
+        } catch (err) {
+            console.error("Erro inesperado:", err);
+            alert("Ocorreu um erro inesperado ao salvar o progresso.");
+        }
+    }
+
+    inicializar();
+</script>
+</body>
+</html>

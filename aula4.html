@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 4: Engenharia de Montagem - CPU e Thermal | Telecurso PC</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --azul-escuro: #003366;
+            --azul-claro: #0056b3;
+            --amarelo: #ffcc00;
+            --branco: #ffffff;
+            --texto: #333;
+            --verde: #28a745;
+            --vermelho-alerta: #dc3545;
+            --cinza-bg: #f8f9fa;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: #eef2f7; margin: 0; color: var(--texto); line-height: 1.6; }
+        .navbar { background: var(--azul-escuro); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .btn-voltar { color: white; text-decoration: none; font-weight: bold; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 5px; }
+
+        .container { max-width: 1000px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.07); }
+        h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
+        
+        .pro-tip { background: #e7f3ff; border-left: 5px solid var(--azul-claro); padding: 20px; margin: 20px 0; border-radius: 8px; font-size: 0.95rem; }
+
+        .secao-tecnica { margin-top: 40px; }
+        .peça-card { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 25px; 
+            margin-bottom: 50px; 
+            padding: 30px; 
+            border-left: 6px solid var(--azul-claro); 
+            background: var(--cinza-bg); 
+            border-radius: 8px;
+        }
+        
+        .peça-card img {
+            max-width: 100%; 
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .peça-info h3 { margin: 0 0 10px 0; color: var(--azul-claro); font-size: 1.4rem; }
+        .detalhe-tecnico { background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #ddd; margin-top: 10px; font-size: 0.9rem; }
+        .detalhe-tecnico b { color: var(--azul-escuro); }
+
+        .area-final { text-align: center; margin-top: 50px; padding: 40px; border-top: 2px dashed #ccc; background: #fffcf0; border-radius: 12px; }
+        .btn-quiz { background: var(--azul-escuro); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: 0.3s; }
+        .btn-quiz:hover { background: var(--azul-claro); transform: scale(1.05); }
+
+        @media (min-width: 768px) {
+            .peça-card { flex-direction: row; align-items: flex-start; }
+            .peça-card img { width: 260px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="../modulos.html" class="btn-voltar">← Voltar</a>
+        <span>Módulo 4: Instalação de Alta Precisão</span>
+    </nav>
+
+    <div class="container">
+        <h1>Instalação da CPU e Gestão Térmica</h1>
+        <p>A instalação do processador é o momento de maior risco físico. Um pino dobrado pode inutilizar uma placa-mãe de alto custo instantaneamente. Este módulo ensina o procedimento correto passo-a-passo.</p>
+
+        <div class="pro-tip">
+            <strong>🚀 Fato Importante:</strong> O IHS (Integrated Heat Spreader) da CPU não é perfeitamente plano. A pasta térmica preenche as cavidades microscópicas para melhorar contato com o cooler. Sem pasta = superaquecimento em minutos. Com pasta errada = CPU queimada.
+        </div>
+
+        <div class="secao-tecnica">
+            <div class="peça-card">
+                <img src="../img/soket-dif.jpg" alt="Soquetes LGA vs PGA">
+                <div class="peça-info">
+                    <h3>1. Conhecer Seu Socket - LGA vs PGA</h3>
+                    <p><b>Antes de abrir o cooler, VERIFIQUE qual tipo sua placa tem!</b> A instalação é completamente diferente.</p>
+                    <div class="detalhe-tecnico">
+                        <b>LGA (Intel & AMD AM5):</b> Os pinos estão NA PLACA-MÃE. São microscópicos e extremamente frágeis. Uma simples queda de ar pode entortá-los. Nunca, NUNCA toque neles com os dedos.<br><br>
+                        <b>PGA (AMD AM4):</b> Os pinos estão NA CPU. Menos frágeis, mas entorta ao remover cooler sem cuidado. Sempre "gire" o cooler antes de puxar.<br><br>
+                        ✓ <b>Ação:</b> Consulte o manual da sua placa-mãe em casa no timoteo um look. Se não souber, procure no site do fabricante.
+                    </div>
+                </div>
+            </div>
+
+            
+
+            <div class="peça-card">
+                <img src="../img/encaixecpiu.jpg" alt="Alinhamento Triângulo">
+                <div class="peça-info">
+                    <h3>2. O Encaixe ZIF - Alinhamento Correto</h3>
+                    <p><b>ZIF significa "Zero Insertion Force"</b> = Não use força! Se está travando, está errado.</p>
+                    <div class="detalhe-tecnico">
+                        <b>Como Fazer (Passo a Passo):</b>
+                        <br>① Abra totalmente a TRAVA da socket (alavanca lateral sobe até ficar horizontal)
+                        <br>② Segure a CPU pelos lados • NUNCA pelos contatos
+                        <br>③ Procure os TRIÂNGULOS DOURADOS (um na CPU, um na socket)
+                        <br>④ Alinhe-os EXATAMENTE
+                        <br>⑤ Coloque a CPU no socket SEM FORÇA
+                        <br>⑥ Baixe a trava até travar (deve fazer "clique" automático)
+                        <br><br>
+                        ⚠️ <b>SINAL DE ERRO:</b> Se precisar forçar, ESPERE! Está posicionada errada. Levante a trava e tente novamente.
+                    </div>
+                </div>
+            </div>
+
+            <div class="peça-card">
+                <img src="../img/pasta termica gota.jpg" alt="Padrões de pasta térmica">
+                <div class="peça-info">
+                    <h3>3. Aplicando Pasta Térmica - A Quantidade Correta</h3>
+                    <p><b>Quantidade errada = temperaturas altas!</b> Pouca disserve hot-spots; muita isola o calor como um escudo.</p>
+                    <div class="detalhe-tecnico">
+                        <b>Método Correto:</b>
+                        <br>• <b>Pouca quantidade:</b> Um grão de milho no CENTRO da CPU
+                        <br>• <b>Aplicar:</b> Deixe o cooler pressionar (nunca espalhe com dedo!)
+                        <br>• <b>CPUs com chiplets:</b> Se tem múltiplos núcleos separados, pinte um padrão de "X" ou "5 pontos"
+                        <br><br>
+                        ✓ <b>Quantidade ideal:</b> Quando montar cooler, a pasta deve "vazar" um pouco nas laterais. Se não vazar = pouca; se vazar demais = excessiva.
+                        <br><br>
+                        ⚠️ <b>NUNCA espalha com dedo!</b> A oleosidade torna a pasta pior e pode deixar pegadas que reduzem condutividade.
+                    </div>
+                </div>
+            </div>
+
+            
+
+            <div class="peça-card">
+                <img src="../img/trava cooler.jpg" alt="Ordem de parafusos">
+                <div class="peça-info">
+                    <h3>4. Montando o Cooler - Pressão Uniforme</h3>
+                    <p><b>Aperto errado = pasta sai de um lado só, deixando hot-spots.</b> A placa-mãe pode ainda rachar microscopicamente.</p>
+                    <div class="detalhe-tecnico">
+                        <b>Ordem de Aperto (CRUCIAL):</b>
+                        <br><b>1.</b> Posicione cooler reto acima da CPU
+                        <br><b>2.</b> Aperte LEVEMENTE o parafuso 1 (esquerda-superior)
+                        <br><b>3.</b> Aperte LEVEMENTE o parafuso 3 (direita-inferior) - diagonal oposta!
+                        <br><b>4.</b> Agora aperte LEVEMENTE o parafuso 2 (direita-superior)
+                        <br><b>5.</b> Aperte LEVEMENTE o parafuso 4 (esquerda-inferior) - diagonal
+                        <br><b>6.</b> SOMENTE APÓS todos estarem encaixados, aperte cada um FIRME (mas não com toda força!)
+                        <br><br>
+                        ✓ Essa ordem em "X" garante pressão igual em todos os pontos. Se apertar um lado antes = risco de dano!
+                    </div>
+                </div>
+            </div>
+
+            <div class="peça-card">
+                <img src="../img/conect cooler.png" alt="Header CPU_FAN">
+                <div class="peça-info">
+                    <h3>5. Conexão do Cooler - Monitoramento Crítico</h3>
+                    <p><b>Conectar no header errado = CPU superaquece silenciosamente!</b> A placa-mãe não sabe aumentar ventilação.</p>
+                    <div class="detalhe-tecnico">
+                        <b>Passo a Passo:</b>
+                        <br>① Localize na placa-mãe: <b>CPU_FAN</b> (procure este rótulo no manual ou visualmente perto do socket)
+                        <br>② Plug do cooler tem 4-pinos tipicamente (às vezes 3)
+                        <br>③ Encare com CUIDADO (tem um pequeno clipe de segurança)
+                        <br>④ NUNCA use SYS_FAN, CHA_FAN, ou outros headers!
+                        <br><br>
+                        ⚠️ <b>MUITO IMPORTANTE:</b> Se ligar no header errado, o PC pode:
+                        <br>  • Não reconhecer velocidade do ventilador
+                        <br>  • Sistema de proteção não funciona
+                        <br>  • CPU desliga de surpresa quando quente (thermal shutdown)
+                        <br><br>
+                        ✓ <b>Teste:</b> Ligue o PC e entre em BIOS. Procure por "CPU Fan Speed" - deve mostrar RPM. Se 0 RPM = conexão solta!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="area-final">
+            <div id="status-aprovacao">
+                <h3>Pronto para o Stress Test?</h3>
+                <p>A montagem correta da CPU define a estabilidade de todo o sistema. Teste seus conhecimentos técnicos agora.</p>
+                <button class="btn-quiz" onclick="irParaQuiz()">DESAFIO TÉCNICO MÓDULO 4</button>
+            </div>
+
+            <div id="box-concluir" style="display:none">
+                <h3 style="color: var(--verde)">Mestre em Arrefecimento Validado! ❄️</h3>
+                <p>Sua CPU está instalada com padrões de engenharia.</p>
+                <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()" style="background: var(--verde); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">SALVAR PROGRESSO ✅</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function inicializar() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) {
+            window.location.href = "../index.html";
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('aprovado') === 'true') {
+            document.getElementById('status-aprovacao').style.display = 'none';
+            document.getElementById('box-concluir').style.display = 'block';
+            document.getElementById('btn-finalizar').style.display = 'inline-block';
+        }
+    }
+
+    function irParaQuiz() {
+        // ⚠️ ATENÇÃO: Altere o final de "?modulo=1" para o número correspondente da aula
+        window.location.href = `../quiz.html?modulo=4`; 
+    }
+
+    async function concluirModulo() {
+        try {
+            // Captura o usuário logado e puxa os dados do perfil dele
+            const { data: { user }, error: userError } = await _supabase.auth.getUser();
+            
+            if (userError || !user) {
+                alert("Sessão expirada ou usuário inválido. Faça login novamente.");
+                window.location.href = "../index.html";
+                return;
+            }
+
+            // Envia todos os dados obrigatórios para salvar na tabela 'progresso_alunos'
+            const { error } = await _supabase
+                .from('progresso_alunos')
+                .upsert({ 
+                    user_id: user.id, 
+                    modulo_id: 4,           // ⚠️ ATENÇÃO: Altere este número de acordo com o módulo da aula
+                    concluido: true, 
+                    email: user.email,      // 🌟 CORREÇÃO: Preenche o email obrigatório exigido pelo banco
+                    data_conclusao: new Date().toISOString() // Preenche o horário atual no formato correto do Postgres
+                }, { 
+                    onConflict: 'user_id, modulo_id' 
+                });
+
+            if (!error) {
+                alert("Progresso salvo com sucesso!");
+                window.location.href = "../modulos.html";
+            } else {
+                console.error("Erro do Supabase:", error);
+                alert("Erro ao salvar no banco de dados: " + error.message);
+            }
+        } catch (err) {
+            console.error("Erro inesperado:", err);
+            alert("Ocorreu um erro inesperado ao salvar o progresso.");
+        }
+    }
+
+    inicializar();
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 10: Fluxo de Ar e Ventoinhas | Telecurso PC</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --azul-escuro: #003366;
+            --azul-claro: #0056b3;
+            --amarelo: #ffcc00;
+            --branco: #ffffff;
+            --texto: #333;
+            --verde: #28a745;
+            --vermelho: #dc3545;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; color: var(--texto); line-height: 1.6; }
+        .navbar { background: var(--azul-escuro); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .btn-voltar { color: white; text-decoration: none; font-weight: bold; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 5px; }
+        .container { max-width: 900px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
+        
+        .dica-box { background: #e8f5e9; border-left: 5px solid var(--verde); padding: 20px; margin: 20px 0; border-radius: 8px; }
+
+        .peça-card { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 40px; padding: 25px; border-left: 5px solid var(--azul-claro); background: #f9f9f9; border-radius: 8px; }
+        .peça-card img { max-width: 100%; height: auto; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .peça-info h3 { margin: 0 0 10px 0; color: var(--azul-claro); font-size: 1.3rem; }
+        
+        .instrucao-detalhe { background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.95rem; margin-top: 10px; }
+
+        .area-final { text-align: center; margin-top: 50px; padding: 40px; border-top: 2px dashed #ccc; background: #f0fff4; border-radius: 0 0 12px 12px; }
+        .btn-quiz { background: var(--azul-escuro); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        .btn-concluir { background: var(--verde); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; display: none; }
+
+        @media (min-width: 768px) {
+            .peça-card { flex-direction: row; align-items: flex-start; text-align: left; }
+            .peça-card img { max-width: 250px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="../modulos.html" class="btn-voltar">← Voltar aos Módulos</a>
+        <span>Telecurso Montagem de PC - 2026</span>
+    </nav>
+
+    <div class="container">
+        <h1>Módulo 10: Fans e Fluxo de Ar</h1>
+        <p>As ventoinhas não servem apenas para enfeitar. Elas criam um caminho organizado para o ar frio entrar e o ar quente sair, mantendo a vida útil dos seus componentes.</p>
+
+        <div class="dica-box">
+            <h3>🌬️ A Física do Calor</h3>
+            <p>O ar quente é mais leve e sobe naturalmente. Por isso, a regra de ouro é: <strong>Ar frio entra pela frente/baixo</strong> e o <strong>Ar quente sai por trás/cima</strong>.</p>
+        </div>
+
+        <div class="secao-tecnica">
+            <div class="peça-card">
+                <img src="../img/ar gabinete.png" alt="Direção do fluxo de ar na ventoinha">
+                <div class="peça-info">
+                    <h3>1. Direção do Fluxo de Ar</h3>
+                    <p><b>O PC só esfria bem se o ar for direcionado corretamente.</b> Falha comum: fans puxando e empurrando ao mesmo tempo.</p>
+                    <div class="instrucao-detalhe">
+                        <b>Passo a passo:</b>
+                        <br>① Encontre as setas no corpo da fan.
+                        <br>② Verifique o lado que puxa o ar (normalmente o lado limpo).
+                        <br>③ Posicione as fans frontais/ inferiores para puxar ar frio.
+                        <br>④ Posicione as fans traseiras/ superiores para empurrar ar quente.
+                        <br><br>
+                        ✓ A regra é sempre: frio entra pela frente/baixo e quente sai por trás/cima.
+                    </div>
+                </div>
+            </div>
+            
+
+            <div class="peça-card">
+                <img src="../img/fan fixo pc.webp" alt="Instalação de ventoinha no gabinete">
+                <div class="peça-info">
+                    <h3>2. Fixação e Vibração</h3>
+                    <p><b>Ventoinhas soltas fazem barulho e não resfriam direito.</b> A fixação correta é essencial.</p>
+                    <div class="instrucao-detalhe">
+                        <b>Passo a passo:</b>
+                        <br>① Posicione a fan no buraco do gabinete.
+                        <br>② Encaixe um parafuso em um canto.
+                        <br>③ Rosqueie o parafuso oposto em X.
+                        <br>④ Aperte os quatro parafusos até a fan ficar plana.
+                        <br><br>
+                        ✓ Se a fan ficar torta, ela vibra e faz barulho.
+                    </div>
+                </div>
+            </div>
+
+            <div class="peça-card">
+                <img src="../img/fancabopc.jpg" alt="Conector SYS_FAN na placa-mãe">
+                <div class="peça-info">
+                    <h3>3. Ligando os fios (SYS_FAN)</h3>
+                    <p><b>Mesmo se a fan estiver no lugar correto, ela só funciona se estiver conectada.</b></p>
+                    <div class="instrucao-detalhe">
+                        <b>Passo a passo:</b>
+                        <br>① Localize o conector SYS_FAN ou CHA_FAN na placa-mãe.
+                        <br>② Alinhe a fan com a guia de plástico.
+                        <br>③ Encaixe até firmar.
+                        <br>④ Se a fan for 3 pinos e o conector 4, deixe o pino vazio no lado correto.
+                        <br><br>
+                        ✓ Confirme no BIOS se a fan aparece girando. Se não, a conexão está solta.
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="area-final">
+            <div id="status-aprovacao">
+                <h3>O PC está pronto para respirar?</h3>
+                <p>Responda o quiz sobre refrigeração para liberar a conclusão do curso de hardware.</p>
+                <button class="btn-quiz" onclick="irParaQuiz()">FAZER DESAFIO DO MÓDULO 10</button>
+            </div>
+
+            <div id="box-concluir" style="display:none">
+                <h3 style="color: var(--verde)">PC Refrigerado e Montado! ❄️</h3>
+                <p>Parabéns! Você concluiu toda a montagem física dos componentes. Agora o seu hardware está pronto para ganhar vida!</p>
+                <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()">CONCLUIR MONTAGEM FÍSICA ✅</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function inicializar() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) {
+            window.location.href = "../index.html";
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('aprovado') === 'true') {
+            document.getElementById('status-aprovacao').style.display = 'none';
+            document.getElementById('box-concluir').style.display = 'block';
+            document.getElementById('btn-finalizar').style.display = 'inline-block';
+        }
+    }
+
+    function irParaQuiz() {
+        // ⚠️ ATENÇÃO: Altere o final de "?modulo=1" para o número correspondente da aula
+        window.location.href = `../quiz.html?modulo=10`; 
+    }
+
+    async function concluirModulo() {
+        try {
+            // Captura o usuário logado e puxa os dados do perfil dele
+            const { data: { user }, error: userError } = await _supabase.auth.getUser();
+            
+            if (userError || !user) {
+                alert("Sessão expirada ou usuário inválido. Faça login novamente.");
+                window.location.href = "../index.html";
+                return;
+            }
+
+            // Envia todos os dados obrigatórios para salvar na tabela 'progresso_alunos'
+            const { error } = await _supabase
+                .from('progresso_alunos')
+                .upsert({ 
+                    user_id: user.id, 
+                    modulo_id: 10,           // ⚠️ ATENÇÃO: Altere este número de acordo com o módulo da aula
+                    concluido: true, 
+                    email: user.email,      // 🌟 CORREÇÃO: Preenche o email obrigatório exigido pelo banco
+                    data_conclusao: new Date().toISOString() // Preenche o horário atual no formato correto do Postgres
+                }, { 
+                    onConflict: 'user_id, modulo_id' 
+                });
+
+            if (!error) {
+                alert("Progresso salvo com sucesso!");
+                window.location.href = "../modulos.html";
+            } else {
+                console.error("Erro do Supabase:", error);
+                alert("Erro ao salvar no banco de dados: " + error.message);
+            }
+        } catch (err) {
+            console.error("Erro inesperado:", err);
+            alert("Ocorreu um erro inesperado ao salvar o progresso.");
+        }
+    }
+
+    inicializar();
+</script>
+</body>
+</html>

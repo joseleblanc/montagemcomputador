@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 5: Memória RAM e Arquitetura de Canais | Telecurso PC</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --azul-escuro: #003366;
+            --azul-claro: #0056b3;
+            --amarelo: #ffcc00;
+            --branco: #ffffff;
+            --texto: #333;
+            --verde: #28a745;
+            --cinza-bg: #f8f9fa;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: #eef2f7; margin: 0; color: var(--texto); line-height: 1.6; }
+        .navbar { background: var(--azul-escuro); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .btn-voltar { color: white; text-decoration: none; font-weight: bold; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 5px; }
+
+        .container { max-width: 1000px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.07); }
+        h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
+        
+        .box-avancado { background: #fff4e5; border-left: 5px solid #ffa500; padding: 20px; margin: 20px 0; border-radius: 8px; font-size: 0.95rem; }
+
+        .secao-tecnica { margin-top: 40px; }
+        .peça-card { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 25px; 
+            margin-bottom: 50px; 
+            padding: 30px; 
+            border-left: 6px solid var(--azul-claro); 
+            background: var(--cinza-bg); 
+            border-radius: 8px;
+        }
+        
+        .peça-card img {
+            max-width: 100%; 
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .peça-info h3 { margin: 0 0 10px 0; color: var(--azul-claro); font-size: 1.4rem; }
+        .detalhe-tech { background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #ddd; margin-top: 10px; font-size: 0.9rem; }
+        .detalhe-tech b { color: var(--azul-escuro); }
+
+        .area-final { text-align: center; margin-top: 50px; padding: 40px; border-top: 2px dashed #ccc; background: #f0f7ff; border-radius: 12px; }
+        .btn-quiz { background: var(--azul-escuro); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: 0.3s; }
+        .btn-quiz:hover { background: var(--azul-claro); transform: translateY(-2px); }
+
+        @media (min-width: 768px) {
+            .peça-card { flex-direction: row; align-items: flex-start; }
+            .peça-card img { width: 260px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="../modulos.html" class="btn-voltar">← Painel</a>
+        <span>Módulo 5: Engenharia de Memória - 2026</span>
+    </nav>
+
+    <div class="container">
+        <h1>Memória RAM e Largura de Banda</h1>
+        <p><b>Instalar RAM PARECE fácil, mas é aqui que muitos PCs "não ligam"!</b> Este módulo ensina como fazer certo da primeira vez, garantindo máxima performance.</p>
+
+        <div class="box-avancado">
+            <strong>⚠️ O Segredo de Hoje:</strong> A maioria dos PCs que "não dão imagem" no primeiro boot tem RAM mal encaixada. Às vezes está 90% encaixada, mas aquele 1mm faltando causa erro total. Você vai aprender a identificar e corrigir isso.
+        </div>
+
+        <div class="secao-tecnica">
+            <div class="peça-card">
+                <img src="../img/trava memoria ram.jpg" alt="Travas dos slots DIMM">
+                <div class="peça-info">
+                    <h3>1. Preparação - Abrindo os Slots</h3>
+                    <p><b>Antes de colocar RAM, abra os clipes!</b> Placa-mãe com clipes fechados = você não consegue inserir.</p>
+                    <div class="detalhe-tech">
+                        <b>Como Identificar e Abrir:</b>
+                        <br>• Procure na placa-mãe pelos SLOTS DIMM (fendas longas e retas)
+                        <br>• Em cada lado do slot há um CLIPE BRANCO ou PRETO (pequenos, ≈ 1cm)
+                        <br>• Puxe-os PARA FORA gentilmente (não com força bruta!)
+                        <br>• Eles devem saltar/abrir sosinha
+                        <br><br>
+                        ⚠️ <b>Cuidado ESPECIAL:</b> Algumas placas high-end têm clipes apenas de UM LADO (top). O que está por baixo é FIXO. Se forçar o lado fixo, quebra a placa-mãe. Respeite a configuração!
+                    </div>
+                </div>
+            </div>
+
+            <div class="peça-card">
+                <img src="../img/memoria ram slot encaixe.jpg" alt="Chanfro DDR5 vs DDR4">
+                <div class="peça-info">
+                    <h3>2. O Chanfro - Seu Protetor Contra Erro</h3>
+                    <p><b>A fenda no pente RAM é INTENCIONAL!</b> Ela impede que você encaixe RAM errada (DDR4 em socket DDR5, por exemplo).</p>
+                    <div class="detalhe-tech">
+                        <b>Como Usar o Chanfro:</b>
+                        <br>① Procure uma pequena fenda/corte no MEIO da base do pente RAM
+                        <br>② Procure no slot uma aba que corresponde a esse corte
+                        <br>③ Alinhe a fenda com a aba
+                        <br><br>
+                        ⚠️ <b>IMPORTANTE:</b>
+                        <br>• Força excessiva? = Posição ERRADA. Remova e tente novamente.
+                        <br>• DDR4 × DDR5? Não encaixam em sockets diferentes (design diferente)
+                        <br>• Contatos devem ser OURO COM OURO (sem oxidação)
+                        <br><br>
+                        ✓ <b>Regra de Ouro:</b> Se não entra naturalmente em 1-2 segundos, está errado. Não force!
+                    </div>
+                </div>
+            </div>
+
+            
+
+            <div class="peça-card">
+                <img src="../img/trava ram.jpg" alt="Instalação firme da RAM">
+                <div class="peça-info">
+                    <h3>3. O Clique - Seu Indicador de Sucesso</h3>
+                    <p><b>Esta é a parte MAIS IMPORTANTE.</b> 70% dos PCs que "não ligam" têm RAM não encaixada (faltam milímetros!).</p>
+                    <div class="detalhe-tech">
+                        <b>Como Encaixar Corretamente:</b>
+                        <br>① Segure o pente pelas laterais (NUNCA pelos contatos!)
+                        <br>② Alinhe com o slot usando o chanfro como guia
+                        <br>③ Pressione com os DOIS POLEGARES nas pontas (não no meio!)
+                        <br>④ Pressione FIRMEMENTE por 3-5 segundos
+                        <br>⑤ ESCUTE E SINTA o clique nos clipes
+                        <br>⑥ Os clipes devem SUBIR automaticamente enquanto você empurra
+                        <br><br>
+                        ✓ <b>Sinais de Sucesso:</b>
+                        <br>• Ouve-se "clique" ALTO e claramente
+                        <br>• RAM fica NO MESMO NÍVEL do slot (não fica inclinada)
+                        <br>• Clipes nos dois lados ficam ALTOS e travados
+                        <br><br>
+                        ❌ <b>Sinais de ERRO:</b>
+                        <br>• Nenhum som = está errada, tira e tenta novamente
+                        <br>• Resistência? = Força no chanfro pra ver se virou
+                        <br>• Fica inclinada de um lado? = Não encaixou, remonte
+                    </div>
+                </div>
+            </div>
+
+            <div class="peça-card">
+                <img src="../img/dual chanel.webp" alt="Diagrama de Dual Channel">
+                <div class="peça-info">
+                    <h3>4. Posicionamento - Dual Channel para Máxima Performance</h3>
+                    <p><b>SE você tem 2 pentes RAM, coloque nos slots CERTOS!</b> Errado = perde 20% de performance.</p>
+                    <div class="detalhe-tech">
+                        <b>Regra Simples:</b>
+                        <br>• Placas com 2 slots = Um deve estar longe do outro (geralmente encaixam em ambos, OK!)
+                        <br>• Placas com 4 slots = Slots alternados = A2 e B2 (2º e 4º contando da esquerda)
+                        <br><br>
+                        ✓ <b>Como Identificar:</b>
+                        <br>  Abra manual da placa-mãe e procure "DIMM Configuration"
+                        <br>  OU observe: os slots geralmente têm cores alternadas (azul-preto-azul ou preto-azul-preto)
+                        <br>  Colque os 2 pentes nos mesmos CORES!
+                        <br><br>
+                        <b>Por que Dual Channel?</b> A CPU consegue ler de DOIS pentes ao mesmo tempo (em paralelo), dobrando velocidade. Usar apenas 1 = subutilização.<br><br>
+                        ⚠️ <b>Atenção:</b> Escolher slots errados em placas de 4 slots pode impedir overclock e memórias de alta frequência de funcionarem. Sempre consulte manual!
+                    </div>
+                </div>
+            </div>
+
+            
+
+        </div>
+
+        <div class="area-final">
+            <div id="status-aprovacao">
+                <h3>Sua memória está otimizada?</h3>
+                <p>O desafio agora testará se você sabe onde posicionar os pentes para obter o máximo de FPS e fluidez.</p>
+                <button class="btn-quiz" onclick="irParaQuiz()">INICIAR QUIZ DE PERFORMANCE</button>
+            </div>
+
+            <div id="box-concluir" style="display:none">
+                <h3 style="color: var(--verde)">Arquitetura de Memória Concluída! ⚡</h3>
+                <p>Você agora domina a instalação e otimização de largura de banda.</p>
+                <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()" style="background: var(--verde); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">SALVAR PROGRESSO ✅</button>
+            </div>
+        </div>
+    </div>
+
+ <script>
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function inicializar() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) {
+            window.location.href = "../index.html";
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('aprovado') === 'true') {
+            document.getElementById('status-aprovacao').style.display = 'none';
+            document.getElementById('box-concluir').style.display = 'block';
+            document.getElementById('btn-finalizar').style.display = 'inline-block';
+        }
+    }
+
+    function irParaQuiz() {
+        // ⚠️ ATENÇÃO: Altere o final de "?modulo=1" para o número correspondente da aula
+        window.location.href = `../quiz.html?modulo=5`; 
+    }
+
+    async function concluirModulo() {
+        try {
+            // Captura o usuário logado e puxa os dados do perfil dele
+            const { data: { user }, error: userError } = await _supabase.auth.getUser();
+            
+            if (userError || !user) {
+                alert("Sessão expirada ou usuário inválido. Faça login novamente.");
+                window.location.href = "../index.html";
+                return;
+            }
+
+            // Envia todos os dados obrigatórios para salvar na tabela 'progresso_alunos'
+            const { error } = await _supabase
+                .from('progresso_alunos')
+                .upsert({ 
+                    user_id: user.id, 
+                    modulo_id: 5,           // ⚠️ ATENÇÃO: Altere este número de acordo com o módulo da aula
+                    concluido: true, 
+                    email: user.email,      // 🌟 CORREÇÃO: Preenche o email obrigatório exigido pelo banco
+                    data_conclusao: new Date().toISOString() // Preenche o horário atual no formato correto do Postgres
+                }, { 
+                    onConflict: 'user_id, modulo_id' 
+                });
+
+            if (!error) {
+                alert("Progresso salvo com sucesso!");
+                window.location.href = "../modulos.html";
+            } else {
+                console.error("Erro do Supabase:", error);
+                alert("Erro ao salvar no banco de dados: " + error.message);
+            }
+        } catch (err) {
+            console.error("Erro inesperado:", err);
+            alert("Ocorreu um erro inesperado ao salvar o progresso.");
+        }
+    }
+
+    inicializar();
+</script>
+</body>
+</html>

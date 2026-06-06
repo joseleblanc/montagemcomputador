@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 9: Placa de Vídeo | Telecurso PC</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --azul-escuro: #003366; --azul-claro: #0056b3; --amarelo: #ffcc00; --branco: #ffffff; --texto: #333; --verde: #28a745; --vermelho: #dc3545; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; color: var(--texto); line-height: 1.6; }
+        .navbar { background: var(--azul-escuro); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .btn-voltar { color: white; text-decoration: none; font-weight: bold; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 5px; }
+        .container { max-width: 900px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
+        .dica-box { background: #e3f2fd; border-left: 5px solid var(--azul-claro); padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .peça-card { display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; padding: 25px; border-left: 5px solid var(--azul-claro); background: #f9f9f9; border-radius: 8px; }
+        .peça-card img { max-width: 100%; height: auto; border-radius: 5px; }
+        .peça-info h3 { margin: 0 0 10px 0; color: var(--azul-claro); font-size: 1.3rem; }
+        .instrucao-detalhe { background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.95rem; }
+        .area-final { text-align: center; margin-top: 50px; padding: 40px; border-top: 2px dashed #ccc; background: #f0f7ff; border-radius: 12px; }
+        .btn-quiz { background: var(--azul-escuro); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-concluir { background: var(--verde); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: none; }
+        @media (min-width: 768px) { .peça-card { flex-direction: row; } .peça-card img { max-width: 250px; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar"><a href="../modulos.html" class="btn-voltar">← Voltar</a><span>Telecurso Montagem de PC - 2026</span></nav>
+    <div class="container">
+        <h1>Módulo 9: Placa de Vídeo (O Motor Gráfico)</h1>
+        <p>A GPU é geralmente a peça mais cara e pesada do PC. Trataremos ela com cuidado de cirurgião.</p>
+
+        <div class="dica-box">
+            <h3>💡 Regra do Primeiro Slot</h3>
+            <p>Sempre use o slot PCIe <b>mais perto do processador</b>. Os slots de baixo geralmente são mais lentos e farão sua placa de vídeo perder desempenho.</p>
+        </div>
+
+        <div class="secao-tecnica">
+            <div class="peça-card">
+                <img src="../img/baia-video.webp" alt="Removendo protetores do gabinete">
+                <div class="peça-info">
+                    <h3>1. Abrindo o Caminho</h3>
+                    <p><b>Antes de encaixar a GPU, prepare o gabinete.</b> O slot PCIe só funciona se o caminho estiver livre e alinhado.</p>
+                    <div class="instrucao-detalhe">
+                        <b>Passo a Passo:</b>
+                        <br>① Localize o slot PCIe x16 mais próximo do processador
+                        <br>② Remova as chapinhas metálicas correspondentes na parte traseira do gabinete
+                        <br>③ Guarde as chapinhas em um lugar seguro para não perder
+                        <br>④ Confira se a trava do slot PCIe está aberta antes de encaixar
+                        <br><br>
+                        ⚠️ <b>Atenção:</b> Não empurre a GPU no slot sem antes abrir a trava. Forçar pode causar danos permanentes ao slot.
+                    </div>
+                </div>
+            </div>
+
+            <div class="peça-card">
+                <img src="../img/placav-encaixada.webp" alt="Encaixe da GPU no slot">
+                <div class="peça-info">
+                    <h3>2. Encaixe e Parafusamento</h3>
+                    <p><b>O clique da GPU no slot é o seu sinal de segurança.</b> Depois, parafuse antes de soltar a placa.</p>
+                    <div class="instrucao-detalhe">
+                        <b>Passo a Passo:</b>
+                        <br>① Segure a GPU pela carcaça lateral, não toque nas placas ou contatos
+                        <br>② Alinhe a parte traseira com o suporte do gabinete e a ponta com o slot PCIe
+                        <br>③ Empurre a GPU para baixo com firmeza, até ouvir um clique claro
+                        <br>④ Verifique se a placa está reta e encaixada por completo
+                        <br>⑤ Parafuse a placa no gabinete imediatamente para garantir suporte
+                        <br><br>
+                        ✓ <b>Importante:</b> A placa deve ficar firme e sem inclinação. Se balançar, retire e repita.
+                    </div>
+                </div>
+            </div>
+            
+
+            <div class="peça-card">
+                <img src="../img/cabos placa de video.webp" alt="Conector de energia PCI-E">
+                <div class="peça-info">
+                    <h3>3. Alimentação Extra (PCI-E)</h3>
+                    <p><b>GPU moderna sem cabo PCI-E está incompleta.</b> Nunca use cabos errados, nem misture conectores que não são para GPU.</p>
+                    <div class="instrucao-detalhe">
+                        <b>Passo a Passo:</b>
+                        <br>① Identifique o conector na GPU: 6 pinos, 8 pinos ou 6+2 pinos
+                        <br>② Use apenas cabos rotulados <b>PCI-E</b> da fonte
+                        <br>③ Se a GPU precisar de 8 pinos e sua fonte tiver 6+2, una os dois lados para formar 8 pinos
+                        <br>④ Encaixe o conector firmemente até travar
+                        <br><br>
+                        ⚠️ <b>Nunca use:</b> cabos 4+4 de CPU, cabos SATA ou adaptadores improvisados para alimentar a GPU
+                        <br><br>
+                        ✓ <b>Teste:</b> Ao ligar o PC, fique atento à ventoinha da GPU. Se ela não girar, desligue e verifique a conexão.
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="area-final">
+            <div id="status-aprovacao">
+                <h3>Tudo firme por aí?</h3>
+                <button class="btn-quiz" onclick="irParaQuiz()">FAZER DESAFIO DO MÓDULO 9</button>
+            </div>
+            <div id="box-concluir" style="display:none">
+                <h3 style="color: var(--verde)">Placa de Vídeo Instalada! 🎮</h3>
+                <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()">CONCLUIR MÓDULO ✅</button>
+            </div>
+        </div>
+    </div>
+    <script>
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function inicializar() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) {
+            window.location.href = "../index.html";
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('aprovado') === 'true') {
+            document.getElementById('status-aprovacao').style.display = 'none';
+            document.getElementById('box-concluir').style.display = 'block';
+            document.getElementById('btn-finalizar').style.display = 'inline-block';
+        }
+    }
+
+    function irParaQuiz() {
+        // ⚠️ ATENÇÃO: Altere o final de "?modulo=1" para o número correspondente da aula
+        window.location.href = `../quiz.html?modulo=9`; 
+    }
+
+    async function concluirModulo() {
+        try {
+            // Captura o usuário logado e puxa os dados do perfil dele
+            const { data: { user }, error: userError } = await _supabase.auth.getUser();
+            
+            if (userError || !user) {
+                alert("Sessão expirada ou usuário inválido. Faça login novamente.");
+                window.location.href = "../index.html";
+                return;
+            }
+
+            // Envia todos os dados obrigatórios para salvar na tabela 'progresso_alunos'
+            const { error } = await _supabase
+                .from('progresso_alunos')
+                .upsert({ 
+                    user_id: user.id, 
+                    modulo_id: 9,           // ⚠️ ATENÇÃO: Altere este número de acordo com o módulo da aula
+                    concluido: true, 
+                    email: user.email,      // 🌟 CORREÇÃO: Preenche o email obrigatório exigido pelo banco
+                    data_conclusao: new Date().toISOString() // Preenche o horário atual no formato correto do Postgres
+                }, { 
+                    onConflict: 'user_id, modulo_id' 
+                });
+
+            if (!error) {
+                alert("Progresso salvo com sucesso!");
+                window.location.href = "../modulos.html";
+            } else {
+                console.error("Erro do Supabase:", error);
+                alert("Erro ao salvar no banco de dados: " + error.message);
+            }
+        } catch (err) {
+            console.error("Erro inesperado:", err);
+            alert("Ocorreu um erro inesperado ao salvar o progresso.");
+        }
+    }
+
+    inicializar();
+</script>       
+</body>
+</html>

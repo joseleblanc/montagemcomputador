@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula 7: Fonte e Cabeamento | Telecurso PC</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --azul-escuro: #003366;
+            --azul-claro: #0056b3;
+            --amarelo: #ffcc00;
+            --branco: #ffffff;
+            --texto: #333;
+            --verde: #28a745;
+            --vermelho: #dc3545;
+            --cinza-bg: #f8f9fa;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: #eef2f7; margin: 0; color: var(--texto); line-height: 1.6; }
+        .navbar { background: var(--azul-escuro); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .btn-voltar { color: white; text-decoration: none; font-weight: bold; background: rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 5px; }
+
+        .container { max-width: 950px; margin: 30px auto; background: var(--branco); padding: 40px; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.07); }
+        h1 { color: var(--azul-escuro); border-bottom: 4px solid var(--amarelo); display: inline-block; padding-bottom: 5px; }
+        
+        .alerta-box { background: #fff5f5; border-left: 6px solid var(--vermelho); padding: 20px; margin: 20px 0; border-radius: 8px; }
+        
+        .guia-fios { background: #e7f3ff; border-radius: 8px; padding: 20px; margin: 20px 0; border: 1px solid #b6d4fe; }
+
+        .peça-card { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 25px; 
+            margin-bottom: 45px; 
+            padding: 30px; 
+            border-left: 6px solid var(--azul-claro); 
+            background: var(--cinza-bg); 
+            border-radius: 8px;
+        }
+        
+        .peça-card img {
+            max-width: 100%; 
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .peça-info h3 { margin: 0 0 10px 0; color: var(--azul-claro); font-size: 1.4rem; }
+        .detalhe-iniciante { background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #ddd; margin-top: 10px; font-size: 0.9rem; }
+        .detalhe-iniciante b { color: var(--azul-escuro); }
+
+        .area-final { text-align: center; margin-top: 50px; padding: 45px; border-top: 2px dashed #ccc; background: #f0f7ff; border-radius: 12px; }
+        .btn-quiz { background: var(--azul-escuro); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; transition: 0.3s; }
+        .btn-quiz:hover { background: var(--azul-claro); transform: translateY(-2px); }
+
+        @media (min-width: 768px) {
+            .peça-card { flex-direction: row; align-items: flex-start; }
+            .peça-card img { width: 260px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="../modulos.html" class="btn-voltar">← Voltar</a>
+        <span>Módulo 7: Distribuição de Energia</span>
+    </nav>
+
+    <div class="container">
+        <h1>Módulo 7: Fonte de Alimentação e Cabeamento</h1>
+        <p>A Fonte (PSU) é o sistema circulatório do PC. Ela converte a energia da tomada para as voltagens que os componentes suportam.</p>
+
+        <div class="guia-fios">
+            <strong>💡 Dica de Ouro:</strong> Os conectores são "à prova de erros". Eles possuem formatos quadrados e arredondados diferentes em cada pino. Se você não estiver forçando, é quase impossível ligar errado.
+        </div>
+
+        <div class="secao-tecnica">
+            <div class="peça-card">
+                <img src="../img/fonte parafuso.webp" alt="Instalação da fonte no gabinete">
+                <div class="peça-info">
+                    <h3>1. Orientação da Ventoinha</h3>
+                    <p><b>O ar frio deve entrar, não ficar preso dentro do gabinete.</b> A direção da ventoinha da fonte importa.</p>
+                    <div class="detalhe-iniciante">
+                        <b>Passo a passo:</b>
+                        <br>① Verifique se o gabinete tem ventilação na base.
+                        <br>② Se sim, coloque a ventoinha da fonte para baixo.
+                        <br>③ Se não houver ventilação inferior, coloque a ventoinha para cima.
+                        <br>④ Confirme que a fonte está alinhada com o recorte traseiro do gabinete.
+                        <br><br>
+                        ✓ Uma fonte instalada ao contrário pode puxar ar quente e aquecer o sistema.
+                    </div>
+                </div>
+            </div>
+
+            
+
+            <div class="peça-card">
+                <img src="../img/cabos fonte.webp" alt="Conectores 24 pinos e EPS">
+                <div class="peça-info">
+                    <h3>2. Os "Corações" da Energia</h3>
+                    <p><b>Sem esses dois cabos, o PC não liga.</b> Um alimenta a placa-mãe e outro alimenta o processador.</p>
+                    <div class="detalhe-iniciante">
+                        <b>Passo a passo:</b>
+                        <br>① Conecte o cabo ATX 24 pinos na placa-mãe, alinhando a guia.
+                        <br>② Conecte o cabo EPS 4+4 no conector CPU da placa-mãe.
+                        <br>③ Certifique-se de que o conector CPU está rotulado "CPU".
+                        <br>④ Nunca use cabo de vídeo no conector CPU.
+                        <br><br>
+                        ⚠️ Um cabo mal encaixado pode permitir que o PC ligue, mas o processador ficará sem energia estável.
+                    </div>
+                </div>
+            </div>
+
+            
+
+            <div class="alerta-box">
+                <h3 style="color: var(--vermelho); margin-top: 0;">⚠️ O DESAFIO DO PAINEL FRONTAL</h3>
+                <p>Estes são os fios mais finos e chatos. Eles ligam o botão Power e o LED do gabinete.</p>
+                <div class="detalhe-iniciante" style="background: #fffafa;">
+                    <b>Passo a passo:</b>
+                    <br>① Identifique o conector JFP1 na placa-mãe.
+                    <br>② Localize Power SW, Reset SW, Power LED e HDD LED.
+                    <br>③ Encaixe os conectores observando o triângulo de positivo (+).
+                    <br>④ Se o LED não acender, inverta apenas o conector do LED.
+                    <br><br>
+                    ✓ Se o sistema não ligar, esses fios não impedem o boot. Verifique o ATX e o EPS primeiro.
+                </div>
+            </div>
+
+            <div class="peça-card">
+                <img src="../img/coneccao gabinete placa.webp" alt="Esquema painel frontal JFP1">
+                <div class="peça-info">
+                    <h3>3. Conectando o Painel Frontal (JFP1)</h3>
+                    <p>Olhe atentamente para as letras minúsculas escritas na placa-mãe, logo abaixo dos pinos.</p>
+                    <div class="detalhe-iniciante">
+                        <b>Esquema Comum:</b> O Power SW costuma ficar nos pinos de cima, à direita. O Reset logo abaixo dele. Consulte o QR Code do manual da sua placa para não errar!
+                    </div>
+                </div>
+            </div>
+
+            
+
+            <div class="peça-card">
+                <img src="../img/cabo usb 3.0.jpg" alt="Conector USB 3.0 e HD Audio">
+                <div class="peça-info">
+                    <h3>4. USB 3.0 e Áudio Frontal</h3>
+                    <p><b>Se estes cabos estiverem soltos, o painel frontal não funciona.</b> O encaixe é simples, só exige atenção ao alinhamento.</p>
+                    <div class="detalhe-iniciante">
+                        <b>Passo a passo:</b>
+                        <br>① Encontre o conector USB 3.0 e o conector de áudio na placa-mãe.
+                        <br>② Alinhe o pino faltante do cabo com o pino ausente no conector.
+                        <br>③ Empurre firmemente até encaixar.
+                        <br>④ Verifique se o cabo está reto, sem dobrar de forma forçada.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="area-final">
+            <div id="status-aprovacao">
+                <h3>O sistema está energizado?</h3>
+                <p>Se você conectou tudo certo, estamos a um passo de apertar o botão de ligar pela primeira vez!</p>
+                <button class="btn-quiz" onclick="irParaQuiz()">TESTAR CONHECIMENTO DE CABOS</button>
+            </div>
+
+            <div id="box-concluir" style="display:none">
+                <h3 style="color: var(--verde)">Engenheiro de Cabos Validado! ⚡</h3>
+                <p>Seu PC agora tem energia e comunicação com o gabinete.</p>
+                <button class="btn-concluir" id="btn-finalizar" onclick="concluirModulo()" style="display:inline-block; background: var(--verde); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">SALVAR PROGRESSO ✅</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function inicializar() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) {
+            window.location.href = "../index.html";
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('aprovado') === 'true') {
+            document.getElementById('status-aprovacao').style.display = 'none';
+            document.getElementById('box-concluir').style.display = 'block';
+            document.getElementById('btn-finalizar').style.display = 'inline-block';
+        }
+    }
+
+    function irParaQuiz() {
+        // ⚠️ ATENÇÃO: Altere o final de "?modulo=1" para o número correspondente da aula
+        window.location.href = `../quiz.html?modulo=7`; 
+    }
+
+    async function concluirModulo() {
+        try {
+            // Captura o usuário logado e puxa os dados do perfil dele
+            const { data: { user }, error: userError } = await _supabase.auth.getUser();
+            
+            if (userError || !user) {
+                alert("Sessão expirada ou usuário inválido. Faça login novamente.");
+                window.location.href = "../index.html";
+                return;
+            }
+
+            // Envia todos os dados obrigatórios para salvar na tabela 'progresso_alunos'
+            const { error } = await _supabase
+                .from('progresso_alunos')
+                .upsert({ 
+                    user_id: user.id, 
+                    modulo_id: 7,           // ⚠️ ATENÇÃO: Altere este número de acordo com o módulo da aula
+                    concluido: true, 
+                    email: user.email,      // 🌟 CORREÇÃO: Preenche o email obrigatório exigido pelo banco
+                    data_conclusao: new Date().toISOString() // Preenche o horário atual no formato correto do Postgres
+                }, { 
+                    onConflict: 'user_id, modulo_id' 
+                });
+
+            if (!error) {
+                alert("Progresso salvo com sucesso!");
+                window.location.href = "../modulos.html";
+            } else {
+                console.error("Erro do Supabase:", error);
+                alert("Erro ao salvar no banco de dados: " + error.message);
+            }
+        } catch (err) {
+            console.error("Erro inesperado:", err);
+            alert("Ocorreu um erro inesperado ao salvar o progresso.");
+        }
+    }
+
+    inicializar();
+</script>
+</body>
+</html>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <title>Módulo 13 - Vídeos Tutoriais | Telecurso</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --azul-escuro: #003366;
+            --azul-claro: #0056b3;
+            --amarelo: #ffcc00;
+            --cinza-claro: #f8f9fa;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            padding: 20px; 
+            max-width: 1000px; 
+            margin: auto; 
+            background: #e9ecef;
+            color: #333;
+        }
+        .container { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+        }
+        h1 { color: var(--azul-escuro); text-align: center; border-bottom: 3px solid var(--amarelo); padding-bottom: 10px; }
+        h2 { color: var(--azul-claro); margin-top: 40px; }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* Proporção 16:9 */
+            height: 0;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #000;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .video-info {
+            background: var(--cinza-claro);
+            padding: 20px;
+            border-radius: 0 0 10px 10px;
+            margin-bottom: 40px;
+            border-left: 5px solid var(--azul-claro);
+        }
+        .creditos {
+            font-weight: bold;
+            color: #555;
+            display: block;
+            margin-top: 10px;
+        }
+        .btn-concluir { 
+            background: #28a745; 
+            color: white; 
+            border: none; 
+            padding: 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            width: 100%; 
+            font-weight: bold;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+        .btn-concluir:hover { background: #218838; }
+        /* Container da Grade de Shorts */
+        .shorts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* Ajuste da proporção para Shorts (9:16) */
+        .short-card {
+            position: relative;
+            padding-bottom: 177.78%; /* Proporção vertical */
+            height: 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            background: #000;
+        }
+
+        .short-card iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .shorts-title {
+            color: var(--azul-escuro);
+            border-left: 5px solid var(--amarelo);
+            padding-left: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Módulo 13: Laboratório Prático em Vídeo</h1>
+        <p>Assista aos vídeos abaixo para consolidar o conhecimento prático de montagem e software. Estes vídeos são essenciais para a sua formação técnica.</p>
+
+        <h2>1. Montagem Completa Passo a Passo</h2>
+        <div class="video-container">
+            <iframe 
+                src="https://www.youtube.com/embed/6uVbxr09DBE?rel=0&showinfo=0" 
+                title="COMO MONTAR UM PC PASSO A PASSO COMPLETO 2024" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin" 
+                allowfullscreen>
+            </iframe>
+        </div>
+        <div class="video-info">
+            <p>Acompanhe detalhadamente a instalação física de todos os componentes no gabinete.</p>
+            <span class="creditos">🎬 Créditos: MW Informática</span>
+            <small><a href="https://www.youtube.com/watch?v=6uVbxr09DBE" target="_blank">Ver no YouTube</a></small>
+        </div>
+
+
+
+
+
+
+
+
+
+        <div class="video-container">
+    <iframe 
+        src="https://www.youtube.com/embed/-7d_Tzrc3_w?rel=0&showinfo=0" 
+        title="Como instalar Water Cooler passo a passo" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerpolicy="strict-origin-when-cross-origin" 
+        allowfullscreen>
+    </iframe>
+</div>
+<div class="video-info">
+    <p>Aprenda a fixar o radiador e a bomba, além de ligar corretamente os cabos RGB e de alimentação.</p>
+    <span class="creditos">🎬 Créditos: MW Informática</span>
+    <small><a href="https://www.youtube.com/watch?v=-7d_Tzrc3_w" target="_blank">Ver no YouTube</a></small>
+</div>
+
+
+
+
+
+
+
+
+<div class="video-container">
+    <iframe 
+        src="https://www.youtube.com/embed/Gp3NjQKFu2o?rel=0&showinfo=0" 
+        title="Como escolher peças de PC Gamer" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerpolicy="strict-origin-when-cross-origin" 
+        allowfullscreen>
+    </iframe>
+</div>
+<div class="video-info">
+    <p>Guia 2025 sobre como escolher processador, placa-mãe e memórias compatíveis entre si.</p>
+    <span class="creditos">🎬 Créditos: Gabe Indica</span>
+    <small><a href="https://www.youtube.com/watch?v=Gp3NjQKFu2o" target="_blank">Ver no YouTube</a></small>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<div class="video-container">
+    <iframe 
+        src="https://www.youtube.com/embed/XpPv_2jzzrc?rel=0&showinfo=0" 
+        title="Como arrumar todos os cabos dentro do PC" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerpolicy="strict-origin-when-cross-origin" 
+        allowfullscreen>
+    </iframe>
+</div>
+<div class="video-info">
+    <p>Aprenda técnicas profissionais para esconder e organizar a fiação interna.</p>
+    <span class="creditos">🎬 Créditos: MW Informática</span>
+    <small><a href="https://www.youtube.com/watch?v=XpPv_2jzzrc" target="_blank">Ver no YouTube</a></small>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="video-container">
+    <iframe 
+        src="https://www.youtube.com/embed/BMBo_V8Tvkg?rel=0&showinfo=0" 
+        title="Erros comuns na montagem de PC" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerpolicy="strict-origin-when-cross-origin" 
+        allowfullscreen>
+    </iframe>
+</div>
+<div class="video-info">
+    <p>Conheça os erros mais frequentes de iniciantes para garantir que sua montagem seja segura.</p>
+    <span class="creditos">🎬 Créditos: TecnoArt</span>
+    <small><a href="https://www.youtube.com/watch?v=BMBo_V8Tvkg" target="_blank">Ver no YouTube</a></small>
+</div>
+
+
+
+
+
+
+
+
+
+        <h2>2. Como Formatar o PC e Instalar o Windows</h2>
+        <div class="video-container">
+            <iframe 
+                src="https://www.youtube.com/embed/gaos8yXNwyk?rel=0&showinfo=0" 
+                title="COMO FORMATAR O PC DA FORMA RÁPIDA, CERTA E FÁCIL" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin" 
+                allowfullscreen>
+            </iframe>
+        </div>
+        
+        <div class="video-info">
+            <p>Aprenda a criar a média de instalação e configurar o sistema operacional do zero.</p>
+            <span class="creditos">🎬 Créditos: Iuri Indica</span>
+            <small><a href="https://www.youtube.com/watch?v=gaos8yXNwyk" target="_blank">Ver no YouTube</a></small>
+        </div>
+
+
+
+
+
+
+
+        <div class="video-container">
+    <iframe 
+        src="https://www.youtube.com/embed/cC4_cx2iC4E?rel=0&showinfo=0" 
+        title="Otimização do Windows 2026" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerpolicy="strict-origin-when-cross-origin" 
+        allowfullscreen>
+    </iframe>
+</div>
+<div class="video-info">
+    <p>Dicas atuais de 2026 para remover processos inúteis e melhorar o tempo de resposta do sistema.</p>
+    <span class="creditos">🎬 Créditos: iGust</span>
+    <small><a href="https://www.youtube.com/watch?v=cC4_cx2iC4E" target="_blank">Ver no YouTube</a></small>
+</div>
+
+
+
+
+
+<div class="video-container">
+    <iframe 
+        src="https://www.youtube.com/embed/91kgm8aYlfc?rel=0&showinfo=0" 
+        title="Como testar as peças do seu PC" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerpolicy="strict-origin-when-cross-origin" 
+        allowfullscreen>
+    </iframe>
+</div>
+<div class="video-info">
+    <p>Aprenda a usar ferramentas de Benchmark para verificar a temperatura e a performance de cada componente.</p>
+    <span class="creditos">🎬 Créditos: KaBuM! TV</span>
+    <small><a href="https://www.youtube.com/watch?v=91kgm8aYlfc" target="_blank">Ver no YouTube</a></small>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="video-container">
+    <iframe 
+        src="https://www.youtube.com/embed/6Z-iFYyzpsg?rel=0&showinfo=0" 
+        title="Limpeza de PC Gamer Passo a Passo" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerpolicy="strict-origin-when-cross-origin" 
+        allowfullscreen>
+    </iframe>
+</div>
+<div class="video-info">
+    <p>Tutorial de como fazer uma limpeza profunda e segura, incluindo a troca de pasta térmica.</p>
+    <span class="creditos">🎬 Créditos: TecnoArt</span>
+    <small><a href="https://www.youtube.com/watch?v=6Z-iFYyzpsg" target="_blank">Ver no YouTube</a></small>
+</div>
+
+
+
+
+
+
+
+
+<h2 class="shorts-title">⚡ Dicas Rápidas (Shorts)</h2>
+<div class="shorts-grid">
+    <div class="short-card">
+        <iframe 
+            src="https://www.youtube.com/embed/adbSlSAJlas" 
+            title="Colocando o processador na placa mãe" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <div class="short-card">
+        <iframe 
+            src="https://www.youtube.com/embed/mAy8_DHxIwY" 
+            title="instalando memorias ram" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <div class="short-card">
+        <iframe 
+            src="https://www.youtube.com/embed/DtV5OrA9764" 
+            title="Instalacao do cooler do processador" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <div class="short-card">
+        <iframe 
+            src="https://www.youtube.com/embed/9ocdxGSGzSs" 
+            title="Maneira correta de aplicar pasta térmica" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <div class="short-card">
+        <iframe 
+            src="https://www.youtube.com/embed/ipkWPvmGk3k" 
+            title="Posição correta das ventoinhas" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <div class="short-card">
+        <iframe 
+            src="https://www.youtube.com/embed/N0XhICtiJPw" 
+            title="PC não dá vídeo - Dica rápida" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
+    </div>
+</div>
+<button class="btn-concluir" id="btnConcluir" onclick="concluirAula(13)">
+    LI O CONTEÚDO E ASSISTI AOS VÍDEOS
+</button>
+
+
+ <script>
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function inicializar() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) {
+            window.location.href = "../index.html";
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('aprovado') === 'true') {
+            document.getElementById('status-aprovacao').style.display = 'none';
+            document.getElementById('box-concluir').style.display = 'block';
+            document.getElementById('btn-finalizar').style.display = 'inline-block';
+        }
+    }
+
+    function irParaQuiz() {
+        // ⚠️ ATENÇÃO: Altere o final de "?modulo=1" para o número correspondente da aula
+        window.location.href = `../quiz.html?modulo=13`; 
+    }
+
+    async function concluirModulo() {
+        try {
+            // Captura o usuário logado e puxa os dados do perfil dele
+            const { data: { user }, error: userError } = await _supabase.auth.getUser();
+            
+            if (userError || !user) {
+                alert("Sessão expirada ou usuário inválido. Faça login novamente.");
+                window.location.href = "../index.html";
+                return;
+            }
+
+            // Envia todos os dados obrigatórios para salvar na tabela 'progresso_alunos'
+            const { error } = await _supabase
+                .from('progresso_alunos')
+                .upsert({ 
+                    user_id: user.id, 
+                    modulo_id: 13,           // ⚠️ ATENÇÃO: Altere este número de acordo com o módulo da aula
+                    concluido: true, 
+                    email: user.email,      // 🌟 CORREÇÃO: Preenche o email obrigatório exigido pelo banco
+                    data_conclusao: new Date().toISOString() // Preenche o horário atual no formato correto do Postgres
+                }, { 
+                    onConflict: 'user_id, modulo_id' 
+                });
+
+            if (!error) {
+                alert("Progresso salvo com sucesso!");
+                window.location.href = "../modulos.html";
+            } else {
+                console.error("Erro do Supabase:", error);
+                alert("Erro ao salvar no banco de dados: " + error.message);
+            }
+        } catch (err) {
+            console.error("Erro inesperado:", err);
+            alert("Ocorreu um erro inesperado ao salvar o progresso.");
+        }
+    }
+
+    inicializar();
+</script>
+</body>
+</html>
