@@ -54,6 +54,23 @@
         th { text-align: left; padding: 12px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
         td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
 
+        /* Table tweaks */
+        .table-container table th, .table-container table td { padding: 10px 14px; vertical-align: middle; }
+        .table-container table tr:hover { background: #fbfdff; }
+
+        /* Buttons */
+        .btn { border: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; font-size: 14px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-approve { background: #10b981; color: white; }
+        .btn-reject { background: #ef4444; color: white; }
+        .btn-trash { background: transparent; color: var(--danger); border: 1px solid rgba(239,68,68,0.12); padding:6px; border-radius:6px; }
+
+        /* Status badges */
+        .status-badge { padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; text-transform: uppercase; display:inline-block; }
+        .status-aprovado { background: #dcfce7; color: #166534; }
+        .status-bloqueado { background: #fee2e2; color: #7f1d1d; }
+
         .btn-trash { background: #fee2e2; color: var(--danger); border: none; padding: 8px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
         .btn-trash:hover { background: var(--danger); color: white; }
 
@@ -83,6 +100,22 @@
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* Modal styles */
+        .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(2,6,23,0.45); align-items: center; justify-content: center; z-index: 50; }
+        .modal-card { background: var(--bg-card); width: 560px; max-width: 96%; border-radius: 12px; padding: 18px; box-shadow: 0 10px 30px rgba(2,6,23,0.25); }
+        .modal-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom: 12px; }
+        .modal-title { font-weight:800; font-size:16px; color:var(--text-main); }
+        .modal-close { background:#f1f5f9; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:700; }
+        .modal-body { max-height: 360px; overflow: auto; padding-right:6px; border-radius:6px; }
+        .module-row { display:flex; align-items:center; gap:14px; padding:10px 6px; border-bottom:1px solid var(--border); }
+        .module-checkbox { width: 20px; height:20px; accent-color: var(--primary); }
+        .module-label { flex:1; font-weight:700; color:var(--text-muted); text-transform: uppercase; font-size:13px; display:flex; justify-content:space-between; align-items:center; }
+        .modal-footer { display:flex; justify-content:flex-end; gap:10px; margin-top:14px; }
+        .btn-cancel { background:#f1f5f9; color:var(--text-main); padding:10px 14px; border-radius:10px; font-weight:700; }
+        .btn-save { background:var(--primary); color:white; padding:10px 16px; border-radius:10px; font-weight:800; }
+        .modal-body::-webkit-scrollbar { width:8px; }
+        .modal-body::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:8px; }
     </style>
 </head>
 <body>
@@ -166,15 +199,15 @@
 
                 <div class="table-container">
                     <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">Excluir</th>
-                                <th>Aluno (Email)</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-alunos"></tbody>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">Excluir</th>
+                                        <th>Aluno (Email)</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-alunos"></tbody>
                     </table>
                 </div>
             </div>
@@ -190,6 +223,30 @@
         </div>
 
     </main>
+
+    <!-- Modal de Verificação de Módulos -->
+    <div id="modal-modulos" class="modal-backdrop" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="modal-header">
+                <div>
+                    <div id="modal-title" class="modal-title">Verificação de Módulos</div>
+                    <div id="modal-email-label" style="font-weight:700; color:var(--text-muted); font-size:13px;">&nbsp;</div>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button class="modal-close" onclick="fecharModalModulos()">Fechar</button>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
+                <button class="btn btn-approve" onclick="aprovarAvaliacao(modalEstado.email)">Aprovar na avaliação</button>
+                <button class="btn btn-reject" onclick="reprovarAvaliacao(modalEstado.email)">Reprovar na avaliação</button>
+            </div>
+            <div id="lista-modulos" class="modal-body" aria-live="polite"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="fecharModalModulos()">Cancelar</button>
+                <button class="btn-save" onclick="salvarModulosModal()">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
@@ -327,20 +384,26 @@
 
         function renderizarTabela(lista) {
             const tbody = document.getElementById('tabela-alunos');
-            tbody.innerHTML = lista.map(aluno => `
+            tbody.innerHTML = lista.map(aluno => {
+                const statusText = aluno.status || '';
+                const isApproved = statusText.toLowerCase() === 'aprovado';
+                const actionButton = isApproved
+                    ? `<button class="btn" style="background:#fee2e2; color:var(--danger); font-weight:700; padding:8px 12px;" onclick="toggleApproval('${aluno.email}')">Reprovar</button>`
+                    : `<button class="btn btn-primary" style="padding:8px 12px;" onclick="toggleApproval('${aluno.email}')">Aprovar</button>`;
+
+                return `
                 <tr>
                     <td><button class="btn-trash" onclick="deletarAluno('${aluno.email}')"><i class="fas fa-trash-alt"></i></button></td>
                     <td><b>${aluno.email}</b></td>
-                    <td><span class="status-badge status-${aluno.status}">${aluno.status}</span></td>
+                    <td><span class="status-badge status-${aluno.status}">${statusText}</span></td>
                     <td>
-                        <select onchange="atualizarStatusAluno('${aluno.email}', this.value)" style="margin:0; padding:5px;">
-                            <option value="">Alterar...</option>
-                            <option value="aprovado">Aprovar</option>
-                            <option value="bloqueado">Bloquear</option>
-                        </select>
+                        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                            ${actionButton}
+                            <button class="btn" style="padding:8px; background:#eef2ff; color:var(--primary); font-weight:700;" onclick="abrirVerificacaoModulos('${aluno.email}')">Verificar Módulos</button>
+                        </div>
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
         }
 
         function filtrarAlunos() {
@@ -360,6 +423,264 @@
             if(!status) return;
             await _supabase.from('perfil_alunos').update({ status }).eq('email', email);
             carregarAlunos();
+        }
+
+        async function toggleApproval(email) {
+            try {
+                const aluno = todosAlunos.find(a => a.email === email) || {};
+                const atual = (aluno.status || '').toLowerCase();
+                const novo = (atual === 'aprovado') ? 'bloqueado' : 'aprovado';
+                const { error } = await _supabase.from('perfil_alunos').update({ status: novo }).eq('email', email);
+                if (error) throw error;
+                carregarAlunos();
+            } catch (err) {
+                console.error('toggleApproval error', err);
+                alert('Erro ao alterar aprovação: ' + (err.message || err));
+            }
+        }
+
+        async function alterarModulo(email, delta) {
+            try {
+                const aluno = todosAlunos.find(a => a.email === email) || {};
+                const atual = parseInt(aluno.modulo) || 0;
+                const novo = Math.max(0, atual + delta);
+                const { error } = await _supabase.from('perfil_alunos').update({ modulo: novo }).eq('email', email);
+                if (error) throw error;
+                carregarAlunos();
+            } catch (err) {
+                console.error('alterarModulo error', err);
+                alert('Erro ao alterar módulo: ' + (err.message || err));
+            }
+        }
+
+        async function toggleProva(email) {
+            try {
+                const aluno = todosAlunos.find(a => a.email === email) || {};
+                const atual = !!aluno.prova_liberada;
+                const novo = !atual;
+                const { error } = await _supabase.from('perfil_alunos').update({ prova_liberada: novo }).eq('email', email);
+                if (error) throw error;
+                carregarAlunos();
+            } catch (err) {
+                console.error('toggleProva error', err);
+                alert('Erro ao atualizar estado da prova: ' + (err.message || err));
+            }
+        }
+
+        // --- VERIFICAÇÃO DE MÓDULOS E LIBERAÇÃO AUTOMÁTICA DA PROVA ---
+        const TOTAL_MODULOS = 15; // ajuste conforme número real de módulos (aula0..aula14)
+        let modalEstado = { email: null, checks: {} };
+
+        function abrirVerificacaoModulos(email) {
+            modalEstado.email = email;
+            document.getElementById('modal-email-label').innerText = email;
+            document.getElementById('modal-modulos').style.display = 'flex';
+            renderizarChecks(email);
+        }
+
+        async function fetchUserId(email) {
+            try {
+                const { data, error } = await _supabase.from('perfil_alunos').select('user_id').eq('email', email).maybeSingle();
+                if (error) {
+                    console.error('fetchUserId error', error);
+                }
+                if (data && data.user_id) return data.user_id;
+
+                // Fallback: procurar em progresso_alunos por último registro com esse email
+                const { data: pData, error: pErr } = await _supabase.from('progresso_alunos').select('user_id').eq('email', email).order('data_conclusao', { ascending: false }).limit(1).maybeSingle();
+                if (pErr) {
+                    console.error('fetchUserId fallback error', pErr);
+                }
+                if (pData && pData.user_id) return pData.user_id;
+
+                return null;
+            } catch (e) {
+                console.error('fetchUserId exception', e);
+                return null;
+            }
+        }
+
+        async function aprovarAvaliacao(email) {
+            if (!email) return;
+            try {
+                const userId = await fetchUserId(email);
+                if (!userId) {
+                    alert('Usuário não encontrado para aprovar a avaliação.');
+                    return;
+                }
+
+                const payload = {
+                    user_id: userId,
+                    email: email,
+                    modulo_id: 100,
+                    concluido: true,
+                    nota: 100,
+                    respostas_aluno: 'avancado por adm',
+                    data_conclusao: new Date().toISOString()
+                };
+
+                const { error } = await _supabase
+                    .from('progresso_alunos')
+                    .upsert(payload, { onConflict: 'user_id,modulo_id' });
+
+                if (error) throw error;
+
+                await _supabase.from('perfil_alunos').update({ prova_liberada: true }).eq('email', email);
+                alert(`Avaliação do módulo 100 aprovada com 100% para ${email}.`);
+                renderizarChecks(email);
+                carregarAlunos();
+            } catch (err) {
+                console.error('aprovarAvaliacao error', err);
+                alert('Erro ao aprovar avaliação: ' + (err.message || err));
+            }
+        }
+
+        async function reprovarAvaliacao(email) {
+            if (!email) return;
+            try {
+                const userId = await fetchUserId(email);
+                if (!userId) {
+                    alert('Usuário não encontrado para reprovar a avaliação.');
+                    return;
+                }
+
+                const { error } = await _supabase
+                    .from('progresso_alunos')
+                    .delete()
+                    .eq('user_id', userId)
+                    .eq('modulo_id', 100);
+
+                if (error) throw error;
+
+                await _supabase.from('perfil_alunos').update({ prova_liberada: false }).eq('email', email);
+                alert(`Linha da avaliação do módulo 100 removida para ${email}.`);
+                renderizarChecks(email);
+                carregarAlunos();
+            } catch (err) {
+                console.error('reprovarAvaliacao error', err);
+                alert('Erro ao reprovar avaliação: ' + (err.message || err));
+            }
+        }
+
+        function fecharModalModulos() {
+            document.getElementById('modal-modulos').style.display = 'none';
+            modalEstado = { email: null, checks: {} };
+        }
+
+        async function renderizarChecks(email) {
+            const container = document.getElementById('lista-modulos');
+            container.innerHTML = '<div style="color:var(--text-muted);">Carregando...</div>';
+            try {
+                const userId = await fetchUserId(email);
+                if (!userId) {
+                    container.innerHTML = '<div style="color:var(--danger);">Usuário não encontrado (user_id)</div>';
+                    return;
+                }
+                const { data } = await _supabase.from('progresso_alunos').select('*').eq('user_id', userId).order('data_conclusao', { ascending: false });
+                // Construir mapa do último status por módulo (primeiro encontrado é o mais recente)
+                const latest = {};
+                (data || []).forEach(r => {
+                    const m = Number(r.modulo_id);
+                    if (latest[m] === undefined) latest[m] = !!r.concluido;
+                });
+                modalEstado.checks = {};
+                const nodes = [];
+                for (let i = 0; i < TOTAL_MODULOS; i++) {
+                    const checked = !!latest[i];
+                    modalEstado.checks[i] = checked;
+                    nodes.push(`
+                        <div class="module-row">
+                            <input type="checkbox" class="module-checkbox" id="mod_chk_${i}" ${checked ? 'checked' : ''} onchange="toggleModuleImmediate('${email}', ${i}, this.checked)">
+                            <label for="mod_chk_${i}" class="module-label">
+                                <span>Módulo ${i}</span>
+                                <span style="font-size:12px; color:${checked ? '#16a34a' : 'var(--text-muted)'}; font-weight:800;">${checked ? 'APROVADO' : 'PENDENTE'}</span>
+                            </label>
+                        </div>
+                    `);
+                }
+                container.innerHTML = nodes.join('');
+            } catch (err) {
+                console.error('Erro ao carregar progresso:', err);
+                container.innerHTML = '<div style="color:var(--danger);">Erro ao carregar progresso</div>';
+            }
+        }
+
+        // Atualiza imediatamente ao marcar/desmarcar
+        async function toggleModuleImmediate(email, moduloId, checked) {
+            try {
+                // Sempre inserir nova linha para manter histórico, conforme solicitado
+                const userId = await fetchUserId(email);
+                if (!userId) {
+                    alert('Usuário não encontrado (não foi possível obter user_id)');
+                    return;
+                }
+
+                if (checked) {
+                    // inserir ou atualizar (upsert) o registro para evitar violação de unique constraint
+                    const payload = {
+                        user_id: userId,
+                        email,
+                        modulo_id: moduloId,
+                        concluido: true,
+                        data_conclusao: new Date().toISOString()
+                    };
+                    const res = await _supabase.from('progresso_alunos').upsert([payload], { onConflict: 'user_id,modulo_id' }).select();
+                    console.log('upsert progresso_alunos result', res);
+                    if (res.error) {
+                        console.error('Supabase upsert error', res.error);
+                        alert('Erro ao inserir/atualizar progresso: ' + res.error.message);
+                        return;
+                    }
+                    modalEstado.checks[moduloId] = true;
+                } else {
+                    // ao desmarcar, remover a linha existente (não inserir nova)
+                    const res = await _supabase.from('progresso_alunos').delete().eq('user_id', userId).eq('modulo_id', moduloId).select();
+                    console.log('delete progresso_alunos result', res);
+                    if (res.error) {
+                        console.error('Supabase delete error', res.error);
+                        alert('Erro ao deletar progresso: ' + res.error.message);
+                        return;
+                    }
+                    modalEstado.checks[moduloId] = false;
+                }
+
+                await verificarLiberacaoProva(email);
+            } catch (err) {
+                console.error('toggleModuleImmediate error', err);
+                alert('Erro ao atualizar módulo: ' + (err.message || err));
+            }
+        }
+
+        async function salvarModulosModal() {
+            // Já salvamos a cada alteração, mas aproveitamos para recarregar a tabela e fechar
+            if (!modalEstado.email) return fecharModalModulos();
+            await verificarLiberacaoProva(modalEstado.email);
+            carregarAlunos();
+            fecharModalModulos();
+        }
+
+        async function verificarLiberacaoProva(email) {
+            try {
+                const userId = await fetchUserId(email);
+                if (!userId) {
+                    console.warn('verificarLiberacaoProva: user_id não encontrado');
+                    return;
+                }
+                const { data } = await _supabase.from('progresso_alunos').select('*').eq('user_id', userId).order('data_conclusao', { ascending: false });
+                // pegar o último estado por módulo (primeiro encontrado na listagem ordenada)
+                const latest = {};
+                (data || []).forEach(r => {
+                    const m = Number(r.modulo_id);
+                    if (latest[m] === undefined) latest[m] = !!r.concluido;
+                });
+                const concluidosCount = Object.keys(latest).filter(k => latest[k]).length;
+                const liberado = concluidosCount >= TOTAL_MODULOS;
+                const { error } = await _supabase.from('perfil_alunos').update({ prova_liberada: liberado }).eq('user_id', userId);
+                if (error) console.warn('Não foi possível atualizar prova_liberada:', error);
+                carregarAlunos();
+            } catch (err) {
+                console.error('verificarLiberacaoProva error', err);
+            }
         }
 
         // --- CHAT ---
