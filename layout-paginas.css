@@ -1,0 +1,196 @@
+:root {
+    --hw-carbon: #0d1117;
+    --hw-pcb: #161b22;
+    --hw-copper: #ff7a1a;
+    --hw-gold: #facc15;
+    --hw-cyan: #38bdf8;
+    --hw-green: #22c55e;
+    --hw-danger: #ef4444;
+    --bg-main: #08090c;
+    --surface-card: #161b22;
+    --surface-hover: #1c2129;
+    --text-primary: #ffffff;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border-tech: #30363d;
+    --border-highlight: #484f58;
+}
+
+body {
+    background: var(--bg-main) !important;
+    background-image: linear-gradient(180deg, #08090c 0%, #0f1319 100%) !important;
+    color: var(--text-secondary) !important;
+}
+
+.container,
+.main-card,
+.calc-container {
+    background: var(--surface-card) !important;
+    color: var(--text-secondary) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+header,
+.header,
+.header-calc {
+    background: var(--hw-carbon) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--hw-copper) !important;
+}
+
+h1,
+h2,
+h3,
+.header-calc h2,
+.card-ferramenta h3,
+.nota-box,
+.watts-total,
+.valor {
+    color: var(--text-primary) !important;
+}
+
+.regras-box,
+.questao,
+.opcoes label,
+.regras-box h3,
+.info-box,
+.card-ferramenta,
+.ficha-tecnica,
+.resultado-box {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-color: var(--border-tech) !important;
+}
+
+.regras-box *,
+.questao *,
+.opcoes label *,
+.info-box *,
+.card-ferramenta *,
+.ficha-tecnica *,
+.resultado-box * {
+    color: #ffffff !important;
+}
+
+.questao p,
+.info-box label,
+.valor,
+.resultado-box > div:first-child {
+    color: var(--hw-cyan) !important;
+}
+
+.opcoes label:hover,
+.card-ferramenta:hover {
+    background: var(--surface-hover) !important;
+    border-color: var(--hw-copper) !important;
+}
+
+.btn-enviar,
+.btn-join,
+.btn-calc,
+.btn-abrir {
+    background: var(--hw-copper) !important;
+    color: #000000 !important;
+    border-color: var(--hw-copper) !important;
+}
+
+.btn-enviar:hover,
+.btn-join:hover,
+.btn-calc:hover {
+    background: #ff8c38 !important;
+}
+
+.live-badge {
+    background: rgba(34, 197, 94, 0.15) !important;
+    color: var(--hw-green) !important;
+    border-color: var(--hw-green) !important;
+}
+
+.dot,
+.bg-success {
+    background: var(--hw-green) !important;
+}
+
+.bg-danger {
+    background: var(--hw-danger) !important;
+}
+
+.aviso-card {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-color: var(--hw-danger) !important;
+}
+
+.aviso-card * {
+    color: #ffffff !important;
+}
+
+select,
+input {
+    background: var(--hw-carbon) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-tech) !important;
+}
+
+.btn-voltar,
+.voltar {
+    color: var(--hw-cyan) !important;
+}
+
+.btn-voltar:hover,
+.voltar:hover {
+    color: var(--hw-copper) !important;
+}
+
+.instrucao,
+.label,
+.btn-voltar {
+    color: var(--text-secondary) !important;
+}
+
+.info-item {
+    border-bottom-color: var(--border-tech) !important;
+}
+
+.congratulations-card {
+    background: var(--surface-card) !important;
+    color: var(--text-secondary) !important;
+    border-color: var(--hw-gold) !important;
+}
+
+.aprovado {
+    color: var(--hw-green) !important;
+}
+
+.reprovado {
+    color: var(--hw-danger) !important;
+}
+
+.btn-ready {
+    background: var(--hw-copper) !important;
+    color: #000000 !important;
+}
+
+.btn-ready[style*="22c55e"] {
+    background: var(--hw-green) !important;
+    color: #000000 !important;
+}
+
+.loader {
+    border-color: var(--border-tech) !important;
+    border-top-color: var(--hw-copper) !important;
+}
+
+#preview-area {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-color: var(--border-tech) !important;
+}
+
+#preview-area * {
+    color: #ffffff !important;
+}
+
+#dados-usuario label {
+    color: var(--text-primary) !important;
+}

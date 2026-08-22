@@ -236,10 +236,6 @@
                     <button class="modal-close" onclick="fecharModalModulos()">Fechar</button>
                 </div>
             </div>
-            <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
-                <button class="btn btn-approve" onclick="aprovarAvaliacao(modalEstado.email)">Aprovar na avaliação</button>
-                <button class="btn btn-reject" onclick="reprovarAvaliacao(modalEstado.email)">Reprovar na avaliação</button>
-            </div>
             <div id="lista-modulos" class="modal-body" aria-live="polite"></div>
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="fecharModalModulos()">Cancelar</button>
@@ -397,7 +393,7 @@
                     <td><b>${aluno.email}</b></td>
                     <td><span class="status-badge status-${aluno.status}">${statusText}</span></td>
                     <td>
-                        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                        <div style="display:flex; gap:8px; align-items:center;">
                             ${actionButton}
                             <button class="btn" style="padding:8px; background:#eef2ff; color:var(--primary); font-weight:700;" onclick="abrirVerificacaoModulos('${aluno.email}')">Verificar Módulos</button>
                         </div>
@@ -497,68 +493,6 @@
             } catch (e) {
                 console.error('fetchUserId exception', e);
                 return null;
-            }
-        }
-
-        async function aprovarAvaliacao(email) {
-            if (!email) return;
-            try {
-                const userId = await fetchUserId(email);
-                if (!userId) {
-                    alert('Usuário não encontrado para aprovar a avaliação.');
-                    return;
-                }
-
-                const payload = {
-                    user_id: userId,
-                    email: email,
-                    modulo_id: 100,
-                    concluido: true,
-                    nota: 100,
-                    respostas_aluno: 'avancado por adm',
-                    data_conclusao: new Date().toISOString()
-                };
-
-                const { error } = await _supabase
-                    .from('progresso_alunos')
-                    .upsert(payload, { onConflict: 'user_id,modulo_id' });
-
-                if (error) throw error;
-
-                await _supabase.from('perfil_alunos').update({ prova_liberada: true }).eq('email', email);
-                alert(`Avaliação do módulo 100 aprovada com 100% para ${email}.`);
-                renderizarChecks(email);
-                carregarAlunos();
-            } catch (err) {
-                console.error('aprovarAvaliacao error', err);
-                alert('Erro ao aprovar avaliação: ' + (err.message || err));
-            }
-        }
-
-        async function reprovarAvaliacao(email) {
-            if (!email) return;
-            try {
-                const userId = await fetchUserId(email);
-                if (!userId) {
-                    alert('Usuário não encontrado para reprovar a avaliação.');
-                    return;
-                }
-
-                const { error } = await _supabase
-                    .from('progresso_alunos')
-                    .delete()
-                    .eq('user_id', userId)
-                    .eq('modulo_id', 100);
-
-                if (error) throw error;
-
-                await _supabase.from('perfil_alunos').update({ prova_liberada: false }).eq('email', email);
-                alert(`Linha da avaliação do módulo 100 removida para ${email}.`);
-                renderizarChecks(email);
-                carregarAlunos();
-            } catch (err) {
-                console.error('reprovarAvaliacao error', err);
-                alert('Erro ao reprovar avaliação: ' + (err.message || err));
             }
         }
 
