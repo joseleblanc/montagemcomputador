@@ -58,6 +58,7 @@
             .peça-card img { width: 260px; }
         }
     </style>
+    <link rel="stylesheet" href="layout-aulas.css">
 </head>
 <body>
 
@@ -186,36 +187,69 @@
         </div>
     </div>
 
-    <script>
-        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<script>
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function inicializar() {
-            const { data: { session } } = await _supabase.auth.getSession();
-            if (!session) { window.location.href = "../index.html"; return; }
-
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('aprovado') === 'true') {
-                document.getElementById('status-aprovacao').style.display = 'none';
-                document.getElementById('box-concluir').style.display = 'block';
-            }
+    async function inicializar() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) {
+            window.location.href = "../index.html";
+            return;
         }
 
-        function irParaQuiz() { window.location.href = `../quiz.html?modulo=4`; }
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('aprovado') === 'true') {
+            document.getElementById('status-aprovacao').style.display = 'none';
+            document.getElementById('box-concluir').style.display = 'block';
+            document.getElementById('btn-finalizar').style.display = 'inline-block';
+        }
+    }
 
-        async function concluirModulo() {
-            const { data: { user } } = await _supabase.auth.getUser();
+    function irParaQuiz() {
+        // ⚠️ ATENÇÃO: Altere o final de "?modulo=1" para o número correspondente da aula
+        window.location.href = `../quiz.html?modulo=4`; 
+    }
+
+    async function concluirModulo() {
+        try {
+            // Captura o usuário logado e puxa os dados do perfil dele
+            const { data: { user }, error: userError } = await _supabase.auth.getUser();
+            
+            if (userError || !user) {
+                alert("Sessão expirada ou usuário inválido. Faça login novamente.");
+                window.location.href = "../index.html";
+                return;
+            }
+
+            // Envia todos os dados obrigatórios para salvar na tabela 'progresso_alunos'
             const { error } = await _supabase
                 .from('progresso_alunos')
-                .upsert({ user_id: user.id, modulo_id: 4, concluido: true }, { onConflict: 'user_id, modulo_id' });
+                .upsert({ 
+                    user_id: user.id, 
+                    modulo_id: 4,           // ⚠️ ATENÇÃO: Altere este número de acordo com o módulo da aula
+                    concluido: true, 
+                    email: user.email,      // 🌟 CORREÇÃO: Preenche o email obrigatório exigido pelo banco
+                    data_conclusao: new Date().toISOString() // Preenche o horário atual no formato correto do Postgres
+                }, { 
+                    onConflict: 'user_id, modulo_id' 
+                });
 
             if (!error) {
-                alert("Módulo 4 Concluído! O coração do seu PC está pronto.");
+                alert("Progresso salvo com sucesso!");
                 window.location.href = "../modulos.html";
+            } else {
+                console.error("Erro do Supabase:", error);
+                alert("Erro ao salvar no banco de dados: " + error.message);
             }
+        } catch (err) {
+            console.error("Erro inesperado:", err);
+            alert("Ocorreu um erro inesperado ao salvar o progresso.");
         }
-        inicializar();
-    </script>
+    }
+
+    inicializar();
+</script>
 </body>
 </html>

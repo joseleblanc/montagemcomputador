@@ -110,6 +110,7 @@
             margin-bottom: 20px;
         }
     </style>
+    <link rel="stylesheet" href="layout-aulas.css">
 </head>
 <body>
 
@@ -416,55 +417,69 @@
 </button>
 
 
-    <script>
-        // Configurações do Supabase
-        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA'; // Chave pública
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+ <script>
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function concluirAula(id) {
-            const btn = document.getElementById('btnConcluir');
-            btn.disabled = true;
-            btn.innerText = "A guardar progresso...";
-
-            try {
-                // Obter utilizador atual
-                const { data: { user }, error: userError } = await _supabase.auth.getUser();
-                
-                if (userError || !user) {
-                    alert("Erro: Sessão expirada ou utilizador não autenticado.");
-                    window.location.href = '../index.html'; // Redireciona para login
-                    return;
-                }
-
-                // Verificar se já existe o registo para evitar erro de chave duplicada
-                const { data: existe } = await _supabase
-                    .from('progresso_alunos')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .eq('modulo_id', id);
-
-                if (existe && existe.length === 0) {
-                    const { error: insertError } = await _supabase
-                        .from('progresso_alunos')
-                        .insert([{ 
-                            user_id: user.id, 
-                            modulo_id: id 
-                        }]);
-
-                    if (insertError) throw insertError;
-                }
-
-                // Sucesso: Redirecionar
-                window.location.href = '../modulos.html';
-
-            } catch (error) {
-                console.error("Erro completo:", error);
-                alert("Ocorreu um erro ao guardar o progresso. Verifique a consola.");
-                btn.disabled = false;
-                btn.innerText = "Tentar novamente";
-            }
+    async function inicializar() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) {
+            window.location.href = "../index.html";
+            return;
         }
-    </script>
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('aprovado') === 'true') {
+            document.getElementById('status-aprovacao').style.display = 'none';
+            document.getElementById('box-concluir').style.display = 'block';
+            document.getElementById('btn-finalizar').style.display = 'inline-block';
+        }
+    }
+
+    function irParaQuiz() {
+        // ⚠️ ATENÇÃO: Altere o final de "?modulo=1" para o número correspondente da aula
+        window.location.href = `../quiz.html?modulo=13`; 
+    }
+
+    async function concluirModulo() {
+        try {
+            // Captura o usuário logado e puxa os dados do perfil dele
+            const { data: { user }, error: userError } = await _supabase.auth.getUser();
+            
+            if (userError || !user) {
+                alert("Sessão expirada ou usuário inválido. Faça login novamente.");
+                window.location.href = "../index.html";
+                return;
+            }
+
+            // Envia todos os dados obrigatórios para salvar na tabela 'progresso_alunos'
+            const { error } = await _supabase
+                .from('progresso_alunos')
+                .upsert({ 
+                    user_id: user.id, 
+                    modulo_id: 13,           // ⚠️ ATENÇÃO: Altere este número de acordo com o módulo da aula
+                    concluido: true, 
+                    email: user.email,      // 🌟 CORREÇÃO: Preenche o email obrigatório exigido pelo banco
+                    data_conclusao: new Date().toISOString() // Preenche o horário atual no formato correto do Postgres
+                }, { 
+                    onConflict: 'user_id, modulo_id' 
+                });
+
+            if (!error) {
+                alert("Progresso salvo com sucesso!");
+                window.location.href = "../modulos.html";
+            } else {
+                console.error("Erro do Supabase:", error);
+                alert("Erro ao salvar no banco de dados: " + error.message);
+            }
+        } catch (err) {
+            console.error("Erro inesperado:", err);
+            alert("Ocorreu um erro inesperado ao salvar o progresso.");
+        }
+    }
+
+    inicializar();
+</script>
 </body>
 </html>

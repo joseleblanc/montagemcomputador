@@ -22,6 +22,7 @@
         .btn-concluir { background: var(--verde); color: white; padding: 18px 35px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: none; }
         @media (min-width: 768px) { .peça-card { flex-direction: row; } .peça-card img { max-width: 250px; } }
     </style>
+    <link rel="stylesheet" href="layout-aulas.css">
 </head>
 <body>
     <nav class="navbar"><a href="../modulos.html" class="btn-voltar">← Voltar</a><span>Telecurso Montagem de PC - 2026</span></nav>
@@ -104,27 +105,68 @@
         </div>
     </div>
     <script>
-        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function inicializar() {
-            const { data: { session } } = await _supabase.auth.getSession();
-            if (!session) { window.location.href = "../index.html"; return; }
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('aprovado') === 'true') {
-                document.getElementById('status-aprovacao').style.display = 'none';
-                document.getElementById('box-concluir').style.display = 'block';
-                document.getElementById('btn-finalizar').style.display = 'inline-block';
+    async function inicializar() {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (!session) {
+            window.location.href = "../index.html";
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('aprovado') === 'true') {
+            document.getElementById('status-aprovacao').style.display = 'none';
+            document.getElementById('box-concluir').style.display = 'block';
+            document.getElementById('btn-finalizar').style.display = 'inline-block';
+        }
+    }
+
+    function irParaQuiz() {
+        // ⚠️ ATENÇÃO: Altere o final de "?modulo=1" para o número correspondente da aula
+        window.location.href = `../quiz.html?modulo=9`; 
+    }
+
+    async function concluirModulo() {
+        try {
+            // Captura o usuário logado e puxa os dados do perfil dele
+            const { data: { user }, error: userError } = await _supabase.auth.getUser();
+            
+            if (userError || !user) {
+                alert("Sessão expirada ou usuário inválido. Faça login novamente.");
+                window.location.href = "../index.html";
+                return;
             }
+
+            // Envia todos os dados obrigatórios para salvar na tabela 'progresso_alunos'
+            const { error } = await _supabase
+                .from('progresso_alunos')
+                .upsert({ 
+                    user_id: user.id, 
+                    modulo_id: 9,           // ⚠️ ATENÇÃO: Altere este número de acordo com o módulo da aula
+                    concluido: true, 
+                    email: user.email,      // 🌟 CORREÇÃO: Preenche o email obrigatório exigido pelo banco
+                    data_conclusao: new Date().toISOString() // Preenche o horário atual no formato correto do Postgres
+                }, { 
+                    onConflict: 'user_id, modulo_id' 
+                });
+
+            if (!error) {
+                alert("Progresso salvo com sucesso!");
+                window.location.href = "../modulos.html";
+            } else {
+                console.error("Erro do Supabase:", error);
+                alert("Erro ao salvar no banco de dados: " + error.message);
+            }
+        } catch (err) {
+            console.error("Erro inesperado:", err);
+            alert("Ocorreu um erro inesperado ao salvar o progresso.");
         }
-        function irParaQuiz() { window.location.href = `../quiz.html?modulo=9`; }
-        async function concluirModulo() {
-            const { data: { user } } = await _supabase.auth.getUser();
-            await _supabase.from('progresso_alunos').upsert({ user_id: user.id, modulo_id: 9 });
-            window.location.href = "../modulos.html";
-        }
-        inicializar();
-    </script>
+    }
+
+    inicializar();
+</script>       
 </body>
 </html>

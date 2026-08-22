@@ -61,6 +61,7 @@
         }
         .btn-concluir:hover { background: #218838; transform: translateY(-2px); }
     </style>
+    <link rel="stylesheet" href="layout-aulas.css">
 </head>
 <body>
 
@@ -108,34 +109,44 @@
         const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function concluirAula(id) {
-            try {
-                const { data: { user } } = await _supabase.auth.getUser();
-                if(!user) {
-                    alert("Sessão expirada. Faça login novamente.");
-                    return;
-                }
-
-                // Verifica se já concluiu para não duplicar no banco
-                const { data: existe } = await _supabase
-                    .from('progresso_alunos')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .eq('modulo_id', id);
-
-                if (existe && existe.length === 0) {
-                    await _supabase.from('progresso_alunos').insert([{ 
-                        user_id: user.id, 
-                        modulo_id: id 
-                    }]);
-                }
-
-                window.location.href = '../modulos.html';
-            } catch (error) {
-                console.error("Erro ao salvar progresso:", error);
-                alert("Erro ao salvar. Tente novamente.");
-            }
+async function concluirAula(id) {
+    try {
+        const { data: { user } } = await _supabase.auth.getUser();
+        if(!user) {
+            alert("Sessão expirada. Faça login novamente.");
+            return;
         }
+
+        // 1. Verifica se o registro já existe para este usuário e módulo
+        const { data: existe, error: erroBusca } = await _supabase
+            .from('progresso_alunos')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('modulo_id', id);
+
+        if (erroBusca) throw erroBusca;
+
+        // 2. Se não existir, faz a inserção preenchendo TODOS os campos obrigatórios
+        if (!existe || existe.length === 0) {
+            const { error: erroInsert } = await _supabase
+                .from('progresso_alunos')
+                .insert([{ 
+                    user_id: user.id, 
+                    modulo_id: id,
+                    concluido: true, 
+                    data_conclusao: new Date().toISOString(),
+                    email: user.email // <--- ADICIONADO: Preenche a coluna obrigatória detectada pelo erro!
+                }]);
+                
+            if (erroInsert) throw erroInsert;
+        }
+
+        window.location.href = '../modulos.html';
+    } catch (error) {
+        console.error("Erro detalhado ao salvar progresso:", error);
+        alert("Erro ao salvar o progresso. Verifique o console do navegador.");
+    }
+}
     </script>
 </body>
 </html>
