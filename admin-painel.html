@@ -395,6 +395,7 @@
                     <td>
                         <div style="display:flex; gap:8px; align-items:center;">
                             ${actionButton}
+                            <button class="btn" style="padding:8px; background:#fff7ed; color:#c2410c; font-weight:700;" onclick="enviarResetSenha('${aluno.email}')"><i class="fas fa-key"></i> Resetar senha</button>
                             <button class="btn" style="padding:8px; background:#eef2ff; color:var(--primary); font-weight:700;" onclick="abrirVerificacaoModulos('${aluno.email}')">Verificar Módulos</button>
                         </div>
                     </td>
@@ -432,6 +433,20 @@
             } catch (err) {
                 console.error('toggleApproval error', err);
                 alert('Erro ao alterar aprovação: ' + (err.message || err));
+            }
+        }
+
+        async function enviarResetSenha(email) {
+            if (!confirm(`Enviar um link de redefinição de senha para ${email}?`)) return;
+
+            try {
+                const redirectTo = new URL('reset-senha.html', window.location.href).href;
+                const { error } = await _supabase.auth.resetPasswordForEmail(email, { redirectTo });
+                if (error) throw error;
+                alert(`Link de redefinição enviado para ${email}.`);
+            } catch (err) {
+                console.error('enviarResetSenha error', err);
+                alert('Erro ao enviar o link de redefinição: ' + (err.message || err));
             }
         }
 
