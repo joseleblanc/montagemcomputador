@@ -383,9 +383,13 @@
             tbody.innerHTML = lista.map(aluno => {
                 const statusText = aluno.status || '';
                 const isApproved = statusText.toLowerCase() === 'aprovado';
+                const provaLiberada = !!aluno.prova_liberada;
                 const actionButton = isApproved
                     ? `<button class="btn" style="background:#fee2e2; color:var(--danger); font-weight:700; padding:8px 12px;" onclick="toggleApproval('${aluno.email}')">Reprovar</button>`
                     : `<button class="btn btn-primary" style="padding:8px 12px;" onclick="toggleApproval('${aluno.email}')">Aprovar</button>`;
+                const provaButton = provaLiberada
+                    ? `<button class="btn" style="background:#fee2e2; color:var(--danger); font-weight:700; padding:8px 12px;" onclick="toggleProva('${aluno.email}')">Bloquear Prova</button>`
+                    : `<button class="btn btn-approve" style="padding:8px 12px;" onclick="toggleProva('${aluno.email}')">Aprovar Prova</button>`;
 
                 return `
                 <tr>
@@ -395,6 +399,7 @@
                     <td>
                         <div style="display:flex; gap:8px; align-items:center;">
                             ${actionButton}
+                            ${provaButton}
                             <button class="btn" style="padding:8px; background:#fff7ed; color:#c2410c; font-weight:700;" onclick="enviarResetSenha('${aluno.email}')"><i class="fas fa-key"></i> Resetar senha</button>
                             <button class="btn" style="padding:8px; background:#eef2ff; color:var(--primary); font-weight:700;" onclick="abrirVerificacaoModulos('${aluno.email}')">Verificar Módulos</button>
                         </div>
@@ -467,14 +472,39 @@
         async function toggleProva(email) {
             try {
                 const aluno = todosAlunos.find(a => a.email === email) || {};
-                const atual = !!aluno.prova_liberada;
-                const novo = !atual;
-                const { error } = await _supabase.from('perfil_alunos').update({ prova_liberada: novo }).eq('email', email);
-                if (error) throw error;
+                const userId = await fetchUserId(email);
+                if (!userId) throw new Error('Usuário não encontrado.');
+
+                const notaAtual = await _supabase
+                    .from('progresso_alunos')
+                    .select('nota')
+                    .eq('user_id', userId)
+                    .eq('modulo_id', 100)
+                    .maybeSingle();
+                if (notaAtual.error) throw notaAtual.error;
+
+                const novoAprovado = !(Number(notaAtual.data?.nota) >= 70);
+                const nota = novoAprovado ? 100 : 0;
+                const { error: erroProva } = await _supabase.from('progresso_alunos').upsert({
+                    user_id: userId,
+                    email,
+                    modulo_id: 100,
+                    concluido: true,
+                    nota,
+                    data_conclusao: new Date().toISOString()
+                }, { onConflict: 'user_id,modulo_id' });
+                if (erroProva) throw erroProva;
+
+                const { error: erroPerfil } = await _supabase
+                    .from('perfil_alunos')
+                    .update({ prova_liberada: novoAprovado })
+                    .eq('email', email);
+                if (erroPerfil) throw erroPerfil;
+
                 carregarAlunos();
             } catch (err) {
                 console.error('toggleProva error', err);
-                alert('Erro ao atualizar estado da prova: ' + (err.message || err));
+                alert('Erro ao atualizar nota da prova: ' + (err.message || err));
             }
         }
 
