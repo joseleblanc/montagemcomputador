@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinir senha | Telecurso</title>
+    <link rel="stylesheet" href="layout.css">
+    <style>
+        #btn-salvar {
+            background-color: var(--hw-copper);
+            color: #000000;
+        }
+
+        #btn-salvar:hover {
+            background-color: #ff8c38;
+            box-shadow: 0 0 15px rgba(255, 122, 26, 0.4);
+        }
+
+        .voltar-login {
+            display: block;
+            color: var(--hw-cyan);
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .voltar-login:hover {
+            color: var(--text-primary);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <main class="login-container">
+        <div class="logo-area">
+            <h1>TELECURSO</h1>
+            <p>Redefinição segura de senha</p>
+        </div>
+
+        <div class="form-group">
+            <label for="nova-senha">Nova senha</label>
+            <input type="password" id="nova-senha" minlength="6" autocomplete="new-password" placeholder="Mínimo de 6 caracteres">
+        </div>
+
+        <div class="form-group">
+            <label for="confirmar-senha">Confirmar nova senha</label>
+            <input type="password" id="confirmar-senha" minlength="6" autocomplete="new-password" placeholder="Digite a senha novamente">
+        </div>
+
+        <button id="btn-salvar" class="btn">SALVAR NOVA SENHA</button>
+        <a href="index.html" class="voltar-login">VOLTAR AO LOGIN</a>
+        <div id="mensagem-status"></div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        function exibirMensagem(texto, tipo) {
+            const statusDiv = document.getElementById('mensagem-status');
+            statusDiv.innerText = texto;
+            statusDiv.className = tipo;
+        }
+
+        async function redefinirSenha() {
+            const novaSenha = document.getElementById('nova-senha').value;
+            const confirmarSenha = document.getElementById('confirmar-senha').value;
+            const btnSalvar = document.getElementById('btn-salvar');
+
+            if (novaSenha.length < 6) {
+                exibirMensagem("A senha deve ter pelo menos 6 caracteres.", "erro");
+                return;
+            }
+
+            if (novaSenha !== confirmarSenha) {
+                exibirMensagem("As senhas não coincidem.", "erro");
+                return;
+            }
+
+            btnSalvar.disabled = true;
+            const { error } = await _supabase.auth.updateUser({ password: novaSenha });
+
+            if (error) {
+                exibirMensagem("O link é inválido ou expirou. Solicite uma nova recuperação.", "erro");
+                btnSalvar.disabled = false;
+                return;
+            }
+
+            exibirMensagem("Senha alterada com sucesso! Redirecionando...", "sucesso");
+            await _supabase.auth.signOut();
+            setTimeout(() => window.location.href = 'index.html', 1200);
+        }
+
+        document.getElementById('btn-salvar').addEventListener('click', redefinirSenha);
+        document.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') redefinirSenha();
+        });
+    </script>
+</body>
+</html>

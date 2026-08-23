@@ -30,6 +30,8 @@
         
         <button id="btn-toggle" class="btn" onclick="alternarModo()">NÃO TENHO CONTA (CADASTRAR)</button>
 
+        <button id="btn-reset" class="btn" onclick="solicitarReset()">ESQUECI MINHA SENHA</button>
+
         <div id="mensagem-status"></div>
     </div>
 
@@ -39,6 +41,29 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let modoCadastro = false;
+
+        async function solicitarReset() {
+            const email = document.getElementById('email').value.trim();
+
+            if (!email) {
+                exibirMensagem("Informe seu e-mail para receber o link de recuperação.", "erro");
+                return;
+            }
+
+            const btnReset = document.getElementById('btn-reset');
+            btnReset.disabled = true;
+
+            const redirectTo = new URL('reset-senha.html', window.location.href).href;
+            const { error } = await _supabase.auth.resetPasswordForEmail(email, { redirectTo });
+
+            if (error) {
+                exibirMensagem("Não foi possível enviar o link de recuperação. Tente novamente.", "erro");
+            } else {
+                exibirMensagem("Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.", "sucesso");
+            }
+
+            btnReset.disabled = false;
+        }
 
         function alternarModo() {
             modoCadastro = !modoCadastro;
