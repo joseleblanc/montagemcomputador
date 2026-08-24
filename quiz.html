@@ -169,7 +169,7 @@
         // Captura o número do módulo pela URL (ex: quiz.html?modulo=2)
         const urlParams = new URLSearchParams(window.location.search);
         const moduloAtual = urlParams.get('modulo') || "1";
-        const perguntas = bancoDeDados[moduloAtual];
+        const perguntas = bancoDeDados[moduloAtual] || [];
 
         // Ajusta o título da página conforme o módulo
         document.getElementById('titulo-quiz').innerText = `Desafio: Módulo ${moduloAtual}`;
@@ -177,6 +177,14 @@
         function carregarQuestoes() {
             const container = document.getElementById('conteudo-questoes');
             container.innerHTML = ""; 
+
+            if (!perguntas.length) {
+                container.innerHTML = '<p>Este módulo não possui um desafio cadastrado.</p>';
+                const botao = document.querySelector('.btn-verificar');
+                botao.innerText = 'Continuar módulo';
+                botao.onclick = () => window.location.href = `aulas/aula${moduloAtual}.html?aprovado=true`;
+                return;
+            }
 
             perguntas.forEach((p, i) => {
                 let html = `<div class="pergunta">${i+1}. ${p.q}</div>`;
@@ -190,6 +198,7 @@
         }
 
         function verificarRespostas() {
+            if (!perguntas.length) return;
             let acertos = 0;
             let todasRespondidas = true;
 

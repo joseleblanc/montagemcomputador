@@ -804,8 +804,7 @@
                     const m = Number(r.modulo_id);
                     if (latest[m] === undefined) latest[m] = !!r.concluido;
                 });
-                const concluidosCount = Object.keys(latest).filter(k => latest[k]).length;
-                const liberado = concluidosCount >= TOTAL_MODULOS;
+                const liberado = Array.from({ length: TOTAL_MODULOS }, (_, moduloId) => latest[moduloId] === true).every(Boolean);
                 const { error } = await _supabase.from('perfil_alunos').update({ prova_liberada: liberado }).eq('user_id', userId);
                 if (error) console.warn('Não foi possível atualizar prova_liberada:', error);
                 carregarAlunos();
@@ -892,7 +891,7 @@
                 await _supabase.from('chat_suporte').update({ conversation: nova, lida: true }).eq('ticket', ticket);
             } else {
                 // modelo antigo: não precisa alteração (não lido não preserva em agro)
-                await _supabase.from('chat_suporte').update({ lida: true });
+                await _supabase.from('chat_suporte').update({ lida: true }).eq('ticket', ticket);
             }
         }
 

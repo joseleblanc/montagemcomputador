@@ -41,6 +41,7 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let modoCadastro = false;
+        let acessoEmAndamento = false;
 
         async function solicitarReset() {
             const email = document.getElementById('email').value.trim();
@@ -54,15 +55,16 @@
             btnReset.disabled = true;
 
             const redirectTo = new URL('reset-senha.html', window.location.href).href;
-            const { error } = await _supabase.auth.resetPasswordForEmail(email, { redirectTo });
-
-            if (error) {
-                exibirMensagem("Não foi possível enviar o link de recuperação. Tente novamente.", "erro");
-            } else {
+            try {
+                const { error } = await _supabase.auth.resetPasswordForEmail(email, { redirectTo });
+                if (error) throw error;
                 exibirMensagem("Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.", "sucesso");
+            } catch (error) {
+                console.error("Erro ao solicitar redefinição:", error);
+                exibirMensagem("Não foi possível enviar o link de recuperação. Tente novamente.", "erro");
+            } finally {
+                btnReset.disabled = false;
             }
-
-            btnReset.disabled = false;
         }
 
         function alternarModo() {
@@ -83,7 +85,8 @@
         }
 
         async function gerenciarAcesso() {
-            const email = document.getElementById('email').value;
+            if (acessoEmAndamento) return;
+            const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('senha').value;
 
             if (!email || !password) {
@@ -91,39 +94,36 @@
                 return;
             }
 
+            acessoEmAndamento = true;
             document.getElementById('btn-principal').disabled = true;
 
-            if (modoCadastro) {
-                const { data, error } = await _supabase.auth.signUp({ email, password });
-                if (error) {
-                    exibirMensagem("Erro: " + error.message, "erro");
-                } else {
-                    await _supabase.from('perfil_alunos').insert([{ email: email, user_id: data.user?.id, status: 'pendente' }]); 
+            try {
+                if (modoCadastro) {
+                    const { data, error } = await _supabase.auth.signUp({ email, password });
+                    if (error) throw error;
+                    const { error: perfilError } = await _supabase.from('perfil_alunos').insert([{ email, user_id: data.user?.id, status: 'pendente' }]);
+                    if (perfilError) throw perfilError;
                     exibirMensagem("Cadastro realizado! Aguarde a aprovação do admin.", "sucesso");
-                }
-            } else {
-                // Verifica se o aluno está aprovado antes de logar
-                const { data: perfil, error: errPerfil } = await _supabase
-                    .from('perfil_alunos')
-                    .select('status')
-                    .eq('email', email)
-                    .single();
-
-                if (!perfil || perfil.status !== 'aprovado') {
-                    exibirMensagem("Acesso negado: Conta pendente de aprovação.", "erro");
-                    document.getElementById('btn-principal').disabled = false;
-                    return;
-                }
-
-                const { error } = await _supabase.auth.signInWithPassword({ email, password });
-                if (error) {
-                    exibirMensagem("Erro: E-mail ou senha incorretos.", "erro");
                 } else {
+                    const { data: perfil, error: perfilError } = await _supabase
+                        .from('perfil_alunos').select('status').eq('email', email).maybeSingle();
+                    if (perfilError) throw perfilError;
+                    if (!perfil || perfil.status?.toLowerCase() !== 'aprovado') {
+                        exibirMensagem("Acesso negado: Conta pendente de aprovação.", "erro");
+                        return;
+                    }
+                    const { error } = await _supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
                     exibirMensagem("Acesso autorizado! Entrando...", "sucesso");
                     setTimeout(() => window.location.href = "modulos.html", 1000);
                 }
+            } catch (error) {
+                console.error("Erro no acesso:", error);
+                exibirMensagem(modoCadastro ? "Não foi possível concluir o cadastro. Tente novamente." : "Erro: E-mail ou senha incorretos.", "erro");
+            } finally {
+                acessoEmAndamento = false;
+                document.getElementById('btn-principal').disabled = false;
             }
-            document.getElementById('btn-principal').disabled = false;
         }
 
         function exibirMensagem(texto, tipo) {
@@ -135,8 +135,8 @@
 
         document.getElementById('btn-principal').addEventListener('click', gerenciarAcesso);
         
-        document.addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') gerenciarAcesso();
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter' && (e.target.id === 'email' || e.target.id === 'senha')) gerenciarAcesso();
         });
     </script>
 </body>

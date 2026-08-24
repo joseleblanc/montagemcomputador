@@ -144,7 +144,23 @@
         return array;
     }
 
-    function carregarProva() {
+    async function carregarProva() {
+        const { data: userData, error: userError } = await _supabase.auth.getUser();
+        const user = userData?.user;
+        if (userError || !user) {
+            alert('Sessão expirada. Faça login novamente.');
+            window.location.href = 'index.html';
+            return;
+        }
+
+        const { data: moduloAnterior, error: progressoError } = await _supabase
+            .from('progresso_alunos').select('concluido').eq('user_id', user.id).eq('modulo_id', 14).maybeSingle();
+        if (progressoError || !moduloAnterior?.concluido) {
+            alert('Conclua todos os módulos antes de iniciar a prova final.');
+            window.location.href = 'modulos.html';
+            return;
+        }
+
         // Seleciona 30 questões aleatórias do banco de 60
         const questoesSorteio = shuffle([...bancoCompleto]).slice(0, 30);
         const container = document.getElementById('questoes-lista');

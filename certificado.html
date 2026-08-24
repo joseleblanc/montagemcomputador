@@ -87,12 +87,14 @@
         }
 
         async function prepararDados() {
-            const { data: { user } } = await _supabase.auth.getUser();
+            const { data: { user }, error: userError } = await _supabase.auth.getUser();
+            if (userError) throw userError;
             if (!user) { window.location.href = 'index.html'; return; }
 
-            const { data: perfil } = await _supabase.from('perfil_alunos').select('nome_completo').eq('id', user.id).single();
-            const { data: prova } = await _supabase.from('progresso_alunos').select('nota, concluido').eq('user_id', user.id).eq('modulo_id', 100).single();
-            const { data: presenca } = await _supabase.from('chamada_turmas').select('id').eq('email', user.email).eq('status', 'presente').limit(1);
+            const { data: perfil, error: perfilError } = await _supabase.from('perfil_alunos').select('nome_completo').eq('user_id', user.id).maybeSingle();
+            const { data: prova, error: provaError } = await _supabase.from('progresso_alunos').select('nota, concluido').eq('user_id', user.id).eq('modulo_id', 100).maybeSingle();
+            const { data: presenca, error: presencaError } = await _supabase.from('chamada_turmas').select('id').eq('email', user.email).eq('status', 'presente').limit(1);
+            if (perfilError || provaError || presencaError) throw perfilError || provaError || presencaError;
 
             const provaAprovada = !!prova?.concluido && Number(prova.nota) >= 70;
             const temPresenca = Array.isArray(presenca) && presenca.length > 0;
@@ -257,7 +259,10 @@ function gerarPDF() {
 
             doc.save(`Certificado_${nome.replace(/\s+/g, '_')}.pdf`);
         }
-        prepararDados();
+        prepararDados().catch(error => {
+            console.error('Erro ao preparar certificado:', error);
+            document.getElementById('loading-area').innerHTML = '<h2>Não foi possível carregar o certificado.</h2><p>Verifique sua conexão e tente novamente.</p><a href="modulos.html">Voltar aos módulos</a>';
+        });
     </script>
 </body>
 </html>

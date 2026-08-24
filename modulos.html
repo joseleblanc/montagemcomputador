@@ -128,7 +128,12 @@
         { id: 100, t: "PROVA FINAL", d: "Avaliação final de certificação técnica." }
     ];
 
+    let inicializacaoEmAndamento = false;
+
     async function inicializar() {
+        if (inicializacaoEmAndamento) return;
+        inicializacaoEmAndamento = true;
+        try {
         // --- NOVO: CHECAGEM DE MANUTENÇÃO E AVISOS ---
         const { data: config, error: errC } = await _supabase.from('configuracoes').select('*');
         
@@ -166,7 +171,7 @@
         document.getElementById('nome-aluno').innerHTML = `<i class="fas fa-user-circle"></i> Olá, ${user.email.split('@')[0]}!`;
         
         const { data: progresso } = await _supabase.from('progresso_alunos').select('*').eq('user_id', user.id);
-        const concluidos = progresso ? progresso.map(p => p.modulo_id) : [];
+        const concluidos = [...new Set((progresso || []).filter(p => p.concluido).map(p => Number(p.modulo_id)))];
         
         const concluidosConteudo = concluidos.filter(id => id >= 0 && id <= 14);
         const pct = Math.round((concluidosConteudo.length / 15) * 100);
@@ -181,6 +186,9 @@
         renderizar(concluidos, registroProva ? registroProva.nota : null);
         await atualizarBadgeNovasMensagens();
         await verificarLiberacaoCertificado();
+        } finally {
+            inicializacaoEmAndamento = false;
+        }
     }
 
     function renderizar(concluidos, nota) {
@@ -291,7 +299,7 @@
             .from('chat_suporte')
             .select('conversation')
             .eq('ticket', ticketAluno)
-            .single();
+            .maybeSingle();
 
         if (!error && ticketRow && Array.isArray(ticketRow.conversation)) {
             count = ticketRow.conversation.filter(msg => msg.remetente !== 'aluno' && !msg.lida).length;
@@ -338,7 +346,7 @@
             .from('chat_suporte')
             .select('*')
             .eq('ticket', ticketAluno)
-            .single();
+            .maybeSingle();
 
         let chat = [];
 
@@ -394,13 +402,19 @@
         chatBox.innerHTML = (chat || []).map(m => `
             <div style="text-align: ${m.remetente === 'aluno' ? 'right' : 'left'}; margin-bottom: 8px;">
                 <span style="display:inline-block; padding:8px; border-radius:8px; background:${m.remetente === 'aluno' ? '#dcf8c6' : '#f1f5f9'}; font-size:13px;">
-                    ${m.mensagem}
+                    ${escaparHtml(m.mensagem)}
                 </span>
             </div>
         `).join('');
         chatBox.scrollTop = chatBox.scrollHeight;
 
         await atualizarBadgeNovasMensagens();
+    }
+
+    function escaparHtml(valor) {
+        return String(valor ?? '').replace(/[&<>"']/g, caractere => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+        }[caractere]));
     }
 
     async function enviarDuvidaParaSupabase() {
