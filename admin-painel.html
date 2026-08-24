@@ -116,6 +116,25 @@
         .btn-save { background:var(--primary); color:white; padding:10px 16px; border-radius:10px; font-weight:800; }
         .modal-body::-webkit-scrollbar { width:8px; }
         .modal-body::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:8px; }
+
+        /* TURMAS E CHAMADA */
+        .turma-toolbar { display:grid; grid-template-columns: minmax(220px, 1fr) 180px auto; gap:12px; align-items:end; margin-bottom:20px; }
+        .turma-toolbar input, .turma-toolbar select { margin-bottom:0; }
+        .chamada-resumo { display:flex; gap:18px; flex-wrap:wrap; margin:0 0 18px; color:var(--text-muted); font-size:13px; }
+        .chamada-resumo strong { color:var(--text-main); font-size:16px; }
+        .btn-presenca { min-width:130px; margin:0; font-weight:700; color:white; }
+        .btn-presenca.presente { background:var(--success); }
+        .btn-presenca.falta { background:var(--danger); }
+        .anotacao-input { min-width:220px; margin:0; }
+        .empty-state { padding:28px 12px; text-align:center; color:var(--text-muted); }
+        .anotacao-row { padding:12px 6px; border-bottom:1px solid var(--border); }
+        .anotacao-meta { display:flex; justify-content:space-between; gap:12px; color:var(--text-muted); font-size:12px; margin-bottom:5px; }
+        .anotacao-texto { color:var(--text-main); white-space:pre-wrap; }
+        @media (max-width: 760px) {
+            .turma-toolbar { grid-template-columns:1fr; }
+            .scroll-container { padding:18px; }
+            .chamada-resumo { gap:10px; }
+        }
     </style>
 </head>
 <body>
@@ -129,6 +148,9 @@
             </div>
             <div class="nav-item" id="menu-alunos" onclick="exibirTela('visao-alunos', this)">
                 <i class="fas fa-users"></i> Alunos Cadastrados
+            </div>
+            <div class="nav-item" id="menu-turmas" onclick="exibirTela('visao-turmas', this)">
+                <i class="fas fa-clipboard-list"></i> Turmas e Chamada
             </div>
             <div class="nav-item" style="background:#eef2ff; color:#003366; font-weight:700;" onclick="window.open('https://supabase.com', '_blank')">
                 <i class="fas fa-database"></i> Banco no Supabase
@@ -149,15 +171,6 @@
                 <input type="text" id="horario_aula" placeholder="Ex: Hoje às 19:30">
                 <label>Recado da Sala</label>
                 <textarea id="recado_aula" rows="2" placeholder="Mensagem para os alunos..."></textarea>
-                
-                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <label style="display: block; margin-bottom: 10px;"><i class="fas fa-clipboard-check"></i> Controle de Chamada</label>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-primary" onclick="ativarChamada()" id="btn-ativar-chamada"><i class="fas fa-play"></i> ATIVAR CHAMADA</button>
-                        <button class="btn" style="background: #e2e8f0;" onclick="desativarChamada()" id="btn-desativar-chamada" style="display: none;"><i class="fas fa-stop"></i> DESATIVAR</button>
-                    </div>
-                    <div id="status-chamada" style="margin-top: 10px; font-size: 14px; color: var(--text-muted);"></div>
-                </div>
                 
                 <button class="btn btn-primary" onclick="salvarAula()" style="width: 100%; margin-top: 20px;"><i class="fas fa-save"></i> ATUALIZAR AULA</button>
             </div>
@@ -213,6 +226,33 @@
             </div>
         </div>
 
+        <div id="visao-turmas" class="alunos-view scroll-container">
+            <div class="admin-card" style="border-top-color: var(--success);">
+                <div class="card-header"><i class="fas fa-chalkboard-teacher"></i> Turmas por Módulo</div>
+                <p style="color:var(--text-muted); margin-bottom:18px;">Cada módulo funciona como uma turma. Registre presença, falta e uma anotação para cada aluno.</p>
+                <div class="turma-toolbar">
+                    <div>
+                        <label for="seletor-turma">Turma / Módulo</label>
+                        <select id="seletor-turma" onchange="carregarChamadaTurma()"></select>
+                    </div>
+                    <div>
+                        <label for="data-chamada">Data da chamada</label>
+                        <input type="date" id="data-chamada" onchange="carregarChamadaTurma()">
+                    </div>
+                    <button class="btn btn-primary" onclick="salvarChamadaTurma()"><i class="fas fa-save"></i> Salvar chamada</button>
+                </div>
+                <div id="chamada-resumo" class="chamada-resumo"></div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Aluno</th><th>Presença</th><th>Anotação</th></tr>
+                        </thead>
+                        <tbody id="tabela-chamada"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div id="visao-chat" class="chat-view">
             <div id="chat-ticket-label" style="padding: 16px 24px 0; font-weight: 700;"></div>
             <div id="box-mensagens" class="messages-area"></div>
@@ -244,6 +284,19 @@
         </div>
     </div>
 
+    <div id="modal-anotacoes" class="modal-backdrop" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-anotacoes-title">
+            <div class="modal-header">
+                <div>
+                    <div id="modal-anotacoes-title" class="modal-title">Anotações do aluno</div>
+                    <div id="modal-anotacoes-email" style="font-weight:700; color:var(--text-muted); font-size:13px;">&nbsp;</div>
+                </div>
+                <button class="modal-close" onclick="fecharModalAnotacoes()">Fechar</button>
+            </div>
+            <div id="lista-anotacoes" class="modal-body" aria-live="polite"></div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
@@ -257,11 +310,13 @@
         function exibirTela(id, elemento) {
             document.getElementById('visao-geral').style.display = 'none';
             document.getElementById('visao-alunos').style.display = 'none';
+            document.getElementById('visao-turmas').style.display = 'none';
             document.getElementById('visao-chat').style.display = 'none';
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).style.display = (id === 'visao-chat') ? 'flex' : 'block';
             if(elemento) elemento.classList.add('active');
             if(id === 'visao-alunos') carregarAlunos();
+            if(id === 'visao-turmas') carregarAlunos().then(() => carregarChamadaTurma());
         }
 
         // --- FUNÇÕES DE AULA E AVISO ---
@@ -275,9 +330,6 @@
                 emManutencao = data.find(c => c.chave === 'modo_manutencao')?.valor === "true";
                 atualizarInterfaceManutencao();
                 
-                // Carregar status da chamada
-                const chamadaAtiva = data.find(c => c.chave === 'chamada_ativa')?.valor === "true";
-                atualizarInterfaceChamada(chamadaAtiva);
             }
         }
 
@@ -314,68 +366,167 @@
             label.style.color = emManutencao ? "var(--danger)" : "var(--success)";
         }
 
-        // --- CONTROLE DE CHAMADA ---
-        async function ativarChamada() {
-            try {
-                const { error } = await _supabase.from('configuracoes').upsert({
-                    chave: 'chamada_ativa',
-                    valor: 'true'
-                }, { onConflict: 'chave' });
-                
-                if (error) throw error;
-                
-                document.getElementById('btn-ativar-chamada').style.display = 'none';
-                document.getElementById('btn-desativar-chamada').style.display = 'inline-block';
-                document.getElementById('status-chamada').innerText = 'Chamada ATIVA - Alunos podem confirmar presença';
-                document.getElementById('status-chamada').style.color = 'var(--success)';
-                
-                console.log('Chamada ativada');
-            } catch (error) {
-                console.error('Erro ao ativar chamada:', error);
-                alert('Erro ao ativar chamada: ' + error.message);
-            }
-        }
-
-        async function desativarChamada() {
-            try {
-                const { error } = await _supabase.from('configuracoes').upsert({
-                    chave: 'chamada_ativa',
-                    valor: 'false'
-                }, { onConflict: 'chave' });
-                
-                if (error) throw error;
-                
-                document.getElementById('btn-ativar-chamada').style.display = 'inline-block';
-                document.getElementById('btn-desativar-chamada').style.display = 'none';
-                document.getElementById('status-chamada').innerText = 'Chamada DESATIVADA';
-                document.getElementById('status-chamada').style.color = 'var(--text-muted)';
-                
-                console.log('Chamada desativada');
-            } catch (error) {
-                console.error('Erro ao desativar chamada:', error);
-                alert('Erro ao desativar chamada: ' + error.message);
-            }
-        }
-
-        function atualizarInterfaceChamada(chamadaAtiva) {
-            if (chamadaAtiva) {
-                document.getElementById('btn-ativar-chamada').style.display = 'none';
-                document.getElementById('btn-desativar-chamada').style.display = 'inline-block';
-                document.getElementById('status-chamada').innerText = 'Chamada ATIVA - Alunos podem confirmar presença';
-                document.getElementById('status-chamada').style.color = 'var(--success)';
-            } else {
-                document.getElementById('btn-ativar-chamada').style.display = 'inline-block';
-                document.getElementById('btn-desativar-chamada').style.display = 'none';
-                document.getElementById('status-chamada').innerText = 'Chamada DESATIVADA';
-                document.getElementById('status-chamada').style.color = 'var(--text-muted)';
-            }
-        }
-
         // --- GESTÃO DE ALUNOS COM LUPA ---
         async function carregarAlunos() {
             const { data } = await _supabase.from('perfil_alunos').select('*');
             todosAlunos = data ? [...data].reverse() : []; // Inverte para novos no topo
             renderizarTabela(todosAlunos);
+        }
+
+        const modulosTurmas = [
+            { id: 0, nome: 'Módulo 00 - Introdução ao Curso' },
+            { id: 1, nome: 'Módulo 01 - Conhecendo as peças' },
+            { id: 2, nome: 'Módulo 02 - Separando ferramentas' },
+            { id: 3, nome: 'Módulo 03 - Cuidados de segurança' },
+            { id: 4, nome: 'Módulo 04 - Montando o processador' },
+            { id: 5, nome: 'Módulo 05 - Montando a memória RAM' },
+            { id: 6, nome: 'Módulo 06 - Montando a placa no gabinete' },
+            { id: 7, nome: 'Módulo 07 - Fonte de alimentação' },
+            { id: 8, nome: 'Módulo 08 - Montando armazenamento' },
+            { id: 9, nome: 'Módulo 09 - Montando placa de vídeo' },
+            { id: 10, nome: 'Módulo 10 - Coolers de gabinete' },
+            { id: 11, nome: 'Módulo 11 - Primeiro boot de testes' },
+            { id: 12, nome: 'Módulo 12 - Formatação com Windows' },
+            { id: 13, nome: 'Módulo 13 - Vídeos tutoriais' },
+            { id: 14, nome: 'Módulo 14 - Conclusão' }
+        ];
+        let registrosChamada = {};
+
+        function prepararTurmas() {
+            const seletor = document.getElementById('seletor-turma');
+            if (!seletor || seletor.options.length) return;
+            seletor.innerHTML = modulosTurmas.map(m => `<option value="${m.id}">${m.nome}</option>`).join('');
+            document.getElementById('data-chamada').value = new Date().toISOString().split('T')[0];
+        }
+
+        async function carregarChamadaTurma() {
+            prepararTurmas();
+            const moduloId = Number(document.getElementById('seletor-turma').value);
+            const dataChamada = document.getElementById('data-chamada').value;
+            const tabela = document.getElementById('tabela-chamada');
+            if (!dataChamada) return;
+            tabela.innerHTML = '<tr><td colspan="3" class="empty-state">Carregando chamada...</td></tr>';
+
+            const { data, error } = await _supabase.from('chamada_turmas').select('*')
+                .eq('modulo_id', moduloId).eq('data', dataChamada);
+            if (error) {
+                tabela.innerHTML = `<tr><td colspan="3" class="empty-state" style="color:var(--danger);">A tabela de chamada ainda não está configurada. Execute o arquivo supabase-chamada-turmas.sql.</td></tr>`;
+                document.getElementById('chamada-resumo').innerHTML = '';
+                return;
+            }
+
+            registrosChamada = Object.fromEntries((data || []).map(registro => [registro.user_id, registro]));
+            const alunosAtivos = todosAlunos.filter(aluno => (aluno.status || '').toLowerCase() !== 'bloqueado');
+            const { data: progresso, error: progressoError } = await _supabase
+                .from('progresso_alunos').select('user_id,email,modulo_id,concluido');
+            if (progressoError) {
+                tabela.innerHTML = '<tr><td colspan="3" class="empty-state" style="color:var(--danger);">Não foi possível descobrir o módulo ativo dos alunos.</td></tr>';
+                return;
+            }
+            const userIdPorEmail = Object.fromEntries((progresso || [])
+                .filter(registro => registro.email && registro.user_id)
+                .map(registro => [registro.email.toLowerCase(), registro.user_id]));
+            const alunosComId = alunosAtivos.map(aluno => ({
+                ...aluno,
+                user_id: aluno.user_id || aluno.id || userIdPorEmail[aluno.email.toLowerCase()]
+            })).filter(aluno => aluno.user_id);
+            const modulosConcluidos = {};
+            (progresso || []).forEach(registro => {
+                const email = registro.email?.toLowerCase();
+                if (email && registro.concluido && Number(registro.modulo_id) >= 0 && Number(registro.modulo_id) <= 14) {
+                    if (!modulosConcluidos[email]) modulosConcluidos[email] = new Set();
+                    modulosConcluidos[email].add(Number(registro.modulo_id));
+                }
+            });
+            const moduloAtivoPorAluno = aluno => {
+                const concluidos = modulosConcluidos[aluno.email.toLowerCase()] || new Set();
+                let moduloAtivo = 0;
+                while (concluidos.has(moduloAtivo) && moduloAtivo < 15) moduloAtivo++;
+                return moduloAtivo;
+            };
+            const alunos = alunosComId.filter(aluno => moduloAtivoPorAluno(aluno) === moduloId);
+            tabela.innerHTML = alunos.length ? alunos.map(aluno => {
+                const registro = registrosChamada[aluno.user_id] || {};
+                const status = registro.status || 'pendente';
+                return `<tr>
+                    <td><b>${aluno.email}</b></td>
+                    <td><button type="button" class="btn btn-presenca ${status === 'falta' ? 'falta' : 'presente'}" data-status="${status === 'falta' ? 'falta' : 'presente'}" data-user-id="${aluno.user_id}" data-email="${aluno.email}" onclick="alternarPresenca(this)">${status === 'falta' ? 'FALTA' : 'PRESENÇA'}</button></td>
+                    <td><input class="anotacao-input" data-user-id="${aluno.user_id}" value="${(registro.anotacao || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" placeholder="Anotação sobre o aluno"></td>
+                </tr>`;
+            }).join('') : `<tr><td colspan="3" class="empty-state">Nenhum aluno está no próximo módulo ativo (${moduloId}).</td></tr>`;
+            atualizarResumoChamada();
+        }
+
+        function atualizarResumoChamada() {
+            const campos = [...document.querySelectorAll('.btn-presenca')];
+            const presentes = campos.filter(campo => campo.dataset.status === 'presente').length;
+            const faltas = campos.filter(campo => campo.dataset.status === 'falta').length;
+            document.getElementById('chamada-resumo').innerHTML = `<span><strong>${campos.length}</strong> alunos</span><span><strong style="color:var(--success)">${presentes}</strong> presentes</span><span><strong style="color:var(--danger)">${faltas}</strong> faltas</span>`;
+        }
+
+        function alternarPresenca(botao) {
+            const presente = botao.dataset.status === 'presente';
+            botao.dataset.status = presente ? 'falta' : 'presente';
+            botao.classList.toggle('presente', !presente);
+            botao.classList.toggle('falta', presente);
+            botao.innerText = presente ? 'FALTA' : 'PRESENÇA';
+            atualizarResumoChamada();
+        }
+
+        async function salvarChamadaTurma() {
+            const moduloId = Number(document.getElementById('seletor-turma').value);
+            const dataChamada = document.getElementById('data-chamada').value;
+            const campos = [...document.querySelectorAll('.btn-presenca')];
+            const registros = campos.map(campo => ({
+                modulo_id: moduloId,
+                data: dataChamada,
+                user_id: campo.dataset.userId,
+                email: campo.dataset.email,
+                status: campo.dataset.status,
+                anotacao: document.querySelector(`.anotacao-input[data-user-id="${campo.dataset.userId}"]`).value.trim(),
+                updated_at: new Date().toISOString()
+            }));
+            if (!registros.length) return;
+            const { error } = await _supabase.from('chamada_turmas').upsert(registros, { onConflict: 'modulo_id,data,user_id' });
+            if (error) {
+                alert('Não foi possível salvar a chamada: ' + error.message);
+                return;
+            }
+            alert('Chamada e anotações salvas com sucesso.');
+        }
+
+        function escaparHtml(valor) {
+            return String(valor ?? '').replace(/[&<>"]/g, caractere => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'
+            }[caractere]));
+        }
+
+        async function abrirAnotacoes(email) {
+            document.getElementById('modal-anotacoes-email').innerText = email;
+            document.getElementById('modal-anotacoes').style.display = 'flex';
+            const lista = document.getElementById('lista-anotacoes');
+            lista.innerHTML = '<div class="empty-state">Carregando anotações...</div>';
+
+            const { data, error } = await _supabase.from('chamada_turmas').select('*')
+                .eq('email', email).order('data', { ascending: false });
+            if (error) {
+                lista.innerHTML = '<div class="empty-state" style="color:var(--danger);">Não foi possível carregar as anotações.</div>';
+                return;
+            }
+
+            const anotacoes = (data || []).filter(registro => registro.anotacao?.trim());
+            lista.innerHTML = anotacoes.length ? anotacoes.map(registro => {
+                const modulo = modulosTurmas.find(item => item.id === Number(registro.modulo_id));
+                const status = registro.status === 'presente' ? 'Presente' : registro.status === 'falta' ? 'Falta' : 'Pendente';
+                return `<div class="anotacao-row">
+                    <div class="anotacao-meta"><strong>${escaparHtml(modulo?.nome || `Módulo ${registro.modulo_id}`)}</strong><span>${escaparHtml(registro.data)} · ${status}</span></div>
+                    <div class="anotacao-texto">${escaparHtml(registro.anotacao)}</div>
+                </div>`;
+            }).join('') : '<div class="empty-state">Nenhuma anotação registrada para este aluno.</div>';
+        }
+
+        function fecharModalAnotacoes() {
+            document.getElementById('modal-anotacoes').style.display = 'none';
         }
 
         function renderizarTabela(lista) {
@@ -402,6 +553,7 @@
                             ${provaButton}
                             <button class="btn" style="padding:8px; background:#fff7ed; color:#c2410c; font-weight:700;" onclick="enviarResetSenha('${aluno.email}')"><i class="fas fa-key"></i> Resetar senha</button>
                             <button class="btn" style="padding:8px; background:#eef2ff; color:var(--primary); font-weight:700;" onclick="abrirVerificacaoModulos('${aluno.email}')">Verificar Módulos</button>
+                            <button class="btn" style="padding:8px; background:#ecfdf5; color:#047857; font-weight:700;" onclick="abrirAnotacoes('${aluno.email}')"><i class="fas fa-sticky-note"></i> Consultar anotações</button>
                         </div>
                     </td>
                 </tr>
@@ -864,10 +1016,6 @@
                         table: 'configuracoes'
                     }, (payload) => {
                         console.log('Configuração atualizada:', payload);
-                        if (payload.new.chave === 'chamada_ativa') {
-                            const chamadaAtiva = payload.new.valor === "true";
-                            atualizarInterfaceChamada(chamadaAtiva);
-                        }
                     })
                     .subscribe();
             } catch (error) {

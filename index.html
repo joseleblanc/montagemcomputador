@@ -98,7 +98,7 @@
                 if (error) {
                     exibirMensagem("Erro: " + error.message, "erro");
                 } else {
-                    await _supabase.from('perfil_alunos').insert([{ email: email, status: 'pendente' }]); 
+                    await _supabase.from('perfil_alunos').insert([{ email: email, user_id: data.user?.id, status: 'pendente' }]); 
                     exibirMensagem("Cadastro realizado! Aguarde a aprovação do admin.", "sucesso");
                 }
             } else {

@@ -508,21 +508,24 @@ async function verificarLiberacaoCertificado() {
         .eq('modulo_id', 100)
         .single();
 
-    // Verificar presença na aula ao vivo
+    // Verificar presença registrada pelo instrutor em uma turma
     const { data: presenca, error: presencaError } = await _supabase
-        .from('chamadas_aula')
+        .from('chamada_turmas')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('email', user.email)
+        .eq('status', 'presente')
         .limit(1);
 
     console.log('Verificação certificado:', { prova, presenca, provaError, presencaError });
 
 const statusEl = document.getElementById('status-prova-topo');
+        const provaAprovada = !provaError && !!prova?.concluido && Number(prova.nota) >= 70;
+        const temPresenca = !presencaError && Array.isArray(presenca) && presenca.length > 0;
         const notaHtml = (prova && prova.nota != null)
             ? `Nota da Prova: <span style="color:${prova.nota >= 70 ? 'var(--verde)' : 'var(--vermelho)'}">${prova.nota}/100</span>`
             : '';
 
-        if (!provaError && prova && prova.concluido && prova.nota >= 70 && !presencaError && presenca && presenca.length > 0) {
+        if (provaAprovada && temPresenca) {
             btn.disabled = false;
             btn.classList.add('liberado');
             btn.style.cursor = 'pointer';
@@ -534,10 +537,10 @@ const statusEl = document.getElementById('status-prova-topo');
             statusEl.innerHTML = `${notaHtml} <strong style="color:var(--verde);">(Certificado liberado)</strong>`;
         } else {
             let motivo = '';
-            if (provaError || !prova || !prova.concluido || prova.nota < 70) {
+            if (!provaAprovada) {
                 motivo = 'Prova final não aprovada';
-            } else if (presencaError || !presenca || presenca.length === 0) {
-                motivo = 'Presença na aula ao vivo não confirmada';
+            } else if (!temPresenca) {
+                motivo = 'Presença em uma turma não registrada';
             }
             statusEl.innerHTML = `${notaHtml} <strong style="color:var(--vermelho);">(${motivo})</strong>`;
     }

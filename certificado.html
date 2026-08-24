@@ -91,18 +91,21 @@
             if (!user) { window.location.href = 'index.html'; return; }
 
             const { data: perfil } = await _supabase.from('perfil_alunos').select('nome_completo').eq('id', user.id).single();
-            const { data: prova } = await _supabase.from('progresso_alunos').select('nota').eq('user_id', user.id).eq('modulo_id', 100).single();
-            const { data: presenca } = await _supabase.from('chamadas_aula').select('id').eq('user_id', user.id).limit(1);
+            const { data: prova } = await _supabase.from('progresso_alunos').select('nota, concluido').eq('user_id', user.id).eq('modulo_id', 100).single();
+            const { data: presenca } = await _supabase.from('chamada_turmas').select('id').eq('email', user.email).eq('status', 'presente').limit(1);
 
-            if (!prova || prova.nota < 70) {
+            const provaAprovada = !!prova?.concluido && Number(prova.nota) >= 70;
+            const temPresenca = Array.isArray(presenca) && presenca.length > 0;
+
+            if (!provaAprovada) {
                 alert("Você ainda não possui nota suficiente para o certificado.");
                 window.location.href = 'modulos.html';
                 return;
             }
 
-            if (!presenca || presenca.length === 0) {
-                alert("Você precisa confirmar presença em pelo menos uma aula ao vivo para obter o certificado.");
-                window.location.href = 'aula-viva.html';
+            if (!temPresenca) {
+                alert("O instrutor precisa registrar sua presença em pelo menos uma turma para obter o certificado.");
+                window.location.href = 'modulos.html';
                 return;
             }
 

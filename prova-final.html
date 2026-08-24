@@ -191,6 +191,8 @@
     });
 
     async function processarProva() {
+        const botaoEnviar = document.querySelector('.btn-enviar');
+        botaoEnviar.disabled = true;
         provaAtiva = false;
         const questoesDOM = document.querySelectorAll('.questao');
         let acertos = 0;
@@ -207,20 +209,32 @@
         const aprovado = nota >= 70;
 
         try {
-            const { data: { user } } = await _supabase.auth.getUser();
-            await _supabase.from('progresso_alunos').upsert({ 
+            const { data: userData, error: userError } = await _supabase.auth.getUser();
+            const user = userData?.user;
+            if (userError || !user) {
+                alert("Sessão expirada. Faça login novamente.");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const { error: erroSalvar } = await _supabase.from('progresso_alunos').upsert({ 
                 user_id: user.id, 
                 modulo_id: 100, 
                 concluido: true, 
                 nota: nota,
                 respostas_aluno: resumo,
+                email: user.email,
                 data_conclusao: new Date().toISOString()
             }, { onConflict: 'user_id, modulo_id' });
 
+            if (erroSalvar) throw erroSalvar;
+
             exibirResultado(nota, aprovado);
         } catch (e) {
-            alert("Erro ao salvar resultado. Verifique sua conexão.");
+            console.error("Erro ao salvar resultado:", e);
+            alert("Erro ao salvar resultado: " + (e.message || "Verifique sua conexão."));
             provaAtiva = true;
+            botaoEnviar.disabled = false;
         }
     }
 
