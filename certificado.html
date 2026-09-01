@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+    <link rel="icon" type="image/png" href="favicon.png">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificado | Telecurso Montagem de PC</title>
@@ -86,33 +88,96 @@
             i.value = v;
         }
 
-        async function prepararDados() {
-            const { data: { user }, error: userError } = await _supabase.auth.getUser();
-            if (userError) throw userError;
-            if (!user) { window.location.href = 'index.html'; return; }
+        function mostrarMensagemCertificado(titulo, mensagem, mostrarBotao = true) {
+            const area = document.getElementById('loading-area');
+            const link = mostrarBotao ? '<a href="modulos.html" style="display:inline-block; margin-top:18px; color:#b77cff; text-decoration:none; font-weight:600;">Voltar aos módulos</a>' : '';
+            area.innerHTML = `<h2>${titulo}</h2><p>${mensagem}</p>${link}`;
+            area.style.display = 'block';
+            document.getElementById('ready-area').style.display = 'none';
+        }
 
-            const { data: perfil, error: perfilError } = await _supabase.from('perfil_alunos').select('nome_completo').eq('user_id', user.id).maybeSingle();
-            const { data: prova, error: provaError } = await _supabase.from('progresso_alunos').select('nota, concluido').eq('user_id', user.id).eq('modulo_id', 100).maybeSingle();
-            const { data: presenca, error: presencaError } = await _supabase.from('chamada_turmas').select('id').eq('email', user.email).eq('status', 'presente').limit(1);
-            if (perfilError || provaError || presencaError) throw perfilError || provaError || presencaError;
+        async function prepararDados() {
+            let user = null;
+            try {
+                const { data, error } = await _supabase.auth.getUser();
+                user = data?.user || null;
+                if (error) {
+                    const mensagem = String(error?.message || '').toLowerCase();
+                    if (mensagem.includes('auth session missing') || mensagem.includes('session missing') || mensagem.includes('not logged in') || mensagem.includes('not authenticated')) {
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    throw error;
+                }
+            } catch (error) {
+                const mensagem = String(error?.message || '').toLowerCase();
+                if (mensagem.includes('auth session missing') || mensagem.includes('session missing') || mensagem.includes('not logged in') || mensagem.includes('not authenticated')) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                throw error;
+            }
+
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            let perfil = null;
+            let perfilError = null;
+            let prova = null;
+            let provaError = null;
+            let presenca = [];
+            let presencaError = null;
+
+            const perfilQuery = await _supabase
+                .from('perfil_alunos')
+                .select('email, status')
+                .eq('email', user.email)
+                .maybeSingle();
+            perfil = perfilQuery.data;
+            perfilError = perfilQuery.error;
+
+            const provaQuery = await _supabase
+                .from('progresso_alunos')
+                .select('nota, concluido')
+                .eq('user_id', user.id)
+                .eq('modulo_id', 100)
+                .maybeSingle();
+            prova = provaQuery.data;
+            provaError = provaQuery.error;
+
+            const presencaQuery = await _supabase
+                .from('chamada_turmas')
+                .select('id')
+                .or(`user_id.eq.${user.id},email.eq.${user.email}`)
+                .eq('status', 'presente')
+                .limit(1);
+            presenca = presencaQuery.data || [];
+            presencaError = presencaQuery.error;
+
+            if (perfilError || provaError || presencaError) {
+                console.error('Erro ao preparar certificado:', { perfilError, provaError, presencaError });
+                mostrarMensagemCertificado('Não foi possível carregar o certificado.', 'Verifique sua conexão e tente novamente.');
+                return;
+            }
 
             const provaAprovada = !!prova?.concluido && Number(prova.nota) >= 70;
             const temPresenca = Array.isArray(presenca) && presenca.length > 0;
 
             if (!provaAprovada) {
-                alert("Você ainda não possui nota suficiente para o certificado.");
-                window.location.href = 'modulos.html';
+                mostrarMensagemCertificado('Ainda não é possível emitir o certificado.', 'Sua nota na prova final ainda não atende ao mínimo exigido.');
                 return;
             }
 
             if (!temPresenca) {
-                alert("O instrutor precisa registrar sua presença em pelo menos uma turma para obter o certificado.");
-                window.location.href = 'modulos.html';
+                mostrarMensagemCertificado('Ainda não é possível emitir o certificado.', 'O instrutor precisa registrar sua presença em pelo menos uma turma.');
                 return;
             }
 
+            const nomeBase = perfil?.email ? perfil.email.split('@')[0] : (user.email ? user.email.split('@')[0] : 'Aluno do Telecurso');
             dadosAluno = {
-                nome: perfil?.nome_completo || "Aluno do Telecurso",
+                nome: nomeBase || "Aluno do Telecurso",
                 id: user.id
             };
 
@@ -257,11 +322,115 @@ function gerarPDF() {
             doc.setTextColor(150, 150, 150);
             doc.text("Documento emitido eletronicamente em conformidade com o regimento interno.", width - 15, height - 15, { align: "right" });
 
+            // 7. SEGUNDA PÁGINA: documento formal em retrato A4
+            doc.addPage('p', 'a4');
+            doc.setPage(2);
+
+            const page2Width = doc.internal.pageSize.getWidth();
+            const page2Height = doc.internal.pageSize.getHeight();
+
+            if (page2Width > page2Height) {
+                doc.deletePage(2);
+                doc.addPage('p', 'a4');
+            }
+
+            const page2WidthFinal = doc.internal.pageSize.getWidth();
+            const page2HeightFinal = doc.internal.pageSize.getHeight();
+
+            doc.setFillColor(255, 255, 255);
+            doc.rect(0, 0, page2WidthFinal, page2HeightFinal, 'F');
+
+            doc.setDrawColor(220, 220, 220);
+            doc.setLineWidth(0.5);
+            doc.rect(10, 10, page2WidthFinal - 20, page2HeightFinal - 20);
+
+            doc.setTextColor(0, 51, 102);
+            doc.setFont('times', 'bold');
+            doc.setFontSize(18);
+            doc.text('TELECURSO', page2WidthFinal / 2, 22, { align: 'center' });
+            doc.setFontSize(11);
+            doc.text('Montagem e Manutenção de Computadores', page2WidthFinal / 2, 30, { align: 'center' });
+
+            doc.setDrawColor(255, 122, 26);
+            doc.setLineWidth(0.8);
+            doc.line(18, 36, page2WidthFinal - 18, 36);
+
+            doc.setTextColor(20, 20, 20);
+            doc.setFont('times', 'bold');
+            doc.setFontSize(13);
+            doc.text('DESCRIÇÃO DO CURSO', 18, 46);
+
+            doc.setFont('times', 'normal');
+            doc.setFontSize(10.2);
+            const descricaoCurso = 'O curso de Montagem e Manutenção de Computadores desenvolve competências práticas para identificar peças, montar computadores, diagnosticar falhas e manter equipamentos com segurança, organização e eficiência técnica.';
+            const linhasDescricao = doc.splitTextToSize(descricaoCurso, page2WidthFinal - 36);
+            doc.text(linhasDescricao, 18, 56);
+
+            doc.setFont('times', 'bold');
+            doc.setFontSize(12.5);
+            doc.text('OBJETIVO', 18, 82);
+
+            doc.setFont('times', 'normal');
+            doc.setFontSize(10.2);
+            const objetivo = 'Capacitar o participante para montar, configurar, manter e diagnosticar computadores de forma segura, com foco em prática, organização da bancada e suporte técnico profissional.';
+            const linhasObjetivo = doc.splitTextToSize(objetivo, page2WidthFinal - 36);
+            doc.text(linhasObjetivo, 18, 90);
+
+            doc.setFont('times', 'bold');
+            doc.setFontSize(12.5);
+            doc.text('AULAS DO CURSO', 18, 120);
+
+            const aulas = [
+                '1. Introdução ao Curso',
+                '2. Conhecendo as Peças',
+                '3. Separando Ferramentas',
+                '4. Cuidados de Segurança',
+                '5. Montagem do Processador',
+                '6. Memória RAM',
+                '7. Placa-Mãe e Gabinete',
+                '8. Fonte de Alimentação',
+                '9. Armazenamento',
+                '10. Placa de Vídeo',
+                '11. Coolers e Ventilação',
+                '12. Primeiro Boot e Testes',
+                '13. Formatação com Windows',
+                '14. Vídeos Tutoriais',
+                '15. Conclusão',
+                '16. Prova Final'
+            ];
+
+            const colunaEsquerda = aulas.slice(0, 8);
+            const colunaDireita = aulas.slice(8);
+            const posicoesX = [18, 108];
+            const larguraColuna = 82;
+
+            doc.setFont('times', 'normal');
+            doc.setFontSize(9.4);
+
+            [colunaEsquerda, colunaDireita].forEach((coluna, indiceColuna) => {
+                let y = 128;
+                coluna.forEach((aula) => {
+                    const linhasAula = doc.splitTextToSize(aula, larguraColuna);
+                    doc.text(linhasAula, posicoesX[indiceColuna], y);
+                    y += linhasAula.length * 5.2 + 1.3;
+                });
+            });
+
+            doc.setFont('times', 'italic');
+            doc.setFontSize(8.4);
+            doc.setTextColor(90, 90, 90);
+            doc.text('Carga horária total: 20 horas', page2WidthFinal - 18, 182, { align: 'right' });
+
+            doc.setFont('times', 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(60, 60, 60);
+            doc.text('Curso emitido eletronicamente em conformidade com os requisitos estabelecidos.', page2WidthFinal / 2, page2HeightFinal - 10, { align: 'center' });
+
             doc.save(`Certificado_${nome.replace(/\s+/g, '_')}.pdf`);
         }
         prepararDados().catch(error => {
             console.error('Erro ao preparar certificado:', error);
-            document.getElementById('loading-area').innerHTML = '<h2>Não foi possível carregar o certificado.</h2><p>Verifique sua conexão e tente novamente.</p><a href="modulos.html">Voltar aos módulos</a>';
+            mostrarMensagemCertificado('Não foi possível carregar o certificado.', 'Verifique sua conexão e tente novamente.');
         });
     </script>
 </body>
