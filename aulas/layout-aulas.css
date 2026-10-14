@@ -1,0 +1,209 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Rajdhani:wght@600;700&family=Sora:wght@500;600;700&display=swap');
+
+:root {
+    --hw-carbon: #081a36;
+    --hw-pcb: #0d2142;
+    --hw-copper: #e0b04a;
+    --hw-gold: #e0b04a;
+    --hw-cyan: #2dd4bf;
+    --hw-green: #34d399;
+    --hw-danger: #ef4444;
+    --hw-purple: #2dd4bf;
+    --bg-main: #07142b;
+    --surface-card: #0d2142;
+    --surface-hover: #12295a;
+    --text-primary: #f1f6fd;
+    --text-secondary: #c3d3ea;
+    --text-muted: #92a9ca;
+    --border-tech: #1f3b66;
+    --border-highlight: #2e528a;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-main) !important;
+    background-image: none !important;
+    color: var(--text-secondary) !important;
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'Sora', sans-serif;
+}
+
+.navbar {
+    background: var(--hw-carbon) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6) !important;
+}
+
+.btn-voltar {
+    color: var(--text-primary) !important;
+    background: rgba(224, 176, 74, 0.12) !important;
+    border: 1px solid var(--border-tech);
+}
+
+.btn-voltar:hover {
+    background: var(--surface-hover) !important;
+    border-color: var(--hw-copper);
+}
+
+.container,
+.card,
+.congratulations-card {
+    background: var(--surface-card) !important;
+    color: var(--text-secondary) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+h1,
+h2,
+.peça-info h3,
+.star-icon {
+    color: var(--text-primary) !important;
+}
+
+h1 {
+    border-bottom-color: var(--hw-copper) !important;
+}
+
+h2,
+.peça-info h3,
+.tech-specs b {
+    color: var(--hw-cyan) !important;
+}
+
+.intro-text,
+p,
+li {
+    color: var(--text-secondary);
+}
+
+.peça-card {
+    background: var(--hw-pcb) !important;
+    border-left-color: var(--hw-copper) !important;
+}
+
+.tech-specs,
+.instrucao-detalhe,
+.detalhe-iniciante,
+.tech-detail,
+.tech-note,
+.detalhe-tecnico,
+.detalhe-tech,
+.dica-ouro,
+.info-card,
+.passo-card,
+.video-info,
+.highlight-box,
+.instrucoes,
+.box-instrucao,
+.guia-iniciante,
+.guia-fios,
+.pro-tip,
+.dica-box,
+.alerta-tecnico,
+.alerta-esd,
+.alerta,
+.box-avancado,
+.alerta-box,
+.alerta-critico,
+.aviso-prova,
+.checklist-final {
+    background: var(--surface-card) !important;
+    color: var(--text-secondary) !important;
+    border-color: var(--border-tech) !important;
+}
+
+.tech-specs *,
+.instrucao-detalhe *,
+.detalhe-iniciante *,
+.tech-detail *,
+.tech-note *,
+.detalhe-tecnico *,
+.detalhe-tech *,
+.dica-ouro *,
+.info-card *,
+.passo-card *,
+.video-info *,
+.highlight-box *,
+.instrucoes *,
+.box-instrucao *,
+.guia-iniciante *,
+.guia-fios *,
+.pro-tip *,
+.dica-box *,
+.alerta-tecnico *,
+.alerta-esd *,
+.alerta *,
+.box-avancado *,
+.alerta-box *,
+.alerta-critico *,
+.aviso-prova *,
+.checklist-final * {
+    color: var(--text-secondary) !important;
+}
+
+.highlight-box,
+.box-instrucao,
+.guia-iniciante,
+.guia-fios,
+.pro-tip {
+    border-color: var(--hw-cyan) !important;
+}
+
+.instrucoes,
+.dica-box,
+.checklist-final {
+    border-color: var(--hw-green) !important;
+}
+
+.alerta-tecnico,
+.alerta-esd,
+.alerta,
+.box-avancado,
+.aviso-prova {
+    border-color: var(--hw-gold) !important;
+}
+
+.alerta-box,
+.alerta-critico {
+    border-color: var(--hw-danger) !important;
+}
+
+.area-final {
+    background: rgba(52, 211, 153, 0.08) !important;
+    border-top-color: var(--border-highlight) !important;
+}
+
+.btn-quiz,
+.btn-prova {
+    background: var(--hw-copper) !important;
+    color: var(--bg-main) !important;
+    box-shadow: 0 4px 15px rgba(224, 176, 74, 0.3) !important;
+}
+
+.btn-quiz:hover,
+.btn-prova:hover {
+    background: #ecc063 !important;
+}
+
+.btn-concluir {
+    background: var(--hw-green) !important;
+    color: var(--bg-main) !important;
+    box-shadow: 0 4px 15px rgba(52, 211, 153, 0.3) !important;
+}
+
+.destaque-amarelo {
+    background: var(--hw-gold) !important;
+    color: var(--bg-main) !important;
+}
+
+.checklist-final li::before {
+    color: var(--hw-green) !important;
+}
+
+.congratulations-card {
+    border-bottom-color: var(--hw-gold) !important;
+}
