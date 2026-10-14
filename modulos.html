@@ -618,11 +618,12 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
     // --- CHAMADA POR QR CODE ---
     let chamadaStream = null, chamadaAtiva = false, chamadaProcessando = false;
 
-    // QR lido pela câmera nativa do celular abre esta página com ?presenca=TOKEN
+    // QR lido pela câmera nativa do celular abre esta página com ?presenca=MODULO:DATA
     (function () {
-        const t = new URLSearchParams(location.search).get('presenca');
-        if (t) {
-            sessionStorage.setItem('presenca_pendente', t);
+        const valor = new URLSearchParams(location.search).get('presenca');
+        const presenca = valor && extrairDadosPresenca(valor);
+        if (presenca) {
+            sessionStorage.setItem('presenca_pendente', JSON.stringify(presenca));
             history.replaceState(null, '', location.pathname);
         }
     })();
@@ -633,16 +634,26 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
         el.className = tipo || '';
     }
 
-    function extrairTokenPresenca(texto) {
+    function extrairDadosPresenca(texto) {
+        let valor = String(texto || '').trim();
         try {
-            const t = new URL(texto).searchParams.get('presenca');
-            if (t) return t;
+            const url = new URL(valor, window.location.href);
+            valor = url.searchParams.get('presenca') || valor;
         } catch (e) {}
-        return /^[a-f0-9]{16,32}$/i.test(String(texto).trim()) ? String(texto).trim() : null;
+        const correspondencia = /^(\d{1,2}):(\d{4}-\d{2}-\d{2})$/.exec(valor);
+        if (!correspondencia) return null;
+        const moduloId = Number(correspondencia[1]);
+        const data = correspondencia[2];
+        const dataValida = new Date(`${data}T00:00:00Z`);
+        if (moduloId < 0 || moduloId > 14 || Number.isNaN(dataValida.getTime()) || dataValida.toISOString().slice(0, 10) !== data) return null;
+        return { modulo_id: moduloId, data };
     }
 
-    async function registrarPresencaQr(token) {
-        const { data, error } = await _supabase.rpc('registrar_presenca_qr', { p_token: token });
+    async function registrarPresencaQr(presenca) {
+        const { data, error } = await _supabase.rpc('registrar_presenca_qr', {
+            p_modulo_id: presenca.modulo_id,
+            p_data: presenca.data
+        });
         if (error) return { ok: false, erro: 'Não foi possível registrar a presença: ' + error.message };
         return data || { ok: false, erro: 'Resposta inválida do servidor.' };
     }
@@ -724,11 +735,11 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
             } catch (e) { console.warn('Leitura QR:', e); }
             lendoFrame = false;
             if (texto && chamadaAtiva) {
-                const token = extrairTokenPresenca(texto);
-                if (token) {
+                const presenca = extrairDadosPresenca(texto);
+                if (presenca) {
                     chamadaProcessando = true;
                     msgChamada('Validando presença...');
-                    registrarPresencaQr(token).then(r => {
+                    registrarPresencaQr(presenca).then(r => {
                         if (r.ok) pararCameraChamada();
                         mostrarResultadoChamada(r);
                         if (!r.ok) setTimeout(() => { if (chamadaAtiva) { chamadaProcessando = false; msgChamada('Aponte a câmera para o QR Code exibido pelo professor.'); } }, 3000);
@@ -742,13 +753,25 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
     }
 
     async function processarPresencaPendente() {
-        const token = sessionStorage.getItem('presenca_pendente');
-        if (!token) return;
+        const valor = sessionStorage.getItem('presenca_pendente');
+        if (!valor) return;
         sessionStorage.removeItem('presenca_pendente');
         document.getElementById('chamada-video-box').style.display = 'none';
         document.getElementById('modal-chamada').style.display = 'flex';
         msgChamada('Validando presença...');
-        mostrarResultadoChamada(await registrarPresencaQr(token));
+        let presenca;
+        try {
+            const dados = JSON.parse(valor);
+            presenca = extrairDadosPresenca(`${dados.modulo_id}:${dados.data}`);
+        } catch (error) {
+            msgChamada('QR Code de chamada inválido.', 'erro');
+            return;
+        }
+        if (!presenca) {
+            msgChamada('QR Code de chamada inválido.', 'erro');
+            return;
+        }
+        mostrarResultadoChamada(await registrarPresencaQr(presenca));
     }
 
     async function sair() { await _supabase.auth.signOut(); window.location.href = "index.html"; }

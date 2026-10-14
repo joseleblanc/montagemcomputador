@@ -136,7 +136,6 @@
         .qr-box img, .qr-box canvas { max-width:100%; height:auto; }
         .qr-info { flex:1; min-width:220px; color:var(--text-muted); font-size:14px; }
         .qr-info h4 { color:var(--text-main); font-size:16px; margin-bottom:6px; }
-        .qr-info .qr-contador { color:var(--primary); font-weight:800; }
         .qr-erro { color:#b91c1c; font-size:13px; line-height:1.4; padding:8px; max-width:220px; }
         .qr-acoes { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
         .qr-card.ampliado { position:fixed; inset:0; z-index:1900; margin:0; border-radius:0; flex-direction:column; justify-content:center; background:var(--bg-main); text-align:center; }
@@ -311,8 +310,8 @@
                     <div id="qr-code" class="qr-box" aria-label="QR Code da chamada"></div>
                     <div class="qr-info">
                         <h4><i class="fas fa-qrcode"></i> Chamada por QR Code</h4>
-                        <p>Os alunos abrem <b>Chamada</b> no topo da página de módulos e apontam a câmera para este código. Cada aluno confirma a própria presença com o e-mail logado.</p>
-                        <p style="margin-top:8px;">O código muda em <span id="qr-contador" class="qr-contador">30</span>s, para não funcionar em foto repassada.</p>
+                        <p>Os alunos abrem <b>Chamada</b> no topo da página de módulos e apontam a câmera para este código. Só alunos autenticados com este módulo ativo conseguem confirmar. Quem não confirmar fica com falta.</p>
+                        <p style="margin-top:8px;">Este código corresponde ao módulo e à data selecionados. A presença é salva uma única vez por aluno nesta chamada.</p>
                         <div class="qr-acoes">
                             <button type="button" class="btn btn-primary" onclick="alternarQrAmpliado()"><i class="fas fa-expand"></i> <span id="qr-ampliar-txt">Ampliar para projetar</span></button>
                         </div>
@@ -515,9 +514,10 @@
             const dataChamada = document.getElementById('data-chamada').value;
             const tabela = document.getElementById('tabela-chamada');
             if (!dataChamada) return;
-            qrVistos = new Set();
+            pararQrChamada();
             qrContagem = 0;
-            iniciarQrChamada();
+            qrUrlAtual = '';
+            document.getElementById('qr-code').innerHTML = '<div class="qr-erro">Carregando a lista de alunos...</div>';
             tabela.innerHTML = '<tr><td colspan="3" class="empty-state">Carregando chamada...</td></tr>';
 
             const { data, error } = await _supabase.from('chamada_turmas').select('*')
@@ -563,13 +563,13 @@
                 const status = registro.status || 'pendente';
                 return `<tr>
                     <td><b>${aluno.email}</b></td>
-                    <td><button type="button" class="btn btn-presenca ${status === 'falta' ? 'falta' : 'presente'}" data-status="${status === 'falta' ? 'falta' : 'presente'}" data-user-id="${escaparHtml(aluno.user_id)}" data-email="${escaparHtml(aluno.email)}" onclick="alternarPresenca(this)">${status === 'falta' ? 'FALTA' : 'PRESENÇA'}</button>${badgeQr(registro)}</td>
+                    <td><button type="button" class="btn btn-presenca ${status === 'presente' ? 'presente' : 'falta'}" data-status="${status === 'presente' ? 'presente' : 'falta'}" data-manual="false" data-user-id="${escaparHtml(aluno.user_id)}" data-email="${escaparHtml(aluno.email)}" onclick="alternarPresenca(this)">${status === 'presente' ? 'PRESENÇA' : 'FALTA'}</button>${badgeQr(registro)}</td>
                     <td><input class="anotacao-input" data-user-id="${aluno.user_id}" value="${(registro.anotacao || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" placeholder="Anotação sobre o aluno"></td>
                 </tr>`;
             }).join('') : `<tr><td colspan="3" class="empty-state">Nenhum aluno está no próximo módulo ativo (${moduloId}).</td></tr>`;
-            alunos.forEach(aluno => { if ((registrosChamada[aluno.user_id] || {}).metodo === 'qr') qrVistos.add(aluno.user_id); });
+            qrContagem = alunos.filter(aluno => (registrosChamada[aluno.user_id] || {}).metodo === 'qr').length;
             atualizarResumoChamada();
-            atualizarPresencasQr();
+            iniciarQrChamada();
         }
 
         function atualizarResumoChamada() {
@@ -579,7 +579,8 @@
             document.getElementById('chamada-resumo').innerHTML = `<span><strong>${campos.length}</strong> alunos</span><span><strong style="color:var(--success)">${presentes}</strong> presentes</span><span><strong style="color:var(--danger)">${faltas}</strong> faltas</span><span><strong style="color:var(--purple)">${qrContagem}</strong> via QR</span>`;
         }
 
-        function alternarPresenca(botao) {
+        function alternarPresenca(botao, atualizacaoQr = false) {
+            if (!atualizacaoQr) botao.dataset.manual = 'true';
             const presente = botao.dataset.status === 'presente';
             botao.dataset.status = presente ? 'falta' : 'presente';
             botao.classList.toggle('presente', !presente);
@@ -592,15 +593,30 @@
             const moduloId = Number(document.getElementById('seletor-turma').value);
             const dataChamada = document.getElementById('data-chamada').value;
             const campos = [...document.querySelectorAll('.btn-presenca')];
-            const registros = campos.map(campo => ({
-                modulo_id: moduloId,
-                data: dataChamada,
-                user_id: campo.dataset.userId,
-                email: campo.dataset.email,
-                status: campo.dataset.status,
-                anotacao: document.querySelector(`.anotacao-input[data-user-id="${campo.dataset.userId}"]`).value.trim(),
-                updated_at: new Date().toISOString()
-            }));
+            const { data: presencasQr, error: erroPresencasQr } = await _supabase.from('chamada_turmas')
+                .select('user_id,status,metodo,qr_em')
+                .eq('modulo_id', moduloId).eq('data', dataChamada).eq('metodo', 'qr');
+            if (erroPresencasQr) {
+                alert('Não foi possível conferir as presenças via QR antes de salvar: ' + erroPresencasQr.message);
+                return;
+            }
+            const presencasQrPorAluno = new Map((presencasQr || []).map(registro => [registro.user_id, registro]));
+            const registros = campos.map(campo => {
+                const presencaQr = presencasQrPorAluno.get(campo.dataset.userId);
+                const registroAtual = presencaQr || registrosChamada[campo.dataset.userId] || {};
+                if (presencaQr && campo.dataset.status !== 'presente') alternarPresenca(campo, true);
+                return {
+                    modulo_id: moduloId,
+                    data: dataChamada,
+                    user_id: campo.dataset.userId,
+                    email: campo.dataset.email,
+                    status: presencaQr && campo.dataset.manual !== 'true' ? 'presente' : campo.dataset.status,
+                    anotacao: document.querySelector(`.anotacao-input[data-user-id="${campo.dataset.userId}"]`).value.trim(),
+                    updated_at: new Date().toISOString(),
+                    metodo: registroAtual.metodo,
+                    qr_em: registroAtual.qr_em
+                };
+            });
             if (!registros.length) return;
             const { error } = await _supabase.from('chamada_turmas').upsert(registros, { onConflict: 'modulo_id,data,user_id' });
             if (error) {
@@ -611,14 +627,7 @@
         }
 
         // --- CHAMADA POR QR CODE ---
-        const QR_INTERVALO = 30; // segundos até trocar o código
-        let qrTimer = null, qrRestante = 0, qrTick = 0, qrAmpliado = false, qrUrlAtual = '', qrContagem = 0, qrVistos = new Set();
-
-        function novoTokenQr() {
-            const bytes = new Uint8Array(8);
-            crypto.getRandomValues(bytes);
-            return [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
-        }
+        let qrPollTimer = null, qrAmpliado = false, qrUrlAtual = '', qrContagem = 0;
 
         function badgeQr(registro) {
             if (!registro || registro.metodo !== 'qr') return '';
@@ -627,41 +636,37 @@
         }
 
         function pararQrChamada() {
-            if (qrTimer) clearInterval(qrTimer);
-            qrTimer = null;
-            if (qrAmpliado) alternarQrAmpliado();
-        }
-
-        async function iniciarQrChamada() {
-            if (qrTimer) clearInterval(qrTimer);
-            qrTimer = null;
-            qrTick = 0;
-            await gerarTokenQr();
-            if (!document.getElementById('qr-code').querySelector('.qr-erro')) {
-                qrTimer = setInterval(() => {
-                    qrRestante--;
-                    qrTick++;
-                    document.getElementById('qr-contador').textContent = Math.max(qrRestante, 0);
-                    if (qrRestante <= 0) gerarTokenQr();
-                    if (qrTick % 5 === 0) atualizarPresencasQr();
-                }, 1000);
+            if (qrPollTimer) clearInterval(qrPollTimer);
+            qrPollTimer = null;
+            if (qrAmpliado) {
+                qrAmpliado = false;
+                document.getElementById('qr-card').classList.remove('ampliado');
+                document.getElementById('qr-ampliar-txt').textContent = 'Ampliar para projetar';
             }
         }
 
-        async function gerarTokenQr() {
-            qrRestante = QR_INTERVALO;
+        function iniciarQrChamada() {
+            gerarQrChamada();
+            if (!document.getElementById('qr-code').querySelector('.qr-erro')) {
+                qrPollTimer = setInterval(atualizarPresencasQr, 5000);
+            }
+        }
+
+        function gerarQrChamada() {
             const box = document.getElementById('qr-code');
             const moduloId = Number(document.getElementById('seletor-turma').value);
             const dataChamada = document.getElementById('data-chamada').value;
             if (!dataChamada) return;
-            const token = novoTokenQr();
-            const { error } = await _supabase.from('chamada_qr_tokens').insert({ token, modulo_id: moduloId, data: dataChamada });
-            if (error) {
+            const agora = new Date();
+            const dataHoje = new Date(agora.getTime() - agora.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+            if (dataChamada !== dataHoje) {
                 qrUrlAtual = '';
-                box.innerHTML = '<div class="qr-erro">Não foi possível gerar o QR Code. Execute o arquivo supabase-chamada-qr.sql no Supabase.<br><small>' + escaparHtml(error.message) + '</small></div>';
+                box.innerHTML = '<div class="qr-erro">O QR Code só fica disponível para a chamada da data de hoje.</div>';
                 return;
             }
-            qrUrlAtual = token; // conteúdo curto = QR simples e fácil de ler
+            const urlPresenca = new URL('modulos.html', window.location.href);
+            urlPresenca.searchParams.set('presenca', `${moduloId}:${dataChamada}`);
+            qrUrlAtual = urlPresenca.href;
             desenharQr();
         }
 
@@ -685,18 +690,23 @@
             const moduloId = Number(document.getElementById('seletor-turma').value);
             const dataChamada = document.getElementById('data-chamada').value;
             if (!dataChamada) return;
-            const { data, error } = await _supabase.from('chamada_turmas').select('user_id,metodo,qr_em')
+            const { data, error } = await _supabase.from('chamada_turmas').select('user_id,status,metodo,qr_em')
                 .eq('modulo_id', moduloId).eq('data', dataChamada).eq('metodo', 'qr');
-            if (error) return;
+            if (error) {
+                console.error('Não foi possível atualizar as presenças via QR:', error);
+                return;
+            }
             if (moduloId !== Number(document.getElementById('seletor-turma').value) || dataChamada !== document.getElementById('data-chamada').value) return;
             qrContagem = (data || []).length;
             (data || []).forEach(registro => {
                 const botao = document.querySelector(`.btn-presenca[data-user-id="${CSS.escape(String(registro.user_id))}"]`);
                 if (!botao) return;
-                if (!qrVistos.has(registro.user_id)) {
-                    qrVistos.add(registro.user_id);
-                    if (botao.dataset.status !== 'presente') alternarPresenca(botao);
-                }
+                registrosChamada[registro.user_id] = {
+                    ...(registrosChamada[registro.user_id] || {}),
+                    ...registro,
+                    status: botao.dataset.manual === 'true' ? botao.dataset.status : 'presente'
+                };
+                if (botao.dataset.manual !== 'true' && botao.dataset.status !== 'presente') alternarPresenca(botao, true);
                 if (!botao.parentElement.querySelector('.badge-qr')) botao.insertAdjacentHTML('afterend', badgeQr(registro));
             });
             atualizarResumoChamada();
