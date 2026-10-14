@@ -183,8 +183,8 @@
             if (!perguntas.length) {
                 container.innerHTML = '<p>Este módulo não possui um desafio cadastrado.</p>';
                 const botao = document.querySelector('.btn-verificar');
-                botao.innerText = 'Continuar módulo';
-                botao.onclick = () => window.location.href = `aulas/aula${moduloAtual}.html?aprovado=true`;
+                botao.innerText = 'Voltar aos módulos';
+                botao.onclick = () => window.location.href = 'modulos.html';
                 return;
             }
 

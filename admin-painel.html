@@ -33,11 +33,52 @@
 
         /* SIDEBAR */
         .sidebar { width: var(--sidebar-width); background: var(--bg-card); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
-        .sidebar-header { padding: 24px; background: var(--hw-carbon, #081a36); color: #f1f6fd; font-weight: 700; text-align: center; letter-spacing: 1px; }
+        .sidebar-header { padding: 18px 14px; background: var(--hw-carbon, #081a36); color: #f1f6fd; font-weight: 700; letter-spacing: 1px; }
+        .sidebar-header-titulo { text-align:center; }
+        .manutencao-controle { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:14px; padding:12px; background:var(--bg-main); border-radius:8px; letter-spacing:0; }
+        .manutencao-status { min-width:0; }
+        #status-label { display:block; font-size:12px; line-height:1.35; font-weight:800; }
+        .manutencao-status small { display:block; margin-top:2px; color:var(--text-muted); font-size:10px; font-weight:400; }
+        #btn-manutencao { flex:0 0 auto; padding:9px 12px; font-size:12px; }
         .menu-section-label { padding: 20px 24px 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
         .nav-item { padding: 12px 24px; margin: 4px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 500; color: var(--text-muted); transition: var(--transition); }
         .nav-item:hover { background: var(--surface-hover, #12295a); color: var(--hw-cyan, #2dd4bf); }
         .nav-item.active { background: var(--primary-light); color: var(--hw-cyan, #2dd4bf); }
+        .submenu-toggle { width:calc(100% - 24px); border:0; background:transparent; text-align:left; font:inherit; }
+        .submenu-toggle .submenu-chevron { margin-left:auto; transition:transform .2s; }
+        .submenu-toggle[aria-expanded="true"] .submenu-chevron { transform:rotate(180deg); }
+        .nav-submenu { display:none; padding:0 12px 4px 30px; }
+        .nav-submenu.aberto { display:block; }
+        .nav-subitem { padding:10px 12px; margin:3px 0; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:10px; font-size:13px; font-weight:500; color:var(--text-muted); transition:var(--transition); }
+        .nav-subitem:hover,.nav-subitem.active { background:var(--primary-light); color:var(--hw-cyan); }
+        .visao-cabecalho { margin-bottom:20px; }
+        .visao-cabecalho h1 { margin:0; color:#f1f6fd; font-size:1.5rem; }
+        .dashboard-cabecalho { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+        .dashboard-legenda { margin-top:6px; color:var(--text-muted); font-size:13px; }
+        .dashboard-graficos { display:grid; grid-template-columns:minmax(260px,.8fr) minmax(360px,1.5fr); gap:18px; }
+        .dashboard-card { min-width:0; margin-bottom:24px; padding:22px; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; }
+        .dashboard-card h2 { margin-bottom:6px; color:#f1f6fd; font-size:16px; }
+        .dashboard-card > p { margin-bottom:20px; color:var(--text-muted); font-size:12px; }
+        .status-grafico { display:flex; align-items:center; gap:20px; }
+        .status-anel { display:grid; flex:0 0 142px; width:142px; height:142px; place-items:center; border-radius:50%; background:conic-gradient(var(--success) 0deg, var(--success) 0deg, var(--warning) 0deg, var(--warning) 0deg, var(--danger) 0deg, var(--danger) 360deg); }
+        .status-anel-centro { display:flex; width:98px; height:98px; flex-direction:column; align-items:center; justify-content:center; border-radius:50%; background:var(--bg-card); }
+        .status-anel-centro strong { color:#f1f6fd; font-size:24px; }
+        .status-anel-centro span { color:var(--text-muted); font-size:10px; }
+        .status-legenda { display:grid; flex:1; gap:12px; }
+        .status-legenda-item { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:12px; }
+        .status-legenda-nome { display:flex; align-items:center; gap:8px; }
+        .status-ponto { width:9px; height:9px; border-radius:50%; }
+        .status-legenda-item strong { color:#f1f6fd; }
+        .progresso-grafico { display:grid; gap:9px; }
+        .progresso-linha { display:grid; grid-template-columns:68px minmax(60px,1fr) 76px; align-items:center; gap:10px; font-size:11px; }
+        .progresso-nome { color:var(--text-muted); white-space:nowrap; }
+        .progresso-trilho { height:9px; overflow:hidden; border-radius:999px; background:var(--bg-main); }
+        .progresso-barra { height:100%; min-width:0; border-radius:inherit; background:linear-gradient(90deg,var(--purple),#60a5fa); transition:width .3s ease; }
+        .progresso-valor { color:var(--text-main); text-align:right; white-space:nowrap; }
+        .dashboard-vazio { padding:16px; border:1px dashed var(--border); border-radius:8px; color:var(--text-muted); font-size:13px; text-align:center; }
+        .dashboard-erro { color:#fca5a5; }
+        @media(max-width:1100px) { .dashboard-graficos { grid-template-columns:1fr; } }
+        @media(max-width:520px) { .dashboard-cabecalho { align-items:flex-start; flex-direction:column; } .status-grafico { flex-direction:column; } .status-legenda { width:100%; } }
         .lista-contatos { flex: 1; overflow-y: auto; }
 
         /* CONTEÚDO PRINCIPAL */
@@ -47,6 +88,12 @@
         /* CARDS */
         .admin-card { background: var(--bg-card); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid var(--primary); }
         .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-weight: 700; font-size: 1.1rem; }
+        .evento-admin { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px; margin-top:10px; background:var(--bg-main); border:1px solid var(--border); border-radius:8px; }
+        .evento-admin-info { min-width:0; }
+        .evento-admin-info strong,.evento-admin-info span { display:block; overflow-wrap:anywhere; }
+        .evento-admin-info span { margin-top:4px; color:var(--text-muted); font-size:12px; }
+        .evento-admin-acoes { display:flex; flex:0 0 auto; gap:8px; }
+        @media(max-width:600px) { .scroll-container { padding:18px; } .evento-admin { align-items:flex-start; flex-direction:column; } }
 
         /* BARRA DE PESQUISA (LUPA) */
         .search-container { position: relative; margin-bottom: 20px; }
@@ -181,11 +228,23 @@
     </div>
 
     <aside class="sidebar">
-        <div class="sidebar-header"><i class="fas fa-shield-alt"></i> PAINEL ADMIN</div>
+        <div class="sidebar-header">
+            <div class="sidebar-header-titulo"><i class="fas fa-shield-alt"></i> PAINEL ADMIN</div>
+            <div class="manutencao-controle" aria-live="polite">
+                <div class="manutencao-status">
+                    <span id="status-label">Verificando...</span>
+                    <small>Controle de acesso ao site</small>
+                </div>
+                <button class="btn" id="btn-manutencao" onclick="toggleManutencao()">AGUARDE</button>
+            </div>
+        </div>
         <nav>
             <div class="menu-section-label">Sistema</div>
             <div class="nav-item active" id="menu-geral" onclick="exibirTela('visao-geral', this)">
                 <i class="fas fa-home"></i> Visão Geral
+            </div>
+            <div class="nav-item" id="menu-aula-viva" onclick="exibirTela('visao-aula-viva', this)">
+                <i class="fas fa-broadcast-tower"></i> Aula ao vivo
             </div>
             <div class="nav-item" id="menu-alunos" onclick="exibirTela('visao-alunos', this)">
                 <i class="fas fa-users"></i> Alunos Cadastrados
@@ -199,6 +258,13 @@
             <div class="nav-item" onclick="exibirTela('visao-admins', this)">
                 <i class="fas fa-user-shield"></i> Administradores
             </div>
+            <button type="button" class="nav-item submenu-toggle" id="menu-comunicacao" onclick="toggleSubmenuComunicacao()" aria-expanded="false" aria-controls="submenu-comunicacao">
+                <i class="fas fa-bullhorn"></i> Recados e calendário <i class="fas fa-chevron-down submenu-chevron"></i>
+            </button>
+            <div id="submenu-comunicacao" class="nav-submenu">
+                <div class="nav-subitem" onclick="exibirTela('visao-recados', this)"><i class="fas fa-bullhorn"></i> Alerta global</div>
+                <div class="nav-subitem" onclick="exibirTela('visao-calendario', this)"><i class="fas fa-calendar-alt"></i> Calendário alunos</div>
+            </div>
             <div class="nav-item" style="background:#12295a; color:#2dd4bf; font-weight:700;" onclick="window.open('https://supabase.com', '_blank')">
                 <i class="fas fa-database"></i> Banco no Supabase
             </div>
@@ -211,6 +277,16 @@
     <main class="main-content">
         
         <div id="visao-geral" class="scroll-container">
+            <div class="visao-cabecalho dashboard-cabecalho">
+                <div>
+                    <h1>Visão Geral</h1>
+                    <p class="dashboard-legenda">Indicadores da turma e andamento das aulas.</p>
+                </div>
+                <button type="button" class="btn btn-primary" id="btn-atualizar-dashboard" onclick="carregarMetricas()">
+                    <i class="fas fa-sync-alt"></i> Atualizar dados
+                </button>
+            </div>
+            <div id="dashboard-atualizado" class="dashboard-legenda" style="margin:-12px 0 18px;"></div>
             <div class="stats">
                 <div class="stat"><b id="m-total">–</b><span>Alunos cadastrados</span></div>
                 <div class="stat alerta" onclick="irParaPendentes()"><b id="m-pend">–</b><span>Aguardando aprovação</span></div>
@@ -219,8 +295,38 @@
                 <div class="stat"><b id="m-cert">–</b><span>Certificados emitidos</span></div>
                 <div class="stat"><b id="m-tick">–</b><span>Tickets em aberto</span></div>
             </div>
+            <div class="dashboard-graficos">
+                <section class="dashboard-card" aria-labelledby="titulo-status-alunos">
+                    <h2 id="titulo-status-alunos">Situação dos alunos</h2>
+                    <p>Distribuição dos cadastros por situação.</p>
+                    <div id="grafico-status-alunos" aria-live="polite"></div>
+                </section>
+                <section class="dashboard-card" aria-labelledby="titulo-progresso-aulas">
+                    <h2 id="titulo-progresso-aulas">Conclusão por aula</h2>
+                    <p>Alunos que concluíram cada aula em relação aos aprovados.</p>
+                    <div id="grafico-progresso-aulas" aria-live="polite"></div>
+                </section>
+                <section class="dashboard-card" aria-labelledby="titulo-funil-aprendizado">
+                    <h2 id="titulo-funil-aprendizado">Funil de aprendizagem</h2>
+                    <p>Alunos que alcançaram cada etapa do curso.</p>
+                    <div id="grafico-funil-aprendizado" aria-live="polite"></div>
+                </section>
+                <section class="dashboard-card" aria-labelledby="titulo-presencas">
+                    <h2 id="titulo-presencas">Presença nas turmas</h2>
+                    <p>Presenças registradas em relação às chamadas salvas por módulo.</p>
+                    <div id="grafico-presencas" aria-live="polite"></div>
+                </section>
+                <section class="dashboard-card" aria-labelledby="titulo-chamados">
+                    <h2 id="titulo-chamados">Chamados de suporte</h2>
+                    <p>Distribuição dos tickets por status atual.</p>
+                    <div id="grafico-chamados" aria-live="polite"></div>
+                </section>
+            </div>
+        </div>
+
+        <div id="visao-aula-viva" class="alunos-view scroll-container">
             <div class="admin-card">
-                <div class="card-header"><i class="fas fa-broadcast-tower"></i> Aula Ao Vivo</div>
+                <div class="card-header"><i class="fas fa-broadcast-tower"></i> Configurar aula ao vivo</div>
                 <label>URL da Transmissão</label>
                 <input type="text" id="link_aula" placeholder="https://meet.google.com/...">
                 <label>Horário da Aula</label>
@@ -230,30 +336,36 @@
                 
                 <button class="btn btn-primary" onclick="salvarAula()" style="width: 100%; margin-top: 20px;"><i class="fas fa-save"></i> ATUALIZAR AULA</button>
             </div>
+        </div>
 
-            <div style="margin-bottom: 18px; text-align: right;">
-               
-            </div>
-
+        <div id="visao-recados" class="alunos-view scroll-container">
             <div class="admin-card" style="border-top-color: var(--danger);">
-                <div class="card-header" style="color: var(--danger);"><i class="fas fa-bullhorn"></i> Alerta Global</div>
-                <label>Texto do Banner (Aparece no topo dos módulos)</label>
-                <textarea id="aviso_global" rows="2" placeholder="Aviso importante para todos os alunos..."></textarea>
+                <div class="card-header" style="color: var(--danger);"><i class="fas fa-bullhorn"></i> Painel de recados</div>
+                <label for="aviso_global">Recado para os alunos (aparece na tela de módulos)</label>
+                <textarea id="aviso_global" rows="4" placeholder="Aviso importante para todos os alunos..."></textarea>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <button class="btn btn-danger" onclick="salvarAviso()">PUBLICAR</button>
                     <button class="btn" style="background: #12295a; color:#c3d3ea;" onclick="limparAviso()">LIMPAR</button>
                 </div>
             </div>
+        </div>
 
-            <div class="admin-card" style="border-top-color: var(--warning);">
-                <div class="card-header"><i class="fas fa-server"></i> Infraestrutura</div>
-                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-main); padding: 15px; border-radius: 8px;">
-                    <div>
-                        <span id="status-label" style="font-weight: 800;">Verificando...</span>
-                        <div style="font-size: 12px; color: var(--text-muted);">Controle de acesso ao site</div>
-                    </div>
-                    <button class="btn" id="btn-manutencao" onclick="toggleManutencao()">AGUARDE</button>
+        <div id="visao-calendario" class="alunos-view scroll-container">
+            <div class="admin-card" style="border-top-color: var(--purple);">
+                <div class="card-header"><i class="fas fa-calendar-alt"></i> Calendário dos alunos</div>
+                <p style="margin:0 0 16px;color:var(--text-muted);font-size:13px;">Cadastre aulas, encontros e outros eventos para exibir no calendário da tela de módulos.</p>
+                <input type="hidden" id="evento-id">
+                <label for="evento-titulo">Título do evento</label>
+                <input type="text" id="evento-titulo" maxlength="100" placeholder="Ex.: Aula ao vivo — montagem de PC">
+                <label for="evento-data">Data</label>
+                <input type="date" id="evento-data">
+                <label for="evento-descricao">Informações</label>
+                <textarea id="evento-descricao" rows="3" maxlength="500" placeholder="Horário, link ou outras orientações para os alunos..."></textarea>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn btn-primary" id="btn-salvar-evento" onclick="salvarEventoCalendario()"><i class="fas fa-save"></i> PUBLICAR EVENTO</button>
+                    <button class="btn" id="btn-cancelar-evento" style="display:none;background:#12295a;color:#c3d3ea;" onclick="limparFormularioEvento()">CANCELAR EDIÇÃO</button>
                 </div>
+                <div id="lista-eventos-admin" aria-live="polite" style="margin-top:18px;">Carregando eventos...</div>
             </div>
         </div>
         
@@ -411,15 +523,19 @@
         let contatoTicketMap = {}; // ticket=>email
 
         function exibirTela(id, elemento) {
-            document.getElementById('visao-geral').style.display = 'none';
-            document.getElementById('visao-alunos').style.display = 'none';
-            document.getElementById('visao-turmas').style.display = 'none';
-            document.getElementById('visao-chat').style.display = 'none';
-            document.getElementById('visao-certificados').style.display = 'none';
-            document.getElementById('visao-admins').style.display = 'none';
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.main-content > [id^="visao-"]').forEach(view => {
+                view.style.display = 'none';
+            });
+            document.querySelectorAll('.sidebar nav .nav-item, .sidebar nav .nav-subitem').forEach(n => n.classList.remove('active'));
             document.getElementById(id).style.display = (id === 'visao-chat') ? 'flex' : 'block';
             if(elemento) elemento.classList.add('active');
+            const submenu = document.getElementById('submenu-comunicacao');
+            const menuComunicacao = document.getElementById('menu-comunicacao');
+            if (id === 'visao-recados' || id === 'visao-calendario') {
+                submenu.classList.add('aberto');
+                menuComunicacao.setAttribute('aria-expanded', 'true');
+                menuComunicacao.classList.add('active');
+            }
             if(id === 'visao-alunos') carregarAlunos();
             if(id === 'visao-certificados') carregarCertificados();
             if(id === 'visao-admins') carregarAdmins();
@@ -428,36 +544,207 @@
             if(id === 'visao-turmas') carregarAlunos().then(() => carregarChamadaTurma());
         }
 
+        function toggleSubmenuComunicacao() {
+            const submenu = document.getElementById('submenu-comunicacao');
+            const botao = document.getElementById('menu-comunicacao');
+            const aberto = submenu.classList.toggle('aberto');
+            botao.setAttribute('aria-expanded', String(aberto));
+        }
+
         // --- FUNÇÕES DE AULA E AVISO ---
+        let eventosCalendario = [];
+
+        function lerEventosCalendario(valor) {
+            if (!valor) return [];
+            const eventos = JSON.parse(valor);
+            if (!Array.isArray(eventos)) throw new Error('O calendário salvo não está em um formato válido.');
+            const eventosValidos = eventos.every(evento => {
+                if (!evento || typeof evento.id !== 'string' || typeof evento.titulo !== 'string' ||
+                    typeof evento.descricao !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(evento.data)) return false;
+                const [ano, mes, dia] = evento.data.split('-').map(Number);
+                const data = new Date(ano, mes - 1, dia);
+                return data.getFullYear() === ano && data.getMonth() === mes - 1 && data.getDate() === dia;
+            });
+            if (!eventosValidos) throw new Error('O calendário salvo contém um evento inválido.');
+            return eventos;
+        }
+
+        function formatarDataEvento(data) {
+            const [ano, mes, dia] = data.split('-').map(Number);
+            return new Date(ano, mes - 1, dia).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
         async function carregarConfiguracoes() {
-            const { data } = await _supabase.from('configuracoes').select('*');
-            if (data) {
-                document.getElementById('link_aula').value = data.find(c => c.chave === 'link_aula_ao_vivo')?.valor || "";
-                document.getElementById('horario_aula').value = data.find(c => c.chave === 'horario_aula')?.valor || "";
-                document.getElementById('recado_aula').value = data.find(c => c.chave === 'recado_aula')?.valor || "";
-                document.getElementById('aviso_global').value = data.find(c => c.chave === 'recado_geral_modulos')?.valor || "";
-                emManutencao = data.find(c => c.chave === 'modo_manutencao')?.valor === "true";
+            try {
+                const { data, error } = await _supabase.from('configuracoes').select('*');
+                if (error) throw error;
+                const configuracoes = data || [];
+                document.getElementById('link_aula').value = configuracoes.find(c => c.chave === 'link_aula_ao_vivo')?.valor || "";
+                document.getElementById('horario_aula').value = configuracoes.find(c => c.chave === 'horario_aula')?.valor || "";
+                document.getElementById('recado_aula').value = configuracoes.find(c => c.chave === 'recado_aula')?.valor || "";
+                document.getElementById('aviso_global').value = configuracoes.find(c => c.chave === 'recado_geral_modulos')?.valor || "";
+                emManutencao = configuracoes.find(c => c.chave === 'modo_manutencao')?.valor === "true";
                 atualizarInterfaceManutencao();
-                
+                eventosCalendario = lerEventosCalendario(configuracoes.find(c => c.chave === 'calendario_modulos')?.valor);
+                renderizarEventosAdmin();
+            } catch (error) {
+                console.error('Erro ao carregar configurações:', error);
+                document.getElementById('lista-eventos-admin').textContent = 'Não foi possível carregar os eventos. Tente novamente.';
+                alert('Erro ao carregar configurações: ' + (error.message || error));
+            }
+        }
+
+        async function salvarConfiguracao(chave, valor) {
+            const { error } = await _supabase
+                .from('configuracoes')
+                .upsert({ chave, valor }, { onConflict: 'chave' });
+            if (error) throw error;
+        }
+
+        function renderizarEventosAdmin() {
+            const lista = document.getElementById('lista-eventos-admin');
+            const eventosOrdenados = [...eventosCalendario].sort((a, b) => a.data.localeCompare(b.data));
+            if (!eventosOrdenados.length) {
+                lista.textContent = 'Nenhum evento publicado.';
+                return;
+            }
+            lista.innerHTML = eventosOrdenados.map(evento => `
+                <div class="evento-admin">
+                    <div class="evento-admin-info">
+                        <strong>${escaparHtml(evento.titulo)}</strong>
+                        <span>${escaparHtml(formatarDataEvento(evento.data))}${evento.descricao ? ` · ${escaparHtml(evento.descricao)}` : ''}</span>
+                    </div>
+                    <div class="evento-admin-acoes">
+                        <button class="btn btn-primary" data-evento-acao="editar" data-evento-id="${escaparHtml(evento.id)}" aria-label="Editar ${escaparHtml(evento.titulo)}"><i class="fas fa-edit"></i> Editar</button>
+                        <button class="btn btn-danger" data-evento-acao="excluir" data-evento-id="${escaparHtml(evento.id)}" aria-label="Excluir ${escaparHtml(evento.titulo)}"><i class="fas fa-trash"></i> Excluir</button>
+                    </div>
+                </div>
+            `).join('');
+            lista.onclick = eventoClick => {
+                const botao = eventoClick.target.closest('button[data-evento-acao]');
+                if (!botao) return;
+                if (botao.dataset.eventoAcao === 'editar') editarEventoCalendario(botao.dataset.eventoId);
+                if (botao.dataset.eventoAcao === 'excluir') excluirEventoCalendario(botao.dataset.eventoId);
+            };
+        }
+
+        function limparFormularioEvento() {
+            document.getElementById('evento-id').value = '';
+            document.getElementById('evento-titulo').value = '';
+            document.getElementById('evento-data').value = '';
+            document.getElementById('evento-descricao').value = '';
+            document.getElementById('btn-salvar-evento').innerHTML = '<i class="fas fa-save"></i> PUBLICAR EVENTO';
+            document.getElementById('btn-cancelar-evento').style.display = 'none';
+        }
+
+        function editarEventoCalendario(id) {
+            const evento = eventosCalendario.find(item => item.id === id);
+            if (!evento) {
+                alert('O evento selecionado não foi encontrado. Atualize a página e tente novamente.');
+                return;
+            }
+            document.getElementById('evento-id').value = evento.id;
+            document.getElementById('evento-titulo').value = evento.titulo;
+            document.getElementById('evento-data').value = evento.data;
+            document.getElementById('evento-descricao').value = evento.descricao;
+            document.getElementById('btn-salvar-evento').innerHTML = '<i class="fas fa-save"></i> SALVAR ALTERAÇÕES';
+            document.getElementById('btn-cancelar-evento').style.display = 'inline-flex';
+            document.getElementById('evento-titulo').focus();
+        }
+
+        async function salvarEventoCalendario() {
+            const id = document.getElementById('evento-id').value;
+            const titulo = document.getElementById('evento-titulo').value.trim();
+            const data = document.getElementById('evento-data').value;
+            const descricao = document.getElementById('evento-descricao').value.trim();
+            if (!titulo || !data) {
+                alert('Preencha o título e a data do evento.');
+                return;
+            }
+            const [ano, mes, dia] = data.split('-').map(Number);
+            const dataValidada = new Date(ano, mes - 1, dia);
+            if (dataValidada.getFullYear() !== ano || dataValidada.getMonth() !== mes - 1 || dataValidada.getDate() !== dia) {
+                alert('Informe uma data válida para o evento.');
+                return;
+            }
+            const novoId = id || (crypto.randomUUID
+                ? crypto.randomUUID()
+                : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+            const evento = { id: novoId, titulo, data, descricao };
+            const atualizados = id
+                ? eventosCalendario.map(item => item.id === id ? evento : item)
+                : [...eventosCalendario, evento];
+            const botao = document.getElementById('btn-salvar-evento');
+            botao.disabled = true;
+            try {
+                await salvarConfiguracao('calendario_modulos', JSON.stringify(atualizados));
+                eventosCalendario = atualizados;
+                renderizarEventosAdmin();
+                limparFormularioEvento();
+            } catch (error) {
+                console.error('Erro ao salvar evento:', error);
+                alert('Não foi possível publicar o evento: ' + (error.message || error));
+            } finally {
+                botao.disabled = false;
+            }
+        }
+
+        async function excluirEventoCalendario(id) {
+            const evento = eventosCalendario.find(item => item.id === id);
+            if (!evento || !confirm(`Excluir o evento "${evento.titulo}"?`)) return;
+            const atualizados = eventosCalendario.filter(item => item.id !== id);
+            try {
+                await salvarConfiguracao('calendario_modulos', JSON.stringify(atualizados));
+                eventosCalendario = atualizados;
+                renderizarEventosAdmin();
+                if (document.getElementById('evento-id').value === id) limparFormularioEvento();
+            } catch (error) {
+                console.error('Erro ao excluir evento:', error);
+                alert('Não foi possível excluir o evento: ' + (error.message || error));
             }
         }
 
         async function salvarAula() {
-            await _supabase.from('configuracoes').update({ valor: document.getElementById('link_aula').value }).eq('chave', 'link_aula_ao_vivo');
-            await _supabase.from('configuracoes').update({ valor: document.getElementById('horario_aula').value }).eq('chave', 'horario_aula');
-            await _supabase.from('configuracoes').update({ valor: document.getElementById('recado_aula').value }).eq('chave', 'recado_aula');
-            alert("Aula Atualizada!");
+            const botao = document.querySelector('#visao-aula-viva .btn-primary');
+            botao.disabled = true;
+            try {
+                await Promise.all([
+                    salvarConfiguracao('link_aula_ao_vivo', document.getElementById('link_aula').value.trim()),
+                    salvarConfiguracao('horario_aula', document.getElementById('horario_aula').value.trim()),
+                    salvarConfiguracao('recado_aula', document.getElementById('recado_aula').value.trim())
+                ]);
+                alert("Configurações da aula ao vivo atualizadas.");
+            } catch (error) {
+                console.error('Erro ao salvar aula ao vivo:', error);
+                alert('Não foi possível atualizar a aula ao vivo: ' + (error.message || error));
+            } finally {
+                botao.disabled = false;
+            }
         }
 
         async function salvarAviso() {
-            await _supabase.from('configuracoes').update({ valor: document.getElementById('aviso_global').value }).eq('chave', 'recado_geral_modulos');
-            alert("Aviso Global Publicado!");
+            try {
+                await salvarConfiguracao('recado_geral_modulos', document.getElementById('aviso_global').value.trim());
+                alert("Recado publicado na tela de módulos.");
+            } catch (error) {
+                console.error('Erro ao publicar recado:', error);
+                alert('Não foi possível publicar o recado: ' + (error.message || error));
+            }
         }
 
         async function limparAviso() {
-            await _supabase.from('configuracoes').update({ valor: "" }).eq('chave', 'recado_geral_modulos');
-            document.getElementById('aviso_global').value = "";
-            alert("Aviso removido!");
+            try {
+                await salvarConfiguracao('recado_geral_modulos', '');
+                document.getElementById('aviso_global').value = "";
+                alert("Recado removido.");
+            } catch (error) {
+                console.error('Erro ao remover recado:', error);
+                alert('Não foi possível remover o recado: ' + (error.message || error));
+            }
         }
 
         async function toggleManutencao() {
@@ -812,19 +1099,290 @@
             URL.revokeObjectURL(link.href);
         }
 
-        async function carregarMetricas() {
-            const n = (tabela, f) => { const q = _supabase.from(tabela).select('*', { count: 'exact', head: true }); return f ? f(q) : q; };
-            const r = await Promise.all([
-                n('perfil_alunos'),
-                n('perfil_alunos', q => q.eq('status', 'pendente')),
-                n('perfil_alunos', q => q.eq('status', 'aprovado')),
-                n('progresso_alunos', q => q.eq('modulo_id', 100).gte('nota', 70)),
-                n('certificados'),
-                n('chat_suporte', q => q.neq('status', 'concluido'))
-            ]);
-            ['total', 'pend', 'apr', 'prova', 'cert', 'tick'].forEach((id, i) => {
-                document.getElementById('m-' + id).textContent = r[i].error ? '!' : (r[i].count ?? 0);
+        let dashboardCarregando = false;
+
+        async function carregarProgressoDashboard() {
+            const concluidosPorModulo = Array.from({ length: 15 }, () => new Set());
+            const provaAprovada = new Set();
+            const limite = 1000;
+            let inicio = 0;
+
+            while (true) {
+                const { data, error } = await _supabase
+                    .from('progresso_alunos')
+                    .select('user_id,modulo_id,nota')
+                    .eq('concluido', true)
+                    .order('modulo_id')
+                    .order('user_id')
+                    .range(inicio, inicio + limite - 1);
+                if (error) throw error;
+
+                for (const registro of data || []) {
+                    if (registro.user_id == null || registro.modulo_id == null) continue;
+                    const moduloId = Number(registro.modulo_id);
+                    if (Number.isInteger(moduloId) && moduloId >= 0 && moduloId <= 14) {
+                        concluidosPorModulo[moduloId].add(registro.user_id);
+                    } else if (moduloId === 100 && Number(registro.nota) >= 70) {
+                        provaAprovada.add(registro.user_id);
+                    }
+                }
+                if (!data || data.length < limite) break;
+                inicio += limite;
+            }
+
+            const aulasConcluidasPorAluno = new Map();
+            concluidosPorModulo.forEach(alunos => {
+                alunos.forEach(userId => aulasConcluidasPorAluno.set(userId, (aulasConcluidasPorAluno.get(userId) || 0) + 1));
             });
+            return { concluidosPorModulo, provaAprovada, aulasConcluidasPorAluno };
+        }
+
+        async function carregarPresencasDashboard() {
+            const porModulo = Array.from({ length: 15 }, () => ({ presente: 0, falta: 0 }));
+            const limite = 1000;
+            let inicio = 0;
+
+            while (true) {
+                const { data, error } = await _supabase
+                    .from('chamada_turmas')
+                    .select('modulo_id,status')
+                    .order('modulo_id')
+                    .order('data')
+                    .order('user_id')
+                    .range(inicio, inicio + limite - 1);
+                if (error) throw error;
+
+                for (const registro of data || []) {
+                    const moduloId = Number(registro.modulo_id);
+                    if (!Number.isInteger(moduloId) || moduloId < 0 || moduloId > 14) continue;
+                    if (registro.status === 'presente') porModulo[moduloId].presente++;
+                    else if (registro.status === 'falta') porModulo[moduloId].falta++;
+                }
+                if (!data || data.length < limite) break;
+                inicio += limite;
+            }
+            return porModulo;
+        }
+
+        async function carregarChamadosDashboard() {
+            const porStatus = new Map();
+            const limite = 1000;
+            let inicio = 0;
+
+            while (true) {
+                const { data, error } = await _supabase
+                    .from('chat_suporte')
+                    .select('ticket,status')
+                    .order('ticket')
+                    .range(inicio, inicio + limite - 1);
+                if (error) throw error;
+
+                for (const chamado of data || []) {
+                    const status = String(chamado.status || 'sem-status').trim().toLowerCase();
+                    porStatus.set(status, (porStatus.get(status) || 0) + 1);
+                }
+                if (!data || data.length < limite) break;
+                inicio += limite;
+            }
+            return porStatus;
+        }
+
+        function renderizarGraficoStatus(total, aprovados, pendentes) {
+            const area = document.getElementById('grafico-status-alunos');
+            const outros = Math.max(0, total - aprovados - pendentes);
+            if (total === 0) {
+                area.innerHTML = '<div class="dashboard-vazio">Ainda não há alunos cadastrados.</div>';
+                return;
+            }
+
+            const pctAprovados = aprovados / total * 100;
+            const pctPendentes = pendentes / total * 100;
+            const pctOutros = outros / total * 100;
+            const fimAprovados = pctAprovados * 3.6;
+            const fimPendentes = fimAprovados + pctPendentes * 3.6;
+            const fimOutros = fimPendentes + pctOutros * 3.6;
+            const percentual = valor => `${Math.round(valor)}%`;
+
+            area.innerHTML = `
+                <div class="status-grafico" role="img" aria-label="Dos ${total} alunos cadastrados, ${aprovados} aprovados, ${pendentes} pendentes e ${outros} bloqueados ou em outro status.">
+                    <div class="status-anel" style="background:conic-gradient(var(--success) 0deg ${fimAprovados}deg,var(--warning) ${fimAprovados}deg ${fimPendentes}deg,var(--danger) ${fimPendentes}deg ${fimOutros}deg);">
+                        <div class="status-anel-centro"><strong>${total}</strong><span>ALUNOS</span></div>
+                    </div>
+                    <div class="status-legenda" aria-hidden="true">
+                        <div class="status-legenda-item"><span class="status-legenda-nome"><i class="status-ponto" style="background:var(--success)"></i>Aprovados</span><strong>${aprovados} · ${percentual(pctAprovados)}</strong></div>
+                        <div class="status-legenda-item"><span class="status-legenda-nome"><i class="status-ponto" style="background:var(--warning)"></i>Pendentes</span><strong>${pendentes} · ${percentual(pctPendentes)}</strong></div>
+                        <div class="status-legenda-item"><span class="status-legenda-nome"><i class="status-ponto" style="background:var(--danger)"></i>Bloqueados/outros</span><strong>${outros} · ${percentual(pctOutros)}</strong></div>
+                    </div>
+                </div>`;
+        }
+
+        function renderizarGraficoProgresso(progresso, totalAlunos) {
+            const area = document.getElementById('grafico-progresso-aulas');
+            if (!totalAlunos) {
+                area.innerHTML = '<div class="dashboard-vazio">Os dados de conclusão aparecerão quando os alunos começarem as aulas.</div>';
+                return;
+            }
+
+            const linhas = progresso.concluidosPorModulo.map((alunos, moduloId) => {
+                const percentual = totalAlunos ? Math.min(100, alunos.size / totalAlunos * 100) : 0;
+                return `
+                    <div class="progresso-linha" aria-label="Aula ${moduloId + 1}: ${alunos.size} de ${totalAlunos} cadastros, ${Math.round(percentual)}%">
+                        <span class="progresso-nome">Aula ${String(moduloId + 1).padStart(2, '0')}</span>
+                        <span class="progresso-trilho"><span class="progresso-barra" style="display:block;width:${percentual}%"></span></span>
+                        <span class="progresso-valor">${alunos.size} · ${Math.round(percentual)}%</span>
+                    </div>`;
+            });
+            const pctProva = totalAlunos ? Math.min(100, progresso.provaAprovada.size / totalAlunos * 100) : 0;
+            linhas.push(`
+                <div class="progresso-linha" aria-label="Prova final aprovada: ${progresso.provaAprovada.size} de ${totalAlunos} cadastros, ${Math.round(pctProva)}%">
+                    <span class="progresso-nome">Prova final</span>
+                    <span class="progresso-trilho"><span class="progresso-barra" style="display:block;width:${pctProva}%;background:linear-gradient(90deg,var(--success),#60a5fa)"></span></span>
+                    <span class="progresso-valor">${progresso.provaAprovada.size} · ${Math.round(pctProva)}%</span>
+                </div>`);
+            area.innerHTML = `<div class="progresso-grafico">${linhas.join('')}</div>`;
+        }
+
+        function renderizarFunilAprendizagem(progresso, totalAlunos) {
+            const area = document.getElementById('grafico-funil-aprendizado');
+            if (!totalAlunos) {
+                area.innerHTML = '<div class="dashboard-vazio">Não há alunos cadastrados para exibir as etapas.</div>';
+                return;
+            }
+
+            const concluidos = [...progresso.aulasConcluidasPorAluno.values()];
+            const etapas = [
+                { nome: 'Iniciaram', total: concluidos.filter(qtd => qtd >= 1).length },
+                { nome: '5 de 15 aulas', total: concluidos.filter(qtd => qtd >= 5).length },
+                { nome: '10 de 15 aulas', total: concluidos.filter(qtd => qtd >= 10).length },
+                { nome: '15 aulas', total: concluidos.filter(qtd => qtd >= 15).length },
+                { nome: 'Prova aprovada', total: progresso.provaAprovada.size }
+            ];
+            area.innerHTML = `<div class="progresso-grafico">${etapas.map(etapa => {
+                const percentual = Math.min(100, etapa.total / totalAlunos * 100);
+                return `
+                    <div class="progresso-linha" aria-label="${etapa.nome}: ${etapa.total} de ${totalAlunos} alunos, ${Math.round(percentual)}%">
+                        <span class="progresso-nome">${etapa.nome}</span>
+                        <span class="progresso-trilho"><span class="progresso-barra" style="display:block;width:${percentual}%;background:linear-gradient(90deg,var(--primary),#fb923c)"></span></span>
+                        <span class="progresso-valor">${etapa.total} · ${Math.round(percentual)}%</span>
+                    </div>`;
+            }).join('')}</div>`;
+        }
+
+        function renderizarGraficoPresencas(porModulo) {
+            const area = document.getElementById('grafico-presencas');
+            const total = porModulo.reduce((soma, modulo) => soma + modulo.presente + modulo.falta, 0);
+            if (!total) {
+                area.innerHTML = '<div class="dashboard-vazio">Ainda não há chamadas salvas.</div>';
+                return;
+            }
+
+            area.innerHTML = `<div class="progresso-grafico">${porModulo.map((modulo, indice) => {
+                const chamadas = modulo.presente + modulo.falta;
+                const percentual = chamadas ? modulo.presente / chamadas * 100 : 0;
+                return `
+                    <div class="progresso-linha" aria-label="Módulo ${indice}: ${modulo.presente} presenças em ${chamadas} registros, ${Math.round(percentual)}%">
+                        <span class="progresso-nome">Módulo ${indice}</span>
+                        <span class="progresso-trilho"><span class="progresso-barra" style="display:block;width:${percentual}%;background:linear-gradient(90deg,var(--success),#2dd4bf)"></span></span>
+                        <span class="progresso-valor">${modulo.presente}/${chamadas} · ${Math.round(percentual)}%</span>
+                    </div>`;
+            }).filter((_, indice) => porModulo[indice].presente + porModulo[indice].falta > 0).join('')}</div>`;
+        }
+
+        function renderizarGraficoChamados(porStatus) {
+            const area = document.getElementById('grafico-chamados');
+            const total = [...porStatus.values()].reduce((soma, qtd) => soma + qtd, 0);
+            if (!total) {
+                area.innerHTML = '<div class="dashboard-vazio">Não há chamados de suporte registrados.</div>';
+                return;
+            }
+
+            const nomesStatus = {
+                'aguardando': 'Aguardando',
+                'em-atendimento': 'Em atendimento',
+                'concluido': 'Concluídos',
+                'nao-atendido': 'Não atendidos',
+                'sem-status': 'Sem status'
+            };
+            const coresStatus = ['var(--warning)', 'var(--purple)', 'var(--success)', 'var(--danger)', '#60a5fa'];
+            const linhas = [...porStatus.entries()].sort((a, b) => b[1] - a[1]);
+            area.innerHTML = `<div class="progresso-grafico">${linhas.map(([status, qtd], indice) => {
+                const percentual = qtd / total * 100;
+                const nome = nomesStatus[status] || `Outro: ${escaparHtml(status)}`;
+                return `
+                    <div class="progresso-linha" aria-label="${nome}: ${qtd} de ${total} chamados, ${Math.round(percentual)}%">
+                        <span class="progresso-nome">${nome}</span>
+                        <span class="progresso-trilho"><span class="progresso-barra" style="display:block;width:${percentual}%;background:${coresStatus[indice % coresStatus.length]}"></span></span>
+                        <span class="progresso-valor">${qtd} · ${Math.round(percentual)}%</span>
+                    </div>`;
+            }).join('')}</div>`;
+        }
+
+        async function carregarMetricas() {
+            if (dashboardCarregando) return;
+            dashboardCarregando = true;
+            const botao = document.getElementById('btn-atualizar-dashboard');
+            if (botao) botao.disabled = true;
+            const n = (tabela, f) => { const q = _supabase.from(tabela).select('*', { count: 'exact', head: true }); return f ? f(q) : q; };
+            try {
+                const r = await Promise.all([
+                    n('perfil_alunos'),
+                    n('perfil_alunos', q => q.eq('status', 'pendente')),
+                    n('perfil_alunos', q => q.eq('status', 'aprovado')),
+                    n('progresso_alunos', q => q.eq('modulo_id', 100).gte('nota', 70)),
+                    n('certificados'),
+                    n('chat_suporte', q => q.neq('status', 'concluido'))
+                ]);
+                ['total', 'pend', 'apr', 'prova', 'cert', 'tick'].forEach((id, i) => {
+                    document.getElementById('m-' + id).textContent = r[i].error ? '!' : (r[i].count ?? 0);
+                    if (r[i].error) console.error(`Erro ao carregar métrica ${id}:`, r[i].error);
+                });
+
+                if (r[0].error || r[1].error || r[2].error) {
+                    document.getElementById('grafico-status-alunos').innerHTML = '<div class="dashboard-vazio dashboard-erro">Não foi possível carregar a situação dos alunos.</div>';
+                } else {
+                    renderizarGraficoStatus(r[0].count ?? 0, r[2].count ?? 0, r[1].count ?? 0);
+                }
+
+                try {
+                    const progresso = await carregarProgressoDashboard();
+                    if (r[0].error) {
+                        document.getElementById('grafico-progresso-aulas').innerHTML = '<div class="dashboard-vazio dashboard-erro">Não foi possível carregar o total de alunos para calcular o progresso.</div>';
+                        document.getElementById('grafico-funil-aprendizado').innerHTML = '<div class="dashboard-vazio dashboard-erro">Não foi possível carregar o total de alunos para calcular as etapas.</div>';
+                    } else {
+                        renderizarGraficoProgresso(progresso, r[0].count ?? 0);
+                        renderizarFunilAprendizagem(progresso, r[0].count ?? 0);
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar progresso das aulas para o dashboard:', error);
+                    document.getElementById('grafico-progresso-aulas').innerHTML = '<div class="dashboard-vazio dashboard-erro">Não foi possível carregar os dados de conclusão das aulas.</div>';
+                    document.getElementById('grafico-funil-aprendizado').innerHTML = '<div class="dashboard-vazio dashboard-erro">Não foi possível carregar as etapas de aprendizagem.</div>';
+                }
+
+                try {
+                    renderizarGraficoPresencas(await carregarPresencasDashboard());
+                } catch (error) {
+                    console.error('Erro ao carregar presenças para o dashboard:', error);
+                    document.getElementById('grafico-presencas').innerHTML = '<div class="dashboard-vazio dashboard-erro">Não foi possível carregar as chamadas por módulo.</div>';
+                }
+
+                try {
+                    renderizarGraficoChamados(await carregarChamadosDashboard());
+                } catch (error) {
+                    console.error('Erro ao carregar chamados para o dashboard:', error);
+                    document.getElementById('grafico-chamados').innerHTML = '<div class="dashboard-vazio dashboard-erro">Não foi possível carregar os chamados por status.</div>';
+                }
+                document.getElementById('dashboard-atualizado').textContent = `Dados atualizados às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}.`;
+            } catch (error) {
+                console.error('Erro ao carregar métricas do dashboard:', error);
+                document.getElementById('grafico-status-alunos').innerHTML = '<div class="dashboard-vazio dashboard-erro">Falha ao carregar as métricas. Tente atualizar novamente.</div>';
+                document.getElementById('grafico-progresso-aulas').innerHTML = '<div class="dashboard-vazio dashboard-erro">Falha ao carregar as métricas. Tente atualizar novamente.</div>';
+                document.getElementById('grafico-funil-aprendizado').innerHTML = '<div class="dashboard-vazio dashboard-erro">Falha ao carregar as métricas. Tente atualizar novamente.</div>';
+                document.getElementById('grafico-presencas').innerHTML = '<div class="dashboard-vazio dashboard-erro">Falha ao carregar as métricas. Tente atualizar novamente.</div>';
+                document.getElementById('grafico-chamados').innerHTML = '<div class="dashboard-vazio dashboard-erro">Falha ao carregar as métricas. Tente atualizar novamente.</div>';
+            } finally {
+                dashboardCarregando = false;
+                if (botao) botao.disabled = false;
+            }
         }
 
         let listaCertificados = [];

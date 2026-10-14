@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Módulos | Telecurso Montagem de PC</title>
+    <title>Área do Aluno | Telecurso Montagem e Manutenção de Computadores</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -29,93 +29,60 @@ a.card-modulo{text-decoration:none;color:inherit}
 </style>
 
 
-<style id="visual-v2">
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&display=swap');
-:root{
-  --bg-main:#07142b;--hw-carbon:#081a36;--surface-card:#0d2142;--surface-hover:#12295a;--hw-pcb:#0d2142;
-  --border-tech:#1f3b66;--border-highlight:#2e528a;
-  --text-primary:#f1f6fd;--text-secondary:#c3d3ea;--text-muted:#92a9ca;
-  --hw-copper:#e0b04a;--hw-gold:#e0b04a;--hw-cyan:#2dd4bf;--hw-green:#34d399;
-}
-body{background:var(--bg-main)!important;background-image:none!important}
-.container{max-width:980px}
-h1,h2,h3,header strong,.continuar,.trilha-topo h2,.card-corpo h3,.info-aluno h2{font-family:'Sora',sans-serif;letter-spacing:0}
+<style id="visual-v3">
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap');
+:root{--bg-main:#071426;--hw-carbon:#0a1b31;--surface-card:#102640;--surface-hover:#173451;--hw-pcb:#102640;--border-tech:#213d5d;--border-highlight:#355778;--text-primary:#f4f7fb;--text-secondary:#c5d4e4;--text-muted:#91a8bf;--hw-copper:#e7b957;--hw-gold:#e7b957;--hw-cyan:#5eead4;--hw-green:#34d399;--hw-danger:#fb7185}
+*{box-sizing:border-box}body{background:radial-gradient(ellipse at top right,rgba(29,78,116,.28),transparent 42%),var(--bg-main)!important;background-image:none!important;color:var(--text-primary);font-family:'Inter',sans-serif}header{display:flex;align-items:center;justify-content:flex-start;gap:14px;text-align:left;padding:15px max(20px,calc((100% - 1120px)/2));background:rgba(5,17,32,.94);border-bottom:1px solid var(--border-tech);box-shadow:none;backdrop-filter:blur(14px)}header .selo{width:46px;height:46px;object-fit:contain}header strong{display:block;font:800 1.05rem 'Sora',sans-serif;color:var(--text-primary);line-height:1.2}header span{display:block;font-size:.76rem;color:var(--text-muted);margin-top:3px}.btn-chamada-topo{margin-left:auto;display:inline-flex;align-items:center;gap:8px;padding:10px 15px;border:1px solid rgba(231,185,87,.35);border-radius:12px;background:rgba(231,185,87,.13);color:var(--hw-gold);font-family:'Inter',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:.2s}.btn-chamada-topo:hover{background:rgba(231,185,87,.22)}
+.container{max-width:1360px;width:calc(100% - 40px);padding-top:24px}.layout-modulos{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}.conteudo-modulos{min-width:0}.painel-topo{overflow:hidden;position:relative;background:linear-gradient(135deg,#102b47,#0c2038);border:1px solid var(--border-highlight);border-radius:20px;box-shadow:0 18px 50px rgba(0,0,0,.14);padding:22px;margin-bottom:24px}.painel-topo::before{background:linear-gradient(90deg,var(--hw-cyan),var(--hw-gold));height:3px}.painel-topo::after{content:'';position:absolute;right:-20px;top:50%;width:180px;height:180px;transform:translateY(-50%);background:url(favicon.png) center/contain no-repeat;opacity:.055;pointer-events:none}.info-aluno h2{font:700 1.15rem 'Sora',sans-serif;color:var(--text-primary);margin-bottom:12px}.btn-acao{font-family:'Inter',sans-serif;text-transform:none;letter-spacing:0;font-size:.88rem;border-radius:10px}.btn-certificado.liberado{background:var(--hw-gold);box-shadow:none;color:#071426}.barra-fundo{height:9px;background:#071426;border:1px solid var(--border-tech);border-radius:99px;overflow:hidden}.barra-preenchimento{background:linear-gradient(90deg,var(--hw-cyan),var(--hw-gold));box-shadow:none;border-radius:99px}.progresso-sessao strong{color:var(--text-primary)!important}.progresso-sessao small{color:var(--text-muted)!important}
+/* Mural de avisos */
+#alerta-professor{display:none;align-items:flex-start;gap:14px;padding:17px 18px;margin:0 0 24px;border:1px solid rgba(231,185,87,.34);border-left:4px solid var(--hw-gold);border-radius:15px;background:linear-gradient(115deg,rgba(231,185,87,.13),rgba(16,38,64,.96) 60%);color:var(--text-primary);box-shadow:0 10px 28px rgba(0,0,0,.12)}#alerta-professor>i{flex:0 0 auto;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:rgba(231,185,87,.15);color:var(--hw-gold);font-size:18px!important}#texto-alerta{display:block;flex:1;min-width:0;padding-top:3px;line-height:1.6;font-size:.93rem;color:var(--text-secondary)}#alerta-professor button{flex:0 0 auto;color:var(--text-muted)!important;padding:7px;border-radius:8px}#alerta-professor button:hover{background:rgba(255,255,255,.07)}
+/* Foco do aluno: apenas uma aula recebe destaque visual */
+#area-modulos{margin:0 0 34px}.foco-modulo{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;padding:clamp(22px,4vw,38px);margin:0 0 22px;border:1px solid rgba(231,185,87,.5);border-radius:22px;background:linear-gradient(120deg,#142f4b 0%,#102640 58%,#172e43 100%);box-shadow:0 18px 55px rgba(0,0,0,.18)}.foco-modulo::after{content:'';position:absolute;right:90px;top:-110px;width:260px;height:260px;border:1px solid rgba(94,234,212,.11);border-radius:50%;box-shadow:0 0 0 35px rgba(94,234,212,.025),0 0 0 70px rgba(94,234,212,.02);pointer-events:none}.foco-conteudo,.foco-acao{position:relative;z-index:1}.foco-etiqueta{display:inline-flex;align-items:center;gap:8px;margin-bottom:18px;padding:7px 10px;border:1px solid rgba(94,234,212,.24);border-radius:999px;background:rgba(94,234,212,.08);color:var(--hw-cyan);font-size:.73rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.foco-etiqueta .ponto{width:7px;height:7px;border-radius:50%;background:var(--hw-cyan);box-shadow:0 0 0 4px rgba(94,234,212,.1)}.foco-modulo h1{font:800 clamp(1.55rem,3.3vw,2.35rem)/1.18 'Sora',sans-serif;letter-spacing:-.04em;margin:0 0 12px;color:var(--text-primary);max-width:680px}.foco-modulo p{font-size:.98rem;line-height:1.75;color:var(--text-secondary);max-width:690px;margin:0 0 22px}.foco-meta{display:flex;flex-wrap:wrap;gap:9px}.foco-meta span{display:inline-flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid var(--border-tech);border-radius:9px;color:var(--text-muted);font-size:.78rem}.foco-meta i{color:var(--hw-gold)}.foco-botao{display:inline-flex;align-items:center;justify-content:center;gap:11px;min-width:180px;padding:15px 18px;border-radius:12px;background:var(--hw-gold);color:#111d2b;text-decoration:none;font-size:.92rem;font-weight:800;box-shadow:0 8px 22px rgba(231,185,87,.15);transition:transform .2s,filter .2s}.foco-botao:hover{transform:translateY(-2px);filter:brightness(1.07)}.foco-botao.secundario{background:rgba(255,255,255,.07);border:1px solid var(--border-highlight);color:var(--text-primary);box-shadow:none}.foco-icone{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 14px;border:1px solid rgba(231,185,87,.3);border-radius:18px;background:rgba(231,185,87,.1);color:var(--hw-gold);font-size:26px}.foco-lateral{position:relative;z-index:1;min-width:180px;text-align:center}.foco-lateral small{display:block;margin-top:10px;color:var(--text-muted);font-size:.76rem;line-height:1.5}.foco-concluido{border-color:rgba(94,234,212,.4)}.foco-concluido .foco-etiqueta{color:var(--hw-cyan)}
+/* Trilhas completas ficam disponíveis, mas recolhidas */.lista-completa{overflow:hidden;border:1px solid var(--border-tech);border-radius:16px;background:rgba(16,38,64,.56)}.lista-completa>summary{display:flex;align-items:center;gap:12px;list-style:none;cursor:pointer;padding:18px 20px;color:var(--text-primary);font-weight:700}.lista-completa>summary::-webkit-details-marker{display:none}.lista-completa>summary::after{content:'+';margin-left:auto;color:var(--hw-gold);font-size:1.4rem}.lista-completa[open]>summary::after{content:'−'}.lista-completa>summary>i{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:rgba(94,234,212,.09);color:var(--hw-cyan)}.lista-completa>summary small{display:block;margin-top:4px;color:var(--text-muted);font-size:.78rem;font-weight:400}.lista-conteudo{padding:4px 20px 22px}.trilha{margin:20px 0 26px}.trilha-topo{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:0;border:0}.trilha-topo h2{font:700 1rem 'Sora',sans-serif;margin:0;color:var(--text-primary)}.trilha-topo span{margin-left:auto;font-size:.77rem;color:var(--text-muted)}.trilha-topo.ok span{color:var(--hw-cyan)}#area-modulos .trilha .grid-modulos{display:flex;flex-direction:column;gap:9px;margin:0;padding:0;border:0}#area-modulos .card-modulo{position:relative;display:block;text-decoration:none;color:inherit;border:1px solid var(--border-tech);border-radius:12px;background:#0c2037;transition:border-color .18s,background .18s;overflow:hidden}#area-modulos .card-modulo::before,#area-modulos .card-modulo::after{display:none}#area-modulos .card-modulo:not(.bloqueado):hover{transform:none;border-color:#4b6e90;background:var(--surface-hover);box-shadow:none}#area-modulos .card-modulo.bloqueado{opacity:.58;filter:none}#area-modulos .card-modulo .card-banner{background:none;border:0;text-align:left;padding:13px 17px 0;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}#area-modulos .card-modulo.concluido .card-banner{color:var(--hw-cyan)}#area-modulos .card-modulo.ao-vivo .card-banner{color:#fca5a5}#area-modulos .card-modulo.ao-vivo{animation:none;border-color:var(--border-tech)}#area-modulos .card-modulo.ferramenta-card{border:1px solid var(--border-tech)}#area-modulos .card-corpo{padding:5px 17px 16px}#area-modulos .card-corpo h3{font:700 .97rem 'Sora',sans-serif;margin:0 0 6px;color:var(--text-primary)}#area-modulos .card-corpo p{margin:0 0 10px;color:var(--text-muted);font-size:.84rem;line-height:1.55}#area-modulos .status-aula{font-size:.78rem;font-weight:700;color:var(--hw-gold)}#area-modulos .card-modulo.concluido .status-aula{color:var(--hw-cyan)}#area-modulos .card-modulo.bloqueado .status-aula{color:var(--text-muted)}#area-modulos .card-modulo.atual{border-color:var(--border-tech);box-shadow:none;background:#0c2037}#area-modulos .trilha:first-child .grid-modulos{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px;margin:0;padding:0;border:0}
+.continuar{display:none!important}.painel-suporte{max-width:calc(100vw - 32px)}.btn-ajuda{box-shadow:0 8px 24px rgba(231,185,87,.16)}.header-suporte{font-family:'Sora',sans-serif}.modal-chamada{display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:16px}.chamada-box{width:100%;max-width:420px;background:#0b1d32;border:1px solid var(--border-tech);border-radius:16px;padding:20px;text-align:center;color:var(--text-primary)}.chamada-box h3{margin-bottom:8px;font-size:1.1rem}.chamada-video{position:relative;aspect-ratio:1/1;background:#000;border-radius:12px;overflow:hidden;margin-bottom:14px}.chamada-video video{width:100%;height:100%;object-fit:cover}.chamada-video::after{content:'';position:absolute;inset:18%;border:3px solid rgba(231,185,87,.9);border-radius:14px;pointer-events:none}
+@media(max-width:900px){.layout-modulos{grid-template-columns:1fr}.calendario-painel{position:static;grid-row:2}.conteudo-modulos{grid-row:1}}
+@media(max-width:700px){header{padding:12px 16px}.container{width:calc(100% - 24px);padding-top:14px}.painel-topo{padding:17px}.foco-modulo{grid-template-columns:1fr;gap:22px;padding:23px 19px}.foco-lateral{min-width:0;text-align:left;display:flex;align-items:center;gap:14px}.foco-icone{flex:0 0 52px;width:52px;height:52px;margin:0;font-size:21px}.foco-lateral small{margin:0}.foco-acao{display:flex;justify-content:stretch}.foco-botao{width:100%}.foco-modulo::after{right:-130px}.lista-conteudo{padding:4px 12px 18px}.lista-completa>summary{padding:15px}.trilha-topo{align-items:flex-start}.trilha-topo span{font-size:.72rem;text-align:right}.btn-chamada-topo{padding:9px 10px;font-size:.76rem}.btn-chamada-topo i{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+#area-modulos .recursos-curso{margin-top:18px}
+#area-modulos .recursos-curso .grid-modulos{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px;margin:0;padding:0;border:0}
+#alerta-professor .recado-conteudo{flex:1;min-width:0}
+#alerta-professor .recado-titulo{display:block;margin-bottom:4px;color:var(--hw-gold);font:700 .78rem 'Sora',sans-serif;text-transform:uppercase;letter-spacing:.05em}
+#texto-alerta{padding-top:0}
+.calendario-painel{position:sticky;top:20px;min-width:0;padding:18px;border:1px solid var(--border-tech);border-radius:16px;background:linear-gradient(135deg,rgba(16,38,64,.96),rgba(10,27,49,.96));box-shadow:0 10px 28px rgba(0,0,0,.12)}
+.calendario-cabecalho{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-bottom:16px}
+.calendario-titulo{display:flex;align-items:center;gap:10px;margin:0;font:700 1rem 'Sora',sans-serif;color:var(--text-primary)}
+.calendario-titulo i{color:var(--hw-cyan)}
+.calendario-navegacao{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.calendario-navegacao button{width:34px;height:34px;border:1px solid var(--border-tech);border-radius:9px;background:rgba(255,255,255,.04);color:var(--text-primary);cursor:pointer}
+.calendario-navegacao button:hover{border-color:var(--hw-cyan);color:var(--hw-cyan)}
+#calendario-mes{flex:1;min-width:0;text-align:center;color:var(--text-secondary);font-size:.87rem;font-weight:700;text-transform:capitalize}
+.calendario-corpo{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;min-width:0}
+.calendario-grade{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;min-width:0}
+.calendario-dia-semana{text-align:center;padding:5px 0;color:var(--text-muted);font-size:.68rem;font-weight:700;text-transform:uppercase;white-space:nowrap}
+.calendario-dia-vazio{min-height:42px}
+.calendario-dia{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:100%;min-width:0;min-height:40px;padding:3px 1px;border:1px solid transparent;border-radius:9px;background:rgba(255,255,255,.025);color:var(--text-secondary);font:600 .8rem/1 'Inter',sans-serif;cursor:pointer}
+.calendario-dia:hover{border-color:var(--border-highlight);background:var(--surface-hover)}
+.calendario-dia.hoje{border-color:rgba(94,234,212,.4);color:var(--hw-cyan)}
+.calendario-dia.selecionado{background:var(--hw-cyan);color:#071426;font-weight:800}
+.calendario-dia .ponto-evento{width:5px;height:5px;border-radius:50%;background:var(--hw-gold)}
+.calendario-dia.selecionado .ponto-evento{background:#071426}
+.calendario-lista{min-width:0;padding:14px 0 0;border-top:1px solid var(--border-tech)}
+.calendario-lista h3{margin:0 0 12px;color:var(--text-primary);font:700 .87rem 'Sora',sans-serif}
+#calendario-eventos-dia{display:grid;gap:10px}
+.calendario-evento{padding:11px 12px;border:1px solid var(--border-tech);border-radius:10px;background:rgba(7,20,38,.55)}
+.calendario-evento strong{display:block;margin-bottom:5px;color:var(--hw-cyan);font-size:.82rem}
+.calendario-evento p,.calendario-sem-eventos{margin:0;color:var(--text-muted);font-size:.78rem;line-height:1.55;white-space:pre-wrap}
 
-/* Cabeçalho com o selo */
-header{display:flex;align-items:center;justify-content:flex-start;gap:14px;text-align:left;padding:12px 24px;background:rgba(7,20,43,.9);border-bottom:1px solid var(--border-tech);box-shadow:none}
-header .selo{width:44px;height:44px;object-fit:contain}
-header strong{display:block;font-size:1.15rem;color:var(--text-primary);line-height:1.1}
-header span{display:block;font-size:.78rem;color:var(--text-muted)}
-
-/* Painel do aluno */
-.painel-topo{overflow:hidden;background:var(--surface-card);border-color:var(--border-highlight)}
-.painel-topo::before{background:linear-gradient(90deg,var(--hw-cyan),var(--hw-gold))}
-.painel-topo::after{content:'';position:absolute;right:-24px;top:50%;width:190px;height:190px;transform:translateY(-50%);background:url(favicon.png) center/contain no-repeat;opacity:.09;pointer-events:none}
-.barra-fundo{height:10px;background:var(--hw-carbon);border-color:var(--border-tech)}
-.barra-preenchimento{background:linear-gradient(90deg,var(--hw-cyan),var(--hw-gold));box-shadow:none}
-.btn-acao{font-family:'Inter',sans-serif;text-transform:none;letter-spacing:0;font-size:.9rem}
-.btn-certificado.liberado{background:var(--hw-gold);box-shadow:none}
-
-/* Botão continuar */
-.continuar{background:var(--hw-gold);color:#07142b;border-radius:12px;font-size:1.15rem}
-.continuar:hover{background:#ecc063;box-shadow:0 6px 24px rgba(224,176,74,.25)}
-.continuar small{font-family:'Inter',sans-serif;font-weight:500}
-
-/* Trilhas como trilha de circuito */
-.trilha-topo{border-bottom:0;padding-bottom:0}
-.trilha-topo h2{font-size:1.25rem}
-.trilha-topo span{font-family:'Inter',sans-serif}
-#area-modulos .trilha .grid-modulos{display:flex;flex-direction:column;gap:12px;margin-left:12px;padding-left:34px;border-left:2px solid var(--border-highlight)}
-#area-modulos .card-modulo{position:relative;border-radius:12px;background:var(--surface-card)}
-#area-modulos .card-modulo::before{content:'';position:absolute;left:-44px;top:50%;width:14px;height:14px;transform:translateY(-50%);border-radius:50%;background:var(--bg-main);border:2px solid var(--border-highlight)}
-#area-modulos .card-modulo::after{content:'';position:absolute;left:-30px;top:50%;width:30px;height:2px;background:var(--border-highlight)}
-#area-modulos .card-modulo.concluido::before{background:var(--hw-cyan);border-color:var(--hw-cyan)}
-#area-modulos .card-modulo.concluido::after{background:var(--hw-cyan)}
-#area-modulos .card-modulo.atual{border-color:var(--hw-gold)}
-#area-modulos .card-modulo.atual::before{background:var(--hw-gold);border-color:var(--hw-gold);box-shadow:0 0 0 6px rgba(224,176,74,.2)}
-#area-modulos .card-modulo.atual::after{background:var(--hw-gold)}
-#area-modulos .card-modulo:not(.bloqueado):hover{transform:none;border-color:var(--hw-cyan);background:var(--surface-hover);box-shadow:none}
-#area-modulos .card-modulo.bloqueado{opacity:.5;filter:none}
-#area-modulos .card-modulo .card-banner{background:none;border:0;text-align:left;padding:14px 22px 0;font:500 .78rem 'JetBrains Mono',monospace;letter-spacing:0;text-transform:none;color:var(--text-muted)}
-#area-modulos .card-modulo.concluido .card-banner{color:var(--hw-cyan)}
-#area-modulos .card-modulo.ao-vivo .card-banner{color:#fca5a5}
-#area-modulos .card-modulo.ao-vivo{animation:none;border-color:rgba(239,68,68,.6)}
-#area-modulos .card-modulo.ferramenta-card{border:1px solid var(--border-tech)}
-#area-modulos .card-modulo.ferramenta-card .card-banner{color:var(--hw-cyan)}
-#area-modulos .card-corpo{padding:6px 22px 18px}
-#area-modulos .card-corpo h3{font-size:1.1rem;margin-bottom:6px}
-#area-modulos .card-corpo p{margin-bottom:12px}
-#area-modulos .status-aula{font-family:'Inter',sans-serif;font-weight:600;font-size:.82rem;color:var(--hw-gold)}
-#area-modulos .card-modulo.concluido .status-aula{color:var(--hw-cyan)}
-#area-modulos .card-modulo.bloqueado .status-aula{color:var(--text-muted)}
-
-/* Atalhos: grade simples, sem trilha */
-#area-modulos .trilha:first-child .grid-modulos{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin:0;padding:0;border:0}
-#area-modulos .trilha:first-child .card-modulo::before,#area-modulos .trilha:first-child .card-modulo::after{display:none}
-
-/* Suporte */
-.btn-ajuda{box-shadow:0 4px 18px rgba(224,176,74,.3)}
-.header-suporte{font-family:'Sora',sans-serif}
-.btn-chamada-topo{margin-left:auto;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:0;border-radius:var(--radius-md);background:var(--hw-copper);color:#000;font-family:'Sora',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:var(--transition)}
-.btn-chamada-topo:hover{filter:brightness(1.1)}
-.modal-chamada{display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:16px}
-.chamada-box{width:100%;max-width:420px;background:#0b1d3d;border:1px solid var(--border-tech);border-radius:14px;padding:20px;text-align:center;color:var(--text-primary)}
-.chamada-box h3{margin-bottom:8px;font-size:1.1rem}
-#chamada-msg{margin:0 0 14px;font-size:.92rem;color:var(--text-muted);min-height:20px}
-#chamada-msg.ok{color:#34d399;font-weight:700}
-#chamada-msg.erro{color:#f87171;font-weight:700}
-.chamada-video{position:relative;aspect-ratio:1/1;background:#000;border-radius:12px;overflow:hidden;margin-bottom:14px}
-.chamada-video video{width:100%;height:100%;object-fit:cover}
-.chamada-video::after{content:'';position:absolute;inset:18%;border:3px solid rgba(224,176,74,.9);border-radius:14px;pointer-events:none}
-@media (max-width:600px){
-  .btn-chamada-topo{padding:7px 10px;font-size:.78rem}
-}
-@media (max-width:600px){
-  #area-modulos .trilha .grid-modulos{padding-left:26px;margin-left:8px}
-  #area-modulos .card-modulo::before{left:-36px}
-  #area-modulos .card-modulo::after{left:-22px;width:22px}
-  header{padding:10px 16px}
-}
+@media(max-width:700px){.calendario-painel{padding:15px}.calendario-corpo{grid-template-columns:1fr;gap:18px}.calendario-lista{padding:16px 0 0;border-left:0;border-top:1px solid var(--border-tech)}.calendario-dia,.calendario-dia-vazio{min-height:38px}.calendario-cabecalho{align-items:flex-start;flex-direction:column}}
+#painel-aluno .mensagem-conclusao{display:flex;flex:0 0 100%;align-items:center;justify-content:space-between;gap:20px;padding-top:20px;border-top:1px solid var(--border-tech)}
+#painel-aluno .mensagem-conclusao[hidden]{display:none}
+#painel-aluno.curso-concluido{gap:18px 24px}
+#painel-aluno .conclusao-etiqueta{display:inline-flex;align-items:center;gap:7px;margin-bottom:8px;color:var(--hw-cyan);font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+#painel-aluno .conclusao-etiqueta .ponto{width:7px;height:7px;border-radius:50%;background:var(--hw-cyan);box-shadow:0 0 0 4px rgba(94,234,212,.1)}
+#painel-aluno .mensagem-conclusao h2{margin:0 0 8px;font:800 clamp(1.35rem,2.8vw,2rem)/1.2 'Sora',sans-serif;color:var(--text-primary)}
+#painel-aluno .mensagem-conclusao p{max-width:690px;margin:0;color:var(--text-secondary);font-size:.9rem;line-height:1.7}
+#painel-aluno .mensagem-conclusao small{display:block;margin-top:8px;color:var(--text-muted);font-size:.76rem}
+#painel-aluno .conclusao-icone{display:grid;place-items:center;flex:0 0 58px;width:58px;height:58px;border:1px solid rgba(231,185,87,.3);border-radius:16px;background:rgba(231,185,87,.1);color:var(--hw-gold);font-size:24px}
 </style>
 </head>
 <body>
@@ -137,16 +104,20 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
 </div>
 
 <div class="container">
-    
+    <div class="layout-modulos">
+        <main class="conteudo-modulos">
     <div id="alerta-professor">
         <i class="fas fa-bullhorn" style="font-size: 24px;"></i>
-        <span id="texto-alerta">Carregando avisos importantes...</span>
+        <div class="recado-conteudo">
+            <strong class="recado-titulo">Recado do instrutor</strong>
+            <span id="texto-alerta">Carregando recados...</span>
+        </div>
         <button onclick="this.parentElement.style.display='none'" style="margin-left: auto; background: none; border: none; cursor: pointer; color: var(--azul-escuro); font-size: 18px;">
             <i class="fas fa-times"></i>
         </button>
     </div>
 
-    <div class="painel-topo">
+    <div id="painel-aluno" class="painel-topo">
         <div class="info-aluno">
             <h2 id="nome-aluno"><i class="fas fa-user-circle"></i> Aluno</h2>
             <button class="btn-acao btn-sair" onclick="sair()">Sair da Sala</button>
@@ -172,10 +143,38 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
             </button>
             
         </div>
+        <section id="mensagem-conclusao" class="mensagem-conclusao" aria-labelledby="titulo-conclusao" hidden>
+            <div>
+                <div class="conclusao-etiqueta"><span class="ponto"></span> Trilha concluída</div>
+                <h2 id="titulo-conclusao">Parabéns pela sua jornada!</h2>
+                <p>Você concluiu os módulos e a avaliação final. Consulte a área de certificação ou reveja qualquer conteúdo na lista completa.</p>
+                <small>Disponibilidade do certificado conforme os critérios do curso.</small>
+            </div>
+            <div class="conclusao-icone" aria-hidden="true"><i class="fas fa-graduation-cap"></i></div>
+        </section>
     </div>
 
     <a id="continuar" class="continuar" hidden></a>
     <div id="area-modulos"></div>
+        </main>
+        <aside class="calendario-painel" aria-labelledby="titulo-calendario">
+            <div class="calendario-cabecalho">
+                <h2 id="titulo-calendario" class="calendario-titulo"><i class="fas fa-calendar-alt"></i> Calendário do curso</h2>
+                <div class="calendario-navegacao">
+                    <button type="button" onclick="mudarMesCalendario(-1)" aria-label="Mês anterior"><i class="fas fa-chevron-left"></i></button>
+                    <span id="calendario-mes" aria-live="polite">Carregando...</span>
+                    <button type="button" onclick="mudarMesCalendario(1)" aria-label="Próximo mês"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="calendario-corpo">
+                <div id="calendario-grade" class="calendario-grade" role="group" aria-label="Dias do mês"></div>
+                <div class="calendario-lista">
+                    <h3 id="calendario-data-selecionada">Eventos</h3>
+                    <div id="calendario-eventos-dia" aria-live="polite"><p class="calendario-sem-eventos">Carregando eventos...</p></div>
+                </div>
+            </div>
+        </aside>
+    </div>
 </div>
 
 <!-- WIDGET SUPORTE FLUTUANTE -->
@@ -247,6 +246,112 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
         { id: 100, t: "PROVA FINAL", d: "Avaliação final de certificação técnica." }
     ];
 
+    let eventosCalendarioAluno = [];
+    let dataCalendarioAtual = new Date();
+    let dataCalendarioSelecionada = dataLocalISO(new Date());
+
+    function dataLocalISO(data) {
+        return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`;
+    }
+
+    function escaparTextoHtml(valor) {
+        return String(valor).replace(/[&<>"']/g, caractere => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[caractere]);
+    }
+
+    function formatarDataCalendario(valor, opcoes = { day: 'numeric', month: 'long', year: 'numeric' }) {
+        const [ano, mes, dia] = valor.split('-').map(Number);
+        return new Date(ano, mes - 1, dia).toLocaleDateString('pt-BR', opcoes);
+    }
+
+    function carregarEventosCalendario(valor) {
+        try {
+            const eventos = valor ? JSON.parse(valor) : [];
+            if (!Array.isArray(eventos)) throw new Error('A lista de eventos não está em um formato válido.');
+            const eventosValidos = eventos.every(evento => {
+                if (!evento || typeof evento.id !== 'string' || typeof evento.titulo !== 'string' ||
+                    typeof evento.descricao !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(evento.data)) return false;
+                const [ano, mes, dia] = evento.data.split('-').map(Number);
+                const data = new Date(ano, mes - 1, dia);
+                return data.getFullYear() === ano && data.getMonth() === mes - 1 && data.getDate() === dia;
+            });
+            if (!eventosValidos) throw new Error('O calendário contém um evento inválido.');
+            eventosCalendarioAluno = eventos;
+            renderizarCalendario();
+        } catch (error) {
+            console.error('Erro ao carregar eventos do calendário:', error);
+            document.getElementById('calendario-eventos-dia').innerHTML =
+                '<p class="calendario-sem-eventos">Não foi possível carregar os eventos. Atualize a página e tente novamente.</p>';
+        }
+    }
+
+    function mudarMesCalendario(deslocamento) {
+        const dia = Number(dataCalendarioSelecionada.slice(-2));
+        dataCalendarioAtual = new Date(dataCalendarioAtual.getFullYear(), dataCalendarioAtual.getMonth() + deslocamento, 1);
+        const ultimoDia = new Date(dataCalendarioAtual.getFullYear(), dataCalendarioAtual.getMonth() + 1, 0).getDate();
+        dataCalendarioSelecionada = dataLocalISO(new Date(
+            dataCalendarioAtual.getFullYear(),
+            dataCalendarioAtual.getMonth(),
+            Math.min(dia, ultimoDia)
+        ));
+        renderizarCalendario();
+    }
+
+    function renderizarCalendario() {
+        const ano = dataCalendarioAtual.getFullYear();
+        const mes = dataCalendarioAtual.getMonth();
+        document.getElementById('calendario-mes').textContent = dataCalendarioAtual.toLocaleDateString('pt-BR', {
+            month: 'long',
+            year: 'numeric'
+        });
+
+        const grade = document.getElementById('calendario-grade');
+        const nomesDias = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+        const primeiroDia = (new Date(ano, mes, 1).getDay() + 6) % 7;
+        const totalDias = new Date(ano, mes + 1, 0).getDate();
+        const hoje = dataLocalISO(new Date());
+        let conteudo = nomesDias.map(dia => `<span class="calendario-dia-semana">${dia}</span>`).join('');
+
+        for (let i = 0; i < primeiroDia; i++) conteudo += '<span class="calendario-dia-vazio" aria-hidden="true"></span>';
+        for (let dia = 1; dia <= totalDias; dia++) {
+            const data = dataLocalISO(new Date(ano, mes, dia));
+            const temEvento = eventosCalendarioAluno.some(evento => evento.data === data);
+            const classes = [
+                'calendario-dia',
+                data === hoje ? 'hoje' : '',
+                data === dataCalendarioSelecionada ? 'selecionado' : ''
+            ].filter(Boolean).join(' ');
+            conteudo += `<button type="button" class="${classes}" data-calendario-data="${data}" aria-pressed="${data === dataCalendarioSelecionada}" aria-label="${escaparTextoHtml(formatarDataCalendario(data))}${temEvento ? ', possui evento' : ''}">${dia}${temEvento ? '<span class="ponto-evento" aria-hidden="true"></span>' : ''}</button>`;
+        }
+        grade.innerHTML = conteudo;
+        grade.onclick = clique => {
+            const botao = clique.target.closest('button[data-calendario-data]');
+            if (!botao) return;
+            dataCalendarioSelecionada = botao.dataset.calendarioData;
+            renderizarCalendario();
+        };
+
+        document.getElementById('calendario-data-selecionada').textContent =
+            formatarDataCalendario(dataCalendarioSelecionada);
+        const eventosDoDia = eventosCalendarioAluno
+            .filter(evento => evento.data === dataCalendarioSelecionada)
+            .sort((a, b) => a.titulo.localeCompare(b.titulo, 'pt-BR'));
+        const lista = document.getElementById('calendario-eventos-dia');
+        if (!eventosDoDia.length) {
+            lista.innerHTML = '<p class="calendario-sem-eventos">Nenhum evento nesta data.</p>';
+            return;
+        }
+        lista.innerHTML = eventosDoDia.map(evento => `
+            <article class="calendario-evento">
+                <strong>${escaparTextoHtml(evento.titulo)}</strong>
+                ${evento.descricao ? `<p>${escaparTextoHtml(evento.descricao)}</p>` : ''}
+            </article>
+        `).join('');
+    }
+
+    renderizarCalendario();
+
     let inicializacaoEmAndamento = false;
 
     async function inicializar() {
@@ -256,7 +361,11 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
         // --- NOVO: CHECAGEM DE MANUTENÇÃO E AVISOS ---
         const { data: config, error: errC } = await _supabase.from('configuracoes').select('*');
         
-        if (!errC && config) {
+        if (errC) {
+            console.error('Erro ao carregar avisos e calendário:', errC);
+            document.getElementById('calendario-eventos-dia').innerHTML =
+                '<p class="calendario-sem-eventos">Não foi possível carregar os eventos. Atualize a página e tente novamente.</p>';
+        } else if (config) {
             if (config.find(c => c.chave === 'modo_manutencao')?.valor !== 'true') document.getElementById('manutencao')?.remove();
             // Se modo manutenção estiver ligado, bloqueia tudo
             const manutencao = config.find(c => c.chave === 'modo_manutencao')?.valor;
@@ -280,6 +389,7 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
             } else {
                 document.getElementById('alerta-professor').style.display = 'none';
             }
+            carregarEventosCalendario(config.find(c => c.chave === 'calendario_modulos')?.valor);
         }
 
         // --- LÓGICA ORIGINAL DE USUÁRIO E PROGRESSO ---
@@ -354,25 +464,56 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
 
     function renderizar(concluidos, nota) {
         const porId = id => modulos.find(m => m.id === id);
-        const atalhos = [999, 998].map(id => cardModulo(porId(id), concluidos, nota)).join('');
-        let html = `<section class="trilha"><div class="trilha-topo"><h2>Atalhos</h2></div><div class="grid-modulos">${atalhos}</div></section>`;
+        const sequencia = [...Array(15).keys()].map(porId).filter(Boolean).concat(porId(100)).filter(Boolean);
+        const proximo = sequencia.find(m => !concluidos.includes(m.id) || (m.id === 100 && (nota === null || nota < 70)));
+        const area = document.getElementById('area-modulos');
+        const painelAluno = document.getElementById('painel-aluno');
+        const mensagemConclusao = document.getElementById('mensagem-conclusao');
+        let html = '';
+
+        if (proximo) {
+            painelAluno.classList.remove('curso-concluido');
+            mensagemConclusao.hidden = true;
+            const isProva = proximo.id === 100;
+            const isFerramenta = proximo.id === 998;
+            const liberado = !bloqueado(proximo, concluidos);
+            const link = linkDoModulo(proximo);
+            const tituloTipo = isProva ? 'Avaliação final' : `Módulo ${String(proximo.id).padStart(2, '0')}`;
+            const icone = isProva ? 'fa-clipboard-check' : 'fa-microchip';
+            html += `<section class="foco-modulo" aria-labelledby="titulo-modulo-atual">
+                <div class="foco-conteudo">
+                    <div class="foco-etiqueta"><span class="ponto"></span> Seu próximo passo</div>
+                    <h1 id="titulo-modulo-atual">${proximo.t}</h1>
+                    <p>${proximo.d}</p>
+                    <div class="foco-meta"><span><i class="fas ${icone}"></i> ${tituloTipo}</span><span><i class="fas fa-route"></i> Continue sua trilha de aprendizagem</span></div>
+                </div>
+                <div class="foco-lateral">
+                    <div class="foco-icone"><i class="fas ${isProva ? 'fa-award' : 'fa-play'}"></i></div>
+                    ${liberado ? `<a class="foco-botao" href="${link}">${isProva ? 'Fazer avaliação' : 'Continuar módulo'} <i class="fas fa-arrow-right"></i></a>` : `<span class="foco-botao secundario"><i class="fas fa-lock"></i> Módulo bloqueado</span>`}
+                    <small>${liberado ? 'Seu progresso é salvo durante o curso.' : 'Conclua o módulo anterior para continuar.'}</small>
+                </div>
+            </section>`;
+        } else {
+            painelAluno.classList.add('curso-concluido');
+            mensagemConclusao.hidden = false;
+        }
+
+        const total = 15;
+        const concluidosConteudo = concluidos.filter(id => id >= 0 && id <= 14).length;
+        html += `<details class="lista-completa"><summary><i class="fas fa-layer-group"></i><span>Ver todos os módulos<small>${concluidosConteudo} de ${total} aulas concluídas · trilha completa</small></span></summary><div class="lista-conteudo">`;
         html += trilhas.map(tr => {
             const feitos = tr.ids.filter(id => concluidos.includes(id)).length;
-            const cards = tr.ids.map(id => cardModulo(porId(id), concluidos, nota)).join('');
+            const cards = tr.ids.map(porId).filter(Boolean).map(m => cardModulo(m, concluidos, nota)).join('');
             return `<section class="trilha"><div class="trilha-topo ${feitos === tr.ids.length ? 'ok' : ''}"><h2>${tr.t}</h2><span>${feitos}/${tr.ids.length} concluídos</span></div><div class="grid-modulos">${cards}</div></section>`;
         }).join('');
-        document.getElementById('area-modulos').innerHTML = html;
+        html += '</div></details>';
+        const recursos = [999, 998].map(id => porId(id)).filter(Boolean).map(m => cardModulo(m, concluidos, nota)).join('');
+        html += `<section class="trilha recursos-curso" aria-label="Recursos do curso"><div class="trilha-topo"><h2>Recursos do curso</h2><span>Acesso rápido</span></div><div class="grid-modulos">${recursos}</div></section>`;
+        area.innerHTML = html;
 
-        // Botão "continuar de onde parou"
-        const proximo = [...Array(15).keys()].map(porId).concat(porId(100)).find(m => !concluidos.includes(m.id) || (m.id === 100 && (nota === null || nota < 70)));
+        // Mantém a trilha completa acessível, mas somente o módulo atual ganha destaque no topo.
         const btn = document.getElementById('continuar');
-        if (proximo && !bloqueado(proximo, concluidos)) {
-            const nome = proximo.id === 100 ? 'Prova final' : `Módulo ${String(proximo.id).padStart(2, '0')}`;
-            btn.innerHTML = `<i class="fas fa-play-circle"></i><span><small>Continuar de onde parou</small>${nome}: ${proximo.t}</span><i class="fas fa-arrow-right seta"></i>`;
-            btn.href = linkDoModulo(proximo);
-            document.querySelector(`a.card-modulo[href="${linkDoModulo(proximo)}"]`)?.classList.add('atual');
-            btn.hidden = false;
-        } else { btn.hidden = true; }
+        if (btn) btn.hidden = true;
     }
 
     async function toggleDuvida() {
