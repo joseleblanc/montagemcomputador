@@ -681,7 +681,7 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
             return;
         }
         try {
-            chamadaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+            chamadaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
         } catch (e) {
             document.getElementById('chamada-video-box').style.display = 'none';
             msgChamada('Permita o acesso à câmera para ler o QR Code.', 'erro');
@@ -701,13 +701,13 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
         const video = document.getElementById('chamada-video');
         if (!chamadaProcessando && video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth) {
             const canvas = document.getElementById('chamada-canvas');
-            const escala = Math.min(1, 640 / video.videoWidth);
+            const escala = Math.min(1, 1280 / video.videoWidth);
             canvas.width = Math.round(video.videoWidth * escala);
             canvas.height = Math.round(video.videoHeight * escala);
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const codigo = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+            const codigo = jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' });
             if (codigo && codigo.data) {
                 const token = extrairTokenPresenca(codigo.data);
                 if (token) {
