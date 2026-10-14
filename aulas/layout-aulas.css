@@ -19,11 +19,21 @@
     --border-highlight: #2e528a;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     background: var(--bg-main) !important;
     background-image: none !important;
     color: var(--text-secondary) !important;
+    max-width: none !important;
+    min-height: 100vh;
+    margin: 0;
+    padding: clamp(16px, 4vw, 40px) !important;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
 }
 
 h1,
@@ -32,29 +42,38 @@ h3 {
     font-family: 'Sora', sans-serif;
 }
 
+.container,
+.card,
+.congratulations-card,
+.quiz-card {
+    width: min(100%, 1000px);
+    margin: 0 auto;
+    padding: clamp(22px, 5vw, 44px) !important;
+    border: 1px solid var(--border-tech) !important;
+    border-radius: 18px !important;
+    background: var(--surface-card) !important;
+    color: var(--text-secondary) !important;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32) !important;
+}
+
 .navbar {
     background: var(--hw-carbon) !important;
     color: var(--text-primary) !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.35) !important;
+    margin: calc(-1 * clamp(16px, 4vw, 40px)) calc(-1 * clamp(16px, 4vw, 40px)) 28px;
+    padding: 14px clamp(16px, 4vw, 40px) !important;
 }
 
 .btn-voltar {
     color: var(--text-primary) !important;
     background: rgba(224, 176, 74, 0.12) !important;
     border: 1px solid var(--border-tech);
+    border-radius: 9px !important;
 }
 
 .btn-voltar:hover {
     background: var(--surface-hover) !important;
     border-color: var(--hw-copper);
-}
-
-.container,
-.card,
-.congratulations-card {
-    background: var(--surface-card) !important;
-    color: var(--text-secondary) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
 }
 
 h1,
@@ -65,7 +84,8 @@ h2,
 }
 
 h1 {
-    border-bottom-color: var(--hw-copper) !important;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--hw-copper) !important;
 }
 
 h2,
@@ -77,12 +97,22 @@ h2,
 .intro-text,
 p,
 li {
-    color: var(--text-secondary);
+    color: var(--text-secondary) !important;
+}
+
+.intro-text {
+    font-size: 1.05rem;
 }
 
 .peça-card {
     background: var(--hw-pcb) !important;
     border-left-color: var(--hw-copper) !important;
+    border-radius: 12px !important;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.peça-card:hover {
+    border-left-color: var(--hw-cyan) !important;
 }
 
 .tech-specs,
@@ -184,15 +214,120 @@ li {
     box-shadow: 0 4px 15px rgba(224, 176, 74, 0.3) !important;
 }
 
+.btn-quiz,
+.btn-prova,
+.btn-concluir,
+.btn-verificar {
+    min-height: 48px;
+    padding: 13px 22px !important;
+    border: 1px solid transparent !important;
+    border-radius: 10px !important;
+    font: 700 0.98rem 'Inter', sans-serif !important;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
 .btn-quiz:hover,
 .btn-prova:hover {
     background: #ecc063 !important;
+    transform: translateY(-1px);
 }
 
 .btn-concluir {
     background: var(--hw-green) !important;
     color: var(--bg-main) !important;
     box-shadow: 0 4px 15px rgba(52, 211, 153, 0.3) !important;
+}
+
+.btn-concluir:hover {
+    background: #6ee7b7 !important;
+    transform: translateY(-1px);
+}
+
+.area-final {
+    border: 1px solid var(--border-tech);
+    border-radius: 14px;
+    padding: clamp(18px, 4vw, 30px);
+}
+
+.quiz-card {
+    width: min(100%, 680px);
+    margin: clamp(16px, 4vh, 36px) auto !important;
+}
+
+.quiz-card h2 {
+    text-align: left;
+    margin: 0 0 24px;
+}
+
+.quiz-card #titulo-res.aprovado {
+    color: var(--hw-green) !important;
+}
+
+.quiz-card #titulo-res.reprovado {
+    color: var(--hw-danger) !important;
+}
+
+.pergunta {
+    margin: 24px 0 10px;
+    color: var(--hw-cyan) !important;
+    font-weight: 700;
+}
+
+.opcao {
+    display: flex !important;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 13px 15px !important;
+    border: 1px solid var(--border-tech) !important;
+    border-radius: 10px !important;
+    background: var(--hw-carbon) !important;
+    color: var(--text-secondary) !important;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.opcao:hover {
+    border-color: var(--hw-copper) !important;
+    background: var(--surface-hover) !important;
+}
+
+.opcao input[type="radio"] {
+    flex: 0 0 auto;
+    accent-color: var(--hw-cyan);
+    margin: 4px 0 0;
+}
+
+.btn-verificar {
+    width: 100%;
+    margin-top: 20px;
+    background: var(--hw-copper) !important;
+    color: var(--bg-main) !important;
+}
+
+.btn-verificar:hover {
+    background: #ecc063 !important;
+}
+
+.btn-verificar:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.mensagem-erro {
+    margin: 14px 0 0;
+    color: #fca5a5 !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--hw-cyan);
+    outline-offset: 3px;
+}
+
+[hidden] {
+    display: none !important;
 }
 
 .destaque-amarelo {
@@ -206,4 +341,34 @@ li {
 
 .congratulations-card {
     border-bottom-color: var(--hw-gold) !important;
+}
+
+@media (max-width: 640px) {
+    body {
+        padding: 14px !important;
+    }
+
+    .navbar {
+        margin: -14px -14px 20px;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .container,
+    .card,
+    .congratulations-card,
+    .quiz-card {
+        border-radius: 14px !important;
+    }
+
+    .peça-card {
+        padding: 18px !important;
+        margin-bottom: 24px !important;
+    }
+
+    .btn-quiz,
+    .btn-prova,
+    .btn-concluir {
+        width: 100%;
+    }
 }
