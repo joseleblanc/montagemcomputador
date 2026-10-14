@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Supremo | Telecurso</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap">
+    <style>
+        :root {
+            --primary: #e0b04a;
+            --primary-light: #12295a;
+            --purple: #2dd4bf;
+            --success: #34d399;
+            --danger: #ef4444;
+            --warning: #e0b04a;
+            --bg-main: #07142b;
+            --bg-card: #0d2142;
+            --text-main: #c3d3ea;
+            --text-muted: #92a9ca;
+            --border: #1f3b66;
+            --sidebar-width: 300px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg-main); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
+        h1, h2, h3, .sidebar-header, .card-header { font-family: 'Sora', sans-serif; }
+
+        /* SIDEBAR */
+        .sidebar { width: var(--sidebar-width); background: var(--bg-card); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
+        .sidebar-header { padding: 24px; background: var(--hw-carbon, #081a36); color: #f1f6fd; font-weight: 700; text-align: center; letter-spacing: 1px; }
+        .menu-section-label { padding: 20px 24px 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
+        .nav-item { padding: 12px 24px; margin: 4px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 500; color: var(--text-muted); transition: var(--transition); }
+        .nav-item:hover { background: var(--surface-hover, #12295a); color: var(--hw-cyan, #2dd4bf); }
+        .nav-item.active { background: var(--primary-light); color: var(--hw-cyan, #2dd4bf); }
+        .lista-contatos { flex: 1; overflow-y: auto; }
+
+        /* CONTEÚDO PRINCIPAL */
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .scroll-container { padding: 32px; overflow-y: auto; height: 100%; }
+        
+        /* CARDS */
+        .admin-card { background: var(--bg-card); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid var(--primary); }
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-weight: 700; font-size: 1.1rem; }
+
+        /* BARRA DE PESQUISA (LUPA) */
+        .search-container { position: relative; margin-bottom: 20px; }
+        .search-container input { padding-left: 40px; margin-bottom: 0; width: 100%; border: 2px solid var(--border); }
+        .search-container i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+        /* TABELAS */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 11px; text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+
+        /* Table tweaks */
+        .table-container table th, .table-container table td { padding: 10px 14px; vertical-align: middle; }
+        .table-container table tr:hover { background: #12295a; }
+
+        /* Buttons */
+        .btn { border: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; font-size: 14px; }
+        .btn-primary { background: var(--primary); color: #07142b; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-approve { background: #34d399; color: #07142b; }
+        .btn-reject { background: #ef4444; color: white; }
+        .btn-trash { background: transparent; color: var(--danger); border: 1px solid rgba(239,68,68,0.12); padding:6px; border-radius:6px; }
+
+        /* Status badges */
+        .status-badge { padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; text-transform: uppercase; display:inline-block; }
+        .status-aprovado { background: rgba(52, 211, 153, 0.16); color: #34d399; }
+        .status-bloqueado { background: rgba(239, 68, 68, 0.16); color: #fca5a5; }
+
+        .btn-trash { background: rgba(239,68,68,0.16); color: #fca5a5; border: none; padding: 8px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .btn-trash:hover { background: var(--danger); color: white; }
+
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .status-aprovado { background: rgba(52, 211, 153, 0.16); color: #34d399; }
+        .status-bloqueado { background: rgba(239, 68, 68, 0.16); color: #fca5a5; }
+
+        .status-ticket { padding: 2px 8px; border-radius: 999px; font-size: 11px; color: white; text-transform: uppercase; font-weight: 700; }
+        .status-ticket.aguardando { background: #ef4444; }
+        .status-ticket.concluido { background: #34d399; color: #07142b; }
+        .status-ticket.em-atendimento { background: #e0b04a; color: #07142b; }
+        .status-ticket.nao-atendido { background: #2dd4bf; color: #07142b; }
+
+        /* FORMULÁRIOS */
+        label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
+        input, textarea, select { width: 100%; padding: 12px; background: #081a36; color: #f1f6fd; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; font-size: 14px; outline: none; }
+        .btn { border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+        .btn-primary { background: var(--primary); color: #07142b; }
+        .btn-danger { background: var(--danger); color: white; }
+
+        /* CHAT VIEW */
+        .chat-view, .alunos-view { display: none; flex-direction: column; height: 100%; background: var(--bg-main); }
+        .messages-area { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .bubble { padding: 12px 16px; border-radius: 12px; max-width: 65%; font-size: 14px; }
+        .bubble.aluno { align-self: flex-start; background: var(--bg-card); border: 1px solid var(--border); }
+        .bubble.admin { align-self: flex-end; background: var(--primary); color: #07142b; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #2e528a; border-radius: 10px; }
+
+        /* Modal styles */
+        .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(2,6,23,0.45); align-items: center; justify-content: center; z-index: 50; }
+        .modal-card { background: var(--bg-card); width: 560px; max-width: 96%; border-radius: 12px; padding: 18px; box-shadow: 0 10px 30px rgba(2,6,23,0.25); }
+        .modal-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom: 12px; }
+        .modal-title { font-weight:800; font-size:16px; color:var(--text-main); }
+        .modal-close { background:#12295a; color:var(--text-main); border:1px solid var(--border); padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:700; }
+        .modal-body { max-height: 360px; overflow: auto; padding-right:6px; border-radius:6px; }
+        .module-row { display:flex; align-items:center; gap:14px; padding:10px 6px; border-bottom:1px solid var(--border); }
+        .module-checkbox { width: 20px; height:20px; accent-color: var(--primary); }
+        .module-label { flex:1; font-weight:700; color:var(--text-muted); text-transform: uppercase; font-size:13px; display:flex; justify-content:space-between; align-items:center; }
+        .modal-footer { display:flex; justify-content:flex-end; gap:10px; margin-top:14px; }
+        .btn-cancel { background:#12295a; color:var(--text-main); padding:10px 14px; border-radius:10px; font-weight:700; }
+        .btn-save { background:var(--primary); color:#07142b; padding:10px 16px; border-radius:10px; font-weight:800; }
+        .modal-body::-webkit-scrollbar { width:8px; }
+        .modal-body::-webkit-scrollbar-thumb { background:#2e528a; border-radius:8px; }
+
+        /* TURMAS E CHAMADA */
+        .turma-toolbar { display:grid; grid-template-columns: minmax(220px, 1fr) 180px auto; gap:12px; align-items:end; margin-bottom:20px; }
+        .turma-toolbar input, .turma-toolbar select { margin-bottom:0; }
+        .chamada-resumo { display:flex; gap:18px; flex-wrap:wrap; margin:0 0 18px; color:var(--text-muted); font-size:13px; }
+        .chamada-resumo strong { color:var(--text-main); font-size:16px; }
+        .btn-presenca { min-width:130px; margin:0; font-weight:700; color:white; }
+        .btn-presenca.presente { background:var(--success); }
+        .btn-presenca.falta { background:var(--danger); }
+        .badge-qr { display:inline-flex; align-items:center; gap:6px; margin-left:10px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; background:rgba(45,212,191,.16); color:#2dd4bf; white-space:nowrap; }
+        .qr-card { display:flex; gap:24px; align-items:center; flex-wrap:wrap; margin:0 0 20px; padding:18px; border:1px solid var(--border); border-radius:12px; background:rgba(255,255,255,.03); }
+        .qr-box { background:#fff; padding:12px; border-radius:12px; line-height:0; min-width:120px; min-height:120px; display:flex; align-items:center; justify-content:center; }
+        .qr-box img, .qr-box canvas { max-width:100%; height:auto; }
+        .qr-info { flex:1; min-width:220px; color:var(--text-muted); font-size:14px; }
+        .qr-info h4 { color:var(--text-main); font-size:16px; margin-bottom:6px; }
+        .qr-info .qr-contador { color:var(--primary); font-weight:800; }
+        .qr-erro { color:#b91c1c; font-size:13px; line-height:1.4; padding:8px; max-width:220px; }
+        .qr-acoes { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+        .qr-card.ampliado { position:fixed; inset:0; z-index:1900; margin:0; border-radius:0; flex-direction:column; justify-content:center; background:var(--bg-main); text-align:center; }
+        .qr-card.ampliado .qr-info { flex:0 0 auto; min-width:0; }
+        .qr-card.ampliado .qr-acoes { justify-content:center; }
+        .anotacao-input { min-width:220px; margin:0; }
+        .empty-state { padding:28px 12px; text-align:center; color:var(--text-muted); }
+        .anotacao-row { padding:12px 6px; border-bottom:1px solid var(--border); }
+        .anotacao-meta { display:flex; justify-content:space-between; gap:12px; color:var(--text-muted); font-size:12px; margin-bottom:5px; }
+        .anotacao-texto { color:var(--text-main); white-space:pre-wrap; }
+        @media (max-width: 760px) {
+            .turma-toolbar { grid-template-columns:1fr; }
+            .scroll-container { padding:18px; }
+            .chamada-resumo { gap:10px; }
+        }
+    
+        .gate{position:fixed;inset:0;z-index:2000;background:var(--bg-main);display:flex;align-items:center;justify-content:center;padding:20px}
+        .gate-card{background:var(--bg-card);border-radius:12px;padding:32px;width:100%;max-width:380px;border-top:4px solid var(--primary);box-shadow:0 10px 30px rgba(0,0,0,.15)}
+        .gate-card h2{margin-bottom:6px}.gate-card p{color:var(--text-muted);font-size:14px;margin-bottom:18px}
+        .gate-card input{width:100%;padding:10px 12px;margin:4px 0 14px;border:2px solid var(--border);border-radius:8px}
+        #gate-msg{color:var(--danger);font-size:13px;min-height:18px;margin-top:10px}
+        .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px}
+        .stat{background:var(--bg-card);border-radius:12px;padding:16px 18px;border-left:4px solid var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+        .stat b{display:block;font-size:1.8rem;line-height:1.1}.stat span{font-size:12px;color:var(--text-muted)}
+        .stat.alerta{border-left-color:var(--warning);cursor:pointer}
+        .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+        .chip{border:1px solid var(--border);background:var(--bg-card);padding:7px 14px;border-radius:999px;font-weight:600;font-size:13px;cursor:pointer;color:var(--text-muted)}
+        .chip.on{background:var(--primary);border-color:var(--primary);color:#07142b}
+        .toolbar .grow{margin-left:auto;font-size:13px;color:var(--text-muted)}
+        .alunos-view{display:none}
+    </style>
+</head>
+<body>
+    <div class="gate" id="gate">
+        <div class="gate-card">
+            <h2><i class="fas fa-shield-alt"></i> Painel Admin</h2>
+            <p>Entre com a conta de administrador.</p>
+            <label for="gate-email">E-mail</label><input type="email" id="gate-email" autocomplete="username">
+            <label for="gate-senha">Senha</label><input type="password" id="gate-senha" autocomplete="current-password">
+            <button class="btn btn-primary" style="width:100%" id="gate-btn" onclick="entrarAdmin()">ENTRAR</button>
+            <div id="gate-msg" role="alert"></div>
+        </div>
+    </div>
+
+    <aside class="sidebar">
+        <div class="sidebar-header"><i class="fas fa-shield-alt"></i> PAINEL ADMIN</div>
+        <nav>
+            <div class="menu-section-label">Sistema</div>
+            <div class="nav-item active" id="menu-geral" onclick="exibirTela('visao-geral', this)">
+                <i class="fas fa-home"></i> Visão Geral
+            </div>
+            <div class="nav-item" id="menu-alunos" onclick="exibirTela('visao-alunos', this)">
+                <i class="fas fa-users"></i> Alunos Cadastrados
+            </div>
+            <div class="nav-item" id="menu-turmas" onclick="exibirTela('visao-turmas', this)">
+                <i class="fas fa-clipboard-list"></i> Turmas e Chamada
+            </div>
+            <div class="nav-item" onclick="exibirTela('visao-certificados', this)">
+                <i class="fas fa-certificate"></i> Certificados
+            </div>
+            <div class="nav-item" onclick="exibirTela('visao-admins', this)">
+                <i class="fas fa-user-shield"></i> Administradores
+            </div>
+            <div class="nav-item" style="background:#12295a; color:#2dd4bf; font-weight:700;" onclick="window.open('https://supabase.com', '_blank')">
+                <i class="fas fa-database"></i> Banco no Supabase
+            </div>
+            <div class="nav-item" onclick="sairAdmin()"><i class="fas fa-sign-out-alt"></i> Sair</div>
+        </nav>
+        <div class="menu-section-label">Suporte Alunos</div>
+        <div id="lista-contatos" class="lista-contatos"></div>
+    </aside>
+
+    <main class="main-content">
+        
+        <div id="visao-geral" class="scroll-container">
+            <div class="stats">
+                <div class="stat"><b id="m-total">–</b><span>Alunos cadastrados</span></div>
+                <div class="stat alerta" onclick="irParaPendentes()"><b id="m-pend">–</b><span>Aguardando aprovação</span></div>
+                <div class="stat"><b id="m-apr">–</b><span>Alunos aprovados</span></div>
+                <div class="stat"><b id="m-prova">–</b><span>Aprovados na prova final</span></div>
+                <div class="stat"><b id="m-cert">–</b><span>Certificados emitidos</span></div>
+                <div class="stat"><b id="m-tick">–</b><span>Tickets em aberto</span></div>
+            </div>
+            <div class="admin-card">
+                <div class="card-header"><i class="fas fa-broadcast-tower"></i> Aula Ao Vivo</div>
+                <label>URL da Transmissão</label>
+                <input type="text" id="link_aula" placeholder="https://meet.google.com/...">
+                <label>Horário da Aula</label>
+                <input type="text" id="horario_aula" placeholder="Ex: Hoje às 19:30">
+                <label>Recado da Sala</label>
+                <textarea id="recado_aula" rows="2" placeholder="Mensagem para os alunos..."></textarea>
+                
+                <button class="btn btn-primary" onclick="salvarAula()" style="width: 100%; margin-top: 20px;"><i class="fas fa-save"></i> ATUALIZAR AULA</button>
+            </div>
+
+            <div style="margin-bottom: 18px; text-align: right;">
+               
+            </div>
+
+            <div class="admin-card" style="border-top-color: var(--danger);">
+                <div class="card-header" style="color: var(--danger);"><i class="fas fa-bullhorn"></i> Alerta Global</div>
+                <label>Texto do Banner (Aparece no topo dos módulos)</label>
+                <textarea id="aviso_global" rows="2" placeholder="Aviso importante para todos os alunos..."></textarea>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button class="btn btn-danger" onclick="salvarAviso()">PUBLICAR</button>
+                    <button class="btn" style="background: #12295a; color:#c3d3ea;" onclick="limparAviso()">LIMPAR</button>
+                </div>
+            </div>
+
+            <div class="admin-card" style="border-top-color: var(--warning);">
+                <div class="card-header"><i class="fas fa-server"></i> Infraestrutura</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-main); padding: 15px; border-radius: 8px;">
+                    <div>
+                        <span id="status-label" style="font-weight: 800;">Verificando...</span>
+                        <div style="font-size: 12px; color: var(--text-muted);">Controle de acesso ao site</div>
+                    </div>
+                    <button class="btn" id="btn-manutencao" onclick="toggleManutencao()">AGUARDE</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="visao-alunos" class="alunos-view scroll-container">
+            <div class="admin-card" style="border-top-color: var(--purple);">
+                <div class="card-header"><i class="fas fa-user-graduate"></i> Gestão de Acessos</div>
+                
+                <div class="toolbar">
+                    <button class="chip on" onclick="setFiltroStatus('todos', this)">Todos</button>
+                    <button class="chip" onclick="setFiltroStatus('pendente', this)">Pendentes</button>
+                    <button class="chip" onclick="setFiltroStatus('aprovado', this)">Aprovados</button>
+                    <button class="chip" onclick="setFiltroStatus('bloqueado', this)">Bloqueados</button>
+                    <span class="grow" id="contagem-alunos"></span>
+                    <button class="btn btn-primary" onclick="aprovarPendentes()"><i class="fas fa-check-double"></i> Aprovar pendentes</button>
+                    <button class="btn" style="background:#12295a; color:#c3d3ea;" onclick="exportarCSV()"><i class="fas fa-file-csv"></i> Exportar CSV</button>
+                </div>
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="input-pesquisa" placeholder="Procurar aluno por e-mail..." onkeyup="filtrarAlunos()">
+                </div>
+
+                <div class="table-container">
+                    <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">Excluir</th>
+                                        <th>Aluno (Email)</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-alunos"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="visao-turmas" class="alunos-view scroll-container">
+            <div class="admin-card" style="border-top-color: var(--success);">
+                <div class="card-header"><i class="fas fa-chalkboard-teacher"></i> Turmas por Módulo</div>
+                <p style="color:var(--text-muted); margin-bottom:18px;">Cada módulo funciona como uma turma. Registre presença, falta e uma anotação para cada aluno.</p>
+                <div class="turma-toolbar">
+                    <div>
+                        <label for="seletor-turma">Turma / Módulo</label>
+                        <select id="seletor-turma" onchange="carregarChamadaTurma()"></select>
+                    </div>
+                    <div>
+                        <label for="data-chamada">Data da chamada</label>
+                        <input type="date" id="data-chamada" onchange="carregarChamadaTurma()">
+                    </div>
+                    <button class="btn btn-primary" onclick="salvarChamadaTurma()"><i class="fas fa-save"></i> Salvar chamada</button>
+                </div>
+                <div id="qr-card" class="qr-card">
+                    <div id="qr-code" class="qr-box" aria-label="QR Code da chamada"></div>
+                    <div class="qr-info">
+                        <h4><i class="fas fa-qrcode"></i> Chamada por QR Code</h4>
+                        <p>Os alunos abrem <b>Chamada</b> no topo da página de módulos e apontam a câmera para este código (ou leem com a câmera do celular). Cada aluno confirma a própria presença com o e-mail logado.</p>
+                        <p style="margin-top:8px;">O código muda em <span id="qr-contador" class="qr-contador">30</span>s, para não funcionar em foto repassada.</p>
+                        <div class="qr-acoes">
+                            <button type="button" class="btn btn-primary" onclick="alternarQrAmpliado()"><i class="fas fa-expand"></i> <span id="qr-ampliar-txt">Ampliar para projetar</span></button>
+                        </div>
+                    </div>
+                </div>
+                <div id="chamada-resumo" class="chamada-resumo"></div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Aluno</th><th>Presença</th><th>Anotação</th></tr>
+                        </thead>
+                        <tbody id="tabela-chamada"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="visao-certificados" class="alunos-view scroll-container">
+            <div class="admin-card" style="border-top-color: var(--warning);">
+                <div class="card-header"><i class="fas fa-certificate"></i> Certificados emitidos</div>
+                <div class="search-container"><i class="fas fa-search"></i>
+                    <input type="text" id="busca-cert" placeholder="Procurar por nome ou código..." onkeyup="renderizarCertificados()"></div>
+                <div class="table-container"><table>
+                    <thead><tr><th>Código</th><th>Nome</th><th>CPF</th><th>Emitido em</th><th>Ação</th></tr></thead>
+                    <tbody id="tabela-certificados"></tbody>
+                </table></div>
+            </div>
+        </div>
+
+        <div id="visao-admins" class="alunos-view scroll-container">
+            <div class="admin-card" style="border-top-color: var(--purple);">
+                <div class="card-header"><i class="fas fa-user-shield"></i> Administradores</div>
+                <p style="color:var(--text-muted); margin-bottom:16px;">Só os e-mails desta lista entram no painel. A pessoa precisa ter conta e e-mail confirmado no sistema.</p>
+                <div class="toolbar">
+                    <input type="email" id="novo-adm" placeholder="email@exemplo.com" style="flex:1;min-width:220px;padding:10px 12px;border:2px solid var(--border);border-radius:8px" aria-label="E-mail do novo administrador">
+                    <button class="btn btn-primary" onclick="adicionarAdmin()"><i class="fas fa-plus"></i> Adicionar</button>
+                </div>
+                <div class="table-container"><table>
+                    <thead><tr><th>E-mail</th><th>Adicionado em</th><th>Ação</th></tr></thead>
+                    <tbody id="tabela-admins"></tbody>
+                </table></div>
+            </div>
+        </div>
+
+        <div id="visao-chat" class="chat-view">
+            <div id="chat-ticket-label" style="padding: 16px 24px 0; font-weight: 700;"></div>
+            <div id="box-mensagens" class="messages-area"></div>
+            <div style="padding: 20px; background: white; display: flex; gap: 10px; border-top: 1px solid var(--border);">
+                <input type="text" id="input-msg" placeholder="Responder..." style="margin-bottom:0">
+                <button class="btn btn-primary" onclick="enviarMensagem()">Enviar</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal de Verificação de Módulos -->
+    <div id="modal-modulos" class="modal-backdrop" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="modal-header">
+                <div>
+                    <div id="modal-title" class="modal-title">Verificação de Módulos</div>
+                    <div id="modal-email-label" style="font-weight:700; color:var(--text-muted); font-size:13px;">&nbsp;</div>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button class="modal-close" onclick="fecharModalModulos()">Fechar</button>
+                </div>
+            </div>
+            <div id="lista-modulos" class="modal-body" aria-live="polite"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="fecharModalModulos()">Cancelar</button>
+                <button class="btn-save" onclick="salvarModulosModal()">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-anotacoes" class="modal-backdrop" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-anotacoes-title">
+            <div class="modal-header">
+                <div>
+                    <div id="modal-anotacoes-title" class="modal-title">Anotações do aluno</div>
+                    <div id="modal-anotacoes-email" style="font-weight:700; color:var(--text-muted); font-size:13px;">&nbsp;</div>
+                </div>
+                <button class="modal-close" onclick="fecharModalAnotacoes()">Fechar</button>
+            </div>
+            <div id="lista-anotacoes" class="modal-body" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let alunoSelecionado = null;
+        let emManutencao = false;
+        let todosAlunos = []; // Cache para a pesquisa funcionar rápido
+        let contatoTicketMap = {}; // ticket=>email
+
+        function exibirTela(id, elemento) {
+            document.getElementById('visao-geral').style.display = 'none';
+            document.getElementById('visao-alunos').style.display = 'none';
+            document.getElementById('visao-turmas').style.display = 'none';
+            document.getElementById('visao-chat').style.display = 'none';
+            document.getElementById('visao-certificados').style.display = 'none';
+            document.getElementById('visao-admins').style.display = 'none';
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).style.display = (id === 'visao-chat') ? 'flex' : 'block';
+            if(elemento) elemento.classList.add('active');
+            if(id === 'visao-alunos') carregarAlunos();
+            if(id === 'visao-certificados') carregarCertificados();
+            if(id === 'visao-admins') carregarAdmins();
+            if(id === 'visao-geral') carregarMetricas();
+            if(id !== 'visao-turmas') pararQrChamada();
+            if(id === 'visao-turmas') carregarAlunos().then(() => carregarChamadaTurma());
+        }
+
+        // --- FUNÇÕES DE AULA E AVISO ---
+        async function carregarConfiguracoes() {
+            const { data } = await _supabase.from('configuracoes').select('*');
+            if (data) {
+                document.getElementById('link_aula').value = data.find(c => c.chave === 'link_aula_ao_vivo')?.valor || "";
+                document.getElementById('horario_aula').value = data.find(c => c.chave === 'horario_aula')?.valor || "";
+                document.getElementById('recado_aula').value = data.find(c => c.chave === 'recado_aula')?.valor || "";
+                document.getElementById('aviso_global').value = data.find(c => c.chave === 'recado_geral_modulos')?.valor || "";
+                emManutencao = data.find(c => c.chave === 'modo_manutencao')?.valor === "true";
+                atualizarInterfaceManutencao();
+                
+            }
+        }
+
+        async function salvarAula() {
+            await _supabase.from('configuracoes').update({ valor: document.getElementById('link_aula').value }).eq('chave', 'link_aula_ao_vivo');
+            await _supabase.from('configuracoes').update({ valor: document.getElementById('horario_aula').value }).eq('chave', 'horario_aula');
+            await _supabase.from('configuracoes').update({ valor: document.getElementById('recado_aula').value }).eq('chave', 'recado_aula');
+            alert("Aula Atualizada!");
+        }
+
+        async function salvarAviso() {
+            await _supabase.from('configuracoes').update({ valor: document.getElementById('aviso_global').value }).eq('chave', 'recado_geral_modulos');
+            alert("Aviso Global Publicado!");
+        }
+
+        async function limparAviso() {
+            await _supabase.from('configuracoes').update({ valor: "" }).eq('chave', 'recado_geral_modulos');
+            document.getElementById('aviso_global').value = "";
+            alert("Aviso removido!");
+        }
+
+        async function toggleManutencao() {
+            emManutencao = !emManutencao;
+            await _supabase.from('configuracoes').update({ valor: emManutencao.toString() }).eq('chave', 'modo_manutencao');
+            atualizarInterfaceManutencao();
+        }
+
+        function atualizarInterfaceManutencao() {
+            const btn = document.getElementById('btn-manutencao');
+            const label = document.getElementById('status-label');
+            btn.innerText = emManutencao ? "DESATIVAR" : "ATIVAR";
+            btn.className = emManutencao ? "btn btn-danger" : "btn btn-primary";
+            label.innerText = emManutencao ? "MODO MANUTENÇÃO ATIVO" : "SISTEMA OPERACIONAL";
+            label.style.color = emManutencao ? "var(--danger)" : "var(--success)";
+        }
+
+        // --- GESTÃO DE ALUNOS COM LUPA ---
+        async function carregarAlunos() {
+            const { data } = await _supabase.from('perfil_alunos').select('*');
+            todosAlunos = data ? [...data].reverse() : []; // Inverte para novos no topo
+            filtrarAlunos();
+        }
+
+        const modulosTurmas = [
+            { id: 0, nome: 'Módulo 00 - Introdução ao Curso' },
+            { id: 1, nome: 'Módulo 01 - Conhecendo as peças' },
+            { id: 2, nome: 'Módulo 02 - Separando ferramentas' },
+            { id: 3, nome: 'Módulo 03 - Cuidados de segurança' },
+            { id: 4, nome: 'Módulo 04 - Montando o processador' },
+            { id: 5, nome: 'Módulo 05 - Montando a memória RAM' },
+            { id: 6, nome: 'Módulo 06 - Montando a placa no gabinete' },
+            { id: 7, nome: 'Módulo 07 - Fonte de alimentação' },
+            { id: 8, nome: 'Módulo 08 - Montando armazenamento' },
+            { id: 9, nome: 'Módulo 09 - Montando placa de vídeo' },
+            { id: 10, nome: 'Módulo 10 - Coolers de gabinete' },
+            { id: 11, nome: 'Módulo 11 - Primeiro boot de testes' },
+            { id: 12, nome: 'Módulo 12 - Formatação com Windows' },
+            { id: 13, nome: 'Módulo 13 - Vídeos tutoriais' },
+            { id: 14, nome: 'Módulo 14 - Conclusão' }
+        ];
+        let registrosChamada = {};
+
+        function prepararTurmas() {
+            const seletor = document.getElementById('seletor-turma');
+            if (!seletor || seletor.options.length) return;
+            seletor.innerHTML = modulosTurmas.map(m => `<option value="${m.id}">${m.nome}</option>`).join('');
+            document.getElementById('data-chamada').value = new Date().toISOString().split('T')[0];
+        }
+
+        async function carregarChamadaTurma() {
+            prepararTurmas();
+            const moduloId = Number(document.getElementById('seletor-turma').value);
+            const dataChamada = document.getElementById('data-chamada').value;
+            const tabela = document.getElementById('tabela-chamada');
+            if (!dataChamada) return;
+            qrVistos = new Set();
+            qrContagem = 0;
+            iniciarQrChamada();
+            tabela.innerHTML = '<tr><td colspan="3" class="empty-state">Carregando chamada...</td></tr>';
+
+            const { data, error } = await _supabase.from('chamada_turmas').select('*')
+                .eq('modulo_id', moduloId).eq('data', dataChamada);
+            if (error) {
+                tabela.innerHTML = `<tr><td colspan="3" class="empty-state" style="color:var(--danger);">A tabela de chamada ainda não está configurada. Execute o arquivo supabase-chamada-turmas.sql.</td></tr>`;
+                document.getElementById('chamada-resumo').innerHTML = '';
+                return;
+            }
+
+            registrosChamada = Object.fromEntries((data || []).map(registro => [registro.user_id, registro]));
+            const alunosAtivos = todosAlunos.filter(aluno => (aluno.status || '').toLowerCase() !== 'bloqueado');
+            const { data: progresso, error: progressoError } = await _supabase
+                .from('progresso_alunos').select('user_id,email,modulo_id,concluido');
+            if (progressoError) {
+                tabela.innerHTML = '<tr><td colspan="3" class="empty-state" style="color:var(--danger);">Não foi possível descobrir o módulo ativo dos alunos.</td></tr>';
+                return;
+            }
+            const userIdPorEmail = Object.fromEntries((progresso || [])
+                .filter(registro => registro.email && registro.user_id)
+                .map(registro => [registro.email.toLowerCase(), registro.user_id]));
+            const alunosComId = alunosAtivos.map(aluno => ({
+                ...aluno,
+                user_id: aluno.user_id || aluno.id || userIdPorEmail[aluno.email.toLowerCase()]
+            })).filter(aluno => aluno.user_id);
+            const modulosConcluidos = {};
+            (progresso || []).forEach(registro => {
+                const email = registro.email?.toLowerCase();
+                if (email && registro.concluido && Number(registro.modulo_id) >= 0 && Number(registro.modulo_id) <= 14) {
+                    if (!modulosConcluidos[email]) modulosConcluidos[email] = new Set();
+                    modulosConcluidos[email].add(Number(registro.modulo_id));
+                }
+            });
+            const moduloAtivoPorAluno = aluno => {
+                const concluidos = modulosConcluidos[aluno.email.toLowerCase()] || new Set();
+                let moduloAtivo = 0;
+                while (concluidos.has(moduloAtivo) && moduloAtivo < 15) moduloAtivo++;
+                return moduloAtivo;
+            };
+            const alunos = alunosComId.filter(aluno => moduloAtivoPorAluno(aluno) === moduloId);
+            tabela.innerHTML = alunos.length ? alunos.map(aluno => {
+                const registro = registrosChamada[aluno.user_id] || {};
+                const status = registro.status || 'pendente';
+                return `<tr>
+                    <td><b>${aluno.email}</b></td>
+                    <td><button type="button" class="btn btn-presenca ${status === 'falta' ? 'falta' : 'presente'}" data-status="${status === 'falta' ? 'falta' : 'presente'}" data-user-id="${escaparHtml(aluno.user_id)}" data-email="${escaparHtml(aluno.email)}" onclick="alternarPresenca(this)">${status === 'falta' ? 'FALTA' : 'PRESENÇA'}</button>${badgeQr(registro)}</td>
+                    <td><input class="anotacao-input" data-user-id="${aluno.user_id}" value="${(registro.anotacao || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" placeholder="Anotação sobre o aluno"></td>
+                </tr>`;
+            }).join('') : `<tr><td colspan="3" class="empty-state">Nenhum aluno está no próximo módulo ativo (${moduloId}).</td></tr>`;
+            alunos.forEach(aluno => { if ((registrosChamada[aluno.user_id] || {}).metodo === 'qr') qrVistos.add(aluno.user_id); });
+            atualizarResumoChamada();
+            atualizarPresencasQr();
+        }
+
+        function atualizarResumoChamada() {
+            const campos = [...document.querySelectorAll('.btn-presenca')];
+            const presentes = campos.filter(campo => campo.dataset.status === 'presente').length;
+            const faltas = campos.filter(campo => campo.dataset.status === 'falta').length;
+            document.getElementById('chamada-resumo').innerHTML = `<span><strong>${campos.length}</strong> alunos</span><span><strong style="color:var(--success)">${presentes}</strong> presentes</span><span><strong style="color:var(--danger)">${faltas}</strong> faltas</span><span><strong style="color:var(--purple)">${qrContagem}</strong> via QR</span>`;
+        }
+
+        function alternarPresenca(botao) {
+            const presente = botao.dataset.status === 'presente';
+            botao.dataset.status = presente ? 'falta' : 'presente';
+            botao.classList.toggle('presente', !presente);
+            botao.classList.toggle('falta', presente);
+            botao.innerText = presente ? 'FALTA' : 'PRESENÇA';
+            atualizarResumoChamada();
+        }
+
+        async function salvarChamadaTurma() {
+            const moduloId = Number(document.getElementById('seletor-turma').value);
+            const dataChamada = document.getElementById('data-chamada').value;
+            const campos = [...document.querySelectorAll('.btn-presenca')];
+            const registros = campos.map(campo => ({
+                modulo_id: moduloId,
+                data: dataChamada,
+                user_id: campo.dataset.userId,
+                email: campo.dataset.email,
+                status: campo.dataset.status,
+                anotacao: document.querySelector(`.anotacao-input[data-user-id="${campo.dataset.userId}"]`).value.trim(),
+                updated_at: new Date().toISOString()
+            }));
+            if (!registros.length) return;
+            const { error } = await _supabase.from('chamada_turmas').upsert(registros, { onConflict: 'modulo_id,data,user_id' });
+            if (error) {
+                alert('Não foi possível salvar a chamada: ' + error.message);
+                return;
+            }
+            alert('Chamada e anotações salvas com sucesso.');
+        }
+
+        // --- CHAMADA POR QR CODE ---
+        const QR_INTERVALO = 30; // segundos até trocar o código
+        let qrTimer = null, qrRestante = 0, qrTick = 0, qrAmpliado = false, qrUrlAtual = '', qrContagem = 0, qrVistos = new Set();
+
+        function novoTokenQr() {
+            const bytes = new Uint8Array(16);
+            crypto.getRandomValues(bytes);
+            return [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function badgeQr(registro) {
+            if (!registro || registro.metodo !== 'qr') return '';
+            const hora = registro.qr_em ? new Date(registro.qr_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+            return `<span class="badge-qr" title="Presença confirmada pelo aluno via QR Code"><i class="fas fa-qrcode"></i> QR ${hora}</span>`;
+        }
+
+        function pararQrChamada() {
+            if (qrTimer) clearInterval(qrTimer);
+            qrTimer = null;
+            if (qrAmpliado) alternarQrAmpliado();
+        }
+
+        async function iniciarQrChamada() {
+            if (qrTimer) clearInterval(qrTimer);
+            qrTimer = null;
+            qrTick = 0;
+            await gerarTokenQr();
+            if (!document.getElementById('qr-code').querySelector('.qr-erro')) {
+                qrTimer = setInterval(() => {
+                    qrRestante--;
+                    qrTick++;
+                    document.getElementById('qr-contador').textContent = Math.max(qrRestante, 0);
+                    if (qrRestante <= 0) gerarTokenQr();
+                    if (qrTick % 5 === 0) atualizarPresencasQr();
+                }, 1000);
+            }
+        }
+
+        async function gerarTokenQr() {
+            qrRestante = QR_INTERVALO;
+            const box = document.getElementById('qr-code');
+            const moduloId = Number(document.getElementById('seletor-turma').value);
+            const dataChamada = document.getElementById('data-chamada').value;
+            if (!dataChamada) return;
+            const token = novoTokenQr();
+            const { error } = await _supabase.from('chamada_qr_tokens').insert({ token, modulo_id: moduloId, data: dataChamada });
+            if (error) {
+                qrUrlAtual = '';
+                box.innerHTML = '<div class="qr-erro">Não foi possível gerar o QR Code. Execute o arquivo supabase-chamada-qr.sql no Supabase.<br><small>' + escaparHtml(error.message) + '</small></div>';
+                return;
+            }
+            const base = location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, '');
+            qrUrlAtual = base + 'modulos.html?presenca=' + token;
+            desenharQr();
+        }
+
+        function desenharQr() {
+            const box = document.getElementById('qr-code');
+            box.innerHTML = '';
+            if (!qrUrlAtual) return;
+            const tamanho = qrAmpliado ? Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.6) : 220;
+            new QRCode(box, { text: qrUrlAtual, width: tamanho, height: tamanho, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+        }
+
+        function alternarQrAmpliado() {
+            qrAmpliado = !qrAmpliado;
+            document.getElementById('qr-card').classList.toggle('ampliado', qrAmpliado);
+            document.getElementById('qr-ampliar-txt').textContent = qrAmpliado ? 'Fechar tela cheia' : 'Ampliar para projetar';
+            desenharQr();
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && qrAmpliado) alternarQrAmpliado(); });
+
+        async function atualizarPresencasQr() {
+            const moduloId = Number(document.getElementById('seletor-turma').value);
+            const dataChamada = document.getElementById('data-chamada').value;
+            if (!dataChamada) return;
+            const { data, error } = await _supabase.from('chamada_turmas').select('user_id,metodo,qr_em')
+                .eq('modulo_id', moduloId).eq('data', dataChamada).eq('metodo', 'qr');
+            if (error) return;
+            if (moduloId !== Number(document.getElementById('seletor-turma').value) || dataChamada !== document.getElementById('data-chamada').value) return;
+            qrContagem = (data || []).length;
+            (data || []).forEach(registro => {
+                const botao = document.querySelector(`.btn-presenca[data-user-id="${CSS.escape(String(registro.user_id))}"]`);
+                if (!botao) return;
+                if (!qrVistos.has(registro.user_id)) {
+                    qrVistos.add(registro.user_id);
+                    if (botao.dataset.status !== 'presente') alternarPresenca(botao);
+                }
+                if (!botao.parentElement.querySelector('.badge-qr')) botao.insertAdjacentHTML('afterend', badgeQr(registro));
+            });
+            atualizarResumoChamada();
+        }
+
+        function escaparHtml(valor) {
+            return String(valor ?? '').replace(/[&<>"]/g, caractere => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'
+            }[caractere]));
+        }
+
+        async function abrirAnotacoes(email) {
+            document.getElementById('modal-anotacoes-email').innerText = email;
+            document.getElementById('modal-anotacoes').style.display = 'flex';
+            const lista = document.getElementById('lista-anotacoes');
+            lista.innerHTML = '<div class="empty-state">Carregando anotações...</div>';
+
+            const { data, error } = await _supabase.from('chamada_turmas').select('*')
+                .eq('email', email).order('data', { ascending: false });
+            if (error) {
+                lista.innerHTML = '<div class="empty-state" style="color:var(--danger);">Não foi possível carregar as anotações.</div>';
+                return;
+            }
+
+            const anotacoes = (data || []).filter(registro => registro.anotacao?.trim());
+            lista.innerHTML = anotacoes.length ? anotacoes.map(registro => {
+                const modulo = modulosTurmas.find(item => item.id === Number(registro.modulo_id));
+                const status = registro.status === 'presente' ? 'Presente' : registro.status === 'falta' ? 'Falta' : 'Pendente';
+                return `<div class="anotacao-row">
+                    <div class="anotacao-meta"><strong>${escaparHtml(modulo?.nome || `Módulo ${registro.modulo_id}`)}</strong><span>${escaparHtml(registro.data)} · ${status}</span></div>
+                    <div class="anotacao-texto">${escaparHtml(registro.anotacao)}</div>
+                </div>`;
+            }).join('') : '<div class="empty-state">Nenhuma anotação registrada para este aluno.</div>';
+        }
+
+        function fecharModalAnotacoes() {
+            document.getElementById('modal-anotacoes').style.display = 'none';
+        }
+
+        function renderizarTabela(lista) {
+            const tbody = document.getElementById('tabela-alunos');
+            tbody.innerHTML = lista.map(aluno => {
+                const statusText = aluno.status || '';
+                const isApproved = statusText.toLowerCase() === 'aprovado';
+                const provaLiberada = !!aluno.prova_liberada;
+                const actionButton = isApproved
+                    ? `<button class="btn" style="background:rgba(239,68,68,.16); color:#fca5a5; font-weight:700; padding:8px 12px;" onclick="toggleApproval(this.closest(\'tr\').dataset.email)">Reprovar</button>`
+                    : `<button class="btn btn-primary" style="padding:8px 12px;" onclick="toggleApproval(this.closest(\'tr\').dataset.email)">Aprovar</button>`;
+                const provaButton = provaLiberada
+                    ? `<button class="btn" style="background:rgba(239,68,68,.16); color:#fca5a5; font-weight:700; padding:8px 12px;" onclick="toggleProva(this.closest(\'tr\').dataset.email)">Bloquear Prova</button>`
+                    : `<button class="btn btn-approve" style="padding:8px 12px;" onclick="toggleProva(this.closest(\'tr\').dataset.email)">Aprovar Prova</button>`;
+
+                return `
+                <tr data-email="${escaparHtml(aluno.email)}">
+                    <td><button class="btn-trash" onclick="deletarAluno(this.closest(\'tr\').dataset.email)"><i class="fas fa-trash-alt"></i></button></td>
+                    <td><b>${escaparHtml(aluno.email)}</b></td>
+                    <td><span class="status-badge status-${escaparHtml(aluno.status)}">${escaparHtml(statusText)}</span></td>
+                    <td>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            ${actionButton}
+                            ${provaButton}
+                            <button class="btn" style="padding:8px; background:rgba(224,176,74,.16); color:#e0b04a; font-weight:700;" onclick="enviarResetSenha(this.closest(\'tr\').dataset.email)"><i class="fas fa-key"></i> Resetar senha</button>
+                            <button class="btn" style="padding:8px; background:rgba(45,212,191,.16); color:#2dd4bf; font-weight:700;" onclick="abrirVerificacaoModulos(this.closest(\'tr\').dataset.email)">Verificar Módulos</button>
+                            <button class="btn" style="padding:8px; background:rgba(52,211,153,.16); color:#34d399; font-weight:700;" onclick="abrirAnotacoes(this.closest(\'tr\').dataset.email)"><i class="fas fa-sticky-note"></i> Consultar anotações</button>
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        let filtroStatus = 'todos';
+        function setFiltroStatus(status, el) {
+            filtroStatus = status;
+            document.querySelectorAll('.toolbar .chip').forEach(c => c.classList.toggle('on', c === el));
+            filtrarAlunos();
+        }
+        function filtrarAlunos() {
+            const termo = document.getElementById('input-pesquisa').value.trim().toLowerCase();
+            const lista = todosAlunos.filter(a => (a.email || '').toLowerCase().includes(termo)
+                && (filtroStatus === 'todos' || (a.status || '').toLowerCase() === filtroStatus));
+            renderizarTabela(lista);
+            document.getElementById('contagem-alunos').textContent = `${lista.length} de ${todosAlunos.length} alunos`;
+        }
+        function irParaPendentes() {
+            exibirTela('visao-alunos', document.getElementById('menu-alunos'));
+            carregarAlunos().then(() => setFiltroStatus('pendente', document.querySelectorAll('.toolbar .chip')[1]));
+        }
+        async function aprovarPendentes() {
+            const n = todosAlunos.filter(a => (a.status || '').toLowerCase() === 'pendente').length;
+            if (!n) { alert('Nenhum aluno pendente.'); return; }
+            if (!confirm(`Aprovar ${n} aluno(s) pendente(s) de uma vez?`)) return;
+            const { error } = await _supabase.from('perfil_alunos').update({ status: 'aprovado' }).eq('status', 'pendente');
+            if (error) { alert('Erro ao aprovar: ' + error.message); return; }
+            await carregarAlunos(); carregarMetricas();
+        }
+        function exportarCSV() {
+            const esc = v => { v = String(v ?? ''); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+            const linhas = [['email', 'status', 'modulo', 'prova_liberada'],
+                ...todosAlunos.map(a => [a.email, a.status, a.modulo, a.prova_liberada ? 'sim' : 'nao'])];
+            const blob = new Blob(['\ufeff' + linhas.map(l => l.map(esc).join(';')).join('\n')], { type: 'text/csv;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob); link.download = 'alunos-telecurso.csv'; link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        async function carregarMetricas() {
+            const n = (tabela, f) => { const q = _supabase.from(tabela).select('*', { count: 'exact', head: true }); return f ? f(q) : q; };
+            const r = await Promise.all([
+                n('perfil_alunos'),
+                n('perfil_alunos', q => q.eq('status', 'pendente')),
+                n('perfil_alunos', q => q.eq('status', 'aprovado')),
+                n('progresso_alunos', q => q.eq('modulo_id', 100).gte('nota', 70)),
+                n('certificados'),
+                n('chat_suporte', q => q.neq('status', 'concluido'))
+            ]);
+            ['total', 'pend', 'apr', 'prova', 'cert', 'tick'].forEach((id, i) => {
+                document.getElementById('m-' + id).textContent = r[i].error ? '!' : (r[i].count ?? 0);
+            });
+        }
+
+        let listaCertificados = [];
+        async function carregarCertificados() {
+            const { data, error } = await _supabase.from('certificados').select('codigo,nome,cpf,emitido_em').order('emitido_em', { ascending: false });
+            if (error) { alert('Não foi possível carregar os certificados: ' + error.message); return; }
+            listaCertificados = data || []; renderizarCertificados();
+        }
+        function renderizarCertificados() {
+            const t = document.getElementById('busca-cert').value.trim().toLowerCase();
+            const lista = listaCertificados.filter(c => c.nome.toLowerCase().includes(t) || c.codigo.toLowerCase().includes(t));
+            document.getElementById('tabela-certificados').innerHTML = lista.length ? lista.map(c => `
+                <tr data-codigo="${escaparHtml(c.codigo)}">
+                    <td><b>${escaparHtml(c.codigo)}</b></td><td>${escaparHtml(c.nome)}</td><td>${escaparHtml(c.cpf)}</td>
+                    <td>${new Date(c.emitido_em).toLocaleDateString('pt-BR')}</td>
+                    <td><button class="btn" style="background:rgba(239,68,68,.16);color:#fca5a5;font-weight:700" onclick="revogarCertificado(this.closest('tr').dataset.codigo)">Revogar</button></td>
+                </tr>`).join('') : '<tr><td colspan="5" style="color:var(--text-muted)">Nenhum certificado encontrado.</td></tr>';
+        }
+        async function revogarCertificado(codigo) {
+            if (!confirm(`Revogar o certificado ${codigo}? A validação por QR Code deixará de funcionar.`)) return;
+            const { error } = await _supabase.from('certificados').delete().eq('codigo', codigo);
+            if (error) { alert('Erro ao revogar: ' + error.message); return; }
+            carregarCertificados(); carregarMetricas();
+        }
+
+        async function deletarAluno(email) {
+            if (confirm(`Excluir permanentemente ${email}?`)) {
+                await _supabase.from('perfil_alunos').delete().eq('email', email);
+                carregarAlunos();
+            }
+        }
+
+        async function atualizarStatusAluno(email, status) {
+            if(!status) return;
+            await _supabase.from('perfil_alunos').update({ status }).eq('email', email);
+            carregarAlunos();
+        }
+
+        async function toggleApproval(email) {
+            try {
+                const aluno = todosAlunos.find(a => a.email === email) || {};
+                const atual = (aluno.status || '').toLowerCase();
+                const novo = (atual === 'aprovado') ? 'bloqueado' : 'aprovado';
+                const { error } = await _supabase.from('perfil_alunos').update({ status: novo }).eq('email', email);
+                if (error) throw error;
+                carregarAlunos();
+            } catch (err) {
+                console.error('toggleApproval error', err);
+                alert('Erro ao alterar aprovação: ' + (err.message || err));
+            }
+        }
+
+        async function enviarResetSenha(email) {
+            if (!confirm(`Enviar um link de redefinição de senha para ${email}?`)) return;
+
+            try {
+                const redirectTo = new URL('reset-senha.html', window.location.href).href;
+                const { error } = await _supabase.auth.resetPasswordForEmail(email, { redirectTo });
+                if (error) throw error;
+                alert(`Link de redefinição enviado para ${email}.`);
+            } catch (err) {
+                console.error('enviarResetSenha error', err);
+                alert('Erro ao enviar o link de redefinição: ' + (err.message || err));
+            }
+        }
+
+        async function alterarModulo(email, delta) {
+            try {
+                const aluno = todosAlunos.find(a => a.email === email) || {};
+                const atual = parseInt(aluno.modulo) || 0;
+                const novo = Math.max(0, atual + delta);
+                const { error } = await _supabase.from('perfil_alunos').update({ modulo: novo }).eq('email', email);
+                if (error) throw error;
+                carregarAlunos();
+            } catch (err) {
+                console.error('alterarModulo error', err);
+                alert('Erro ao alterar módulo: ' + (err.message || err));
+            }
+        }
+
+        async function toggleProva(email) {
+            try {
+                const aluno = todosAlunos.find(a => a.email === email) || {};
+                const userId = await fetchUserId(email);
+                if (!userId) throw new Error('Usuário não encontrado.');
+
+                const notaAtual = await _supabase
+                    .from('progresso_alunos')
+                    .select('nota')
+                    .eq('user_id', userId)
+                    .eq('modulo_id', 100)
+                    .maybeSingle();
+                if (notaAtual.error) throw notaAtual.error;
+
+                const novoAprovado = !(Number(notaAtual.data?.nota) >= 70);
+                const nota = novoAprovado ? 100 : 0;
+                const { error: erroProva } = await _supabase.from('progresso_alunos').upsert({
+                    user_id: userId,
+                    email,
+                    modulo_id: 100,
+                    concluido: true,
+                    nota,
+                    data_conclusao: new Date().toISOString()
+                }, { onConflict: 'user_id,modulo_id' });
+                if (erroProva) throw erroProva;
+
+                const { error: erroPerfil } = await _supabase
+                    .from('perfil_alunos')
+                    .update({ prova_liberada: novoAprovado })
+                    .eq('email', email);
+                if (erroPerfil) throw erroPerfil;
+
+                carregarAlunos();
+            } catch (err) {
+                console.error('toggleProva error', err);
+                alert('Erro ao atualizar nota da prova: ' + (err.message || err));
+            }
+        }
+
+        // --- VERIFICAÇÃO DE MÓDULOS E LIBERAÇÃO AUTOMÁTICA DA PROVA ---
+        const TOTAL_MODULOS = 15; // ajuste conforme número real de módulos (aula0..aula14)
+        let modalEstado = { email: null, checks: {} };
+
+        function abrirVerificacaoModulos(email) {
+            modalEstado.email = email;
+            document.getElementById('modal-email-label').innerText = email;
+            document.getElementById('modal-modulos').style.display = 'flex';
+            renderizarChecks(email);
+        }
+
+        async function fetchUserId(email) {
+            try {
+                const { data, error } = await _supabase.from('perfil_alunos').select('user_id').eq('email', email).maybeSingle();
+                if (error) {
+                    console.error('fetchUserId error', error);
+                }
+                if (data && data.user_id) return data.user_id;
+
+                // Fallback: procurar em progresso_alunos por último registro com esse email
+                const { data: pData, error: pErr } = await _supabase.from('progresso_alunos').select('user_id').eq('email', email).order('data_conclusao', { ascending: false }).limit(1).maybeSingle();
+                if (pErr) {
+                    console.error('fetchUserId fallback error', pErr);
+                }
+                if (pData && pData.user_id) return pData.user_id;
+
+                return null;
+            } catch (e) {
+                console.error('fetchUserId exception', e);
+                return null;
+            }
+        }
+
+        function fecharModalModulos() {
+            document.getElementById('modal-modulos').style.display = 'none';
+            modalEstado = { email: null, checks: {} };
+        }
+
+        async function renderizarChecks(email) {
+            const container = document.getElementById('lista-modulos');
+            container.innerHTML = '<div style="color:var(--text-muted);">Carregando...</div>';
+            try {
+                const userId = await fetchUserId(email);
+                if (!userId) {
+                    container.innerHTML = '<div style="color:var(--danger);">Usuário não encontrado (user_id)</div>';
+                    return;
+                }
+                const { data } = await _supabase.from('progresso_alunos').select('*').eq('user_id', userId).order('data_conclusao', { ascending: false });
+                // Construir mapa do último status por módulo (primeiro encontrado é o mais recente)
+                const latest = {};
+                (data || []).forEach(r => {
+                    const m = Number(r.modulo_id);
+                    if (latest[m] === undefined) latest[m] = !!r.concluido;
+                });
+                modalEstado.checks = {};
+                const nodes = [];
+                for (let i = 0; i < TOTAL_MODULOS; i++) {
+                    const checked = !!latest[i];
+                    modalEstado.checks[i] = checked;
+                    nodes.push(`
+                        <div class="module-row">
+                            <input type="checkbox" class="module-checkbox" id="mod_chk_${i}" ${checked ? 'checked' : ''} onchange="toggleModuleImmediate('${email}', ${i}, this.checked)">
+                            <label for="mod_chk_${i}" class="module-label">
+                                <span>Módulo ${i}</span>
+                                <span style="font-size:12px; color:${checked ? '#34d399' : 'var(--text-muted)'}; font-weight:800;">${checked ? 'APROVADO' : 'PENDENTE'}</span>
+                            </label>
+                        </div>
+                    `);
+                }
+                container.innerHTML = nodes.join('');
+            } catch (err) {
+                console.error('Erro ao carregar progresso:', err);
+                container.innerHTML = '<div style="color:var(--danger);">Erro ao carregar progresso</div>';
+            }
+        }
+
+        // Atualiza imediatamente ao marcar/desmarcar
+        async function toggleModuleImmediate(email, moduloId, checked) {
+            try {
+                // Sempre inserir nova linha para manter histórico, conforme solicitado
+                const userId = await fetchUserId(email);
+                if (!userId) {
+                    alert('Usuário não encontrado (não foi possível obter user_id)');
+                    return;
+                }
+
+                if (checked) {
+                    // inserir ou atualizar (upsert) o registro para evitar violação de unique constraint
+                    const payload = {
+                        user_id: userId,
+                        email,
+                        modulo_id: moduloId,
+                        concluido: true,
+                        data_conclusao: new Date().toISOString()
+                    };
+                    const res = await _supabase.from('progresso_alunos').upsert([payload], { onConflict: 'user_id,modulo_id' }).select();
+                    console.log('upsert progresso_alunos result', res);
+                    if (res.error) {
+                        console.error('Supabase upsert error', res.error);
+                        alert('Erro ao inserir/atualizar progresso: ' + res.error.message);
+                        return;
+                    }
+                    modalEstado.checks[moduloId] = true;
+                } else {
+                    // ao desmarcar, remover a linha existente (não inserir nova)
+                    const res = await _supabase.from('progresso_alunos').delete().eq('user_id', userId).eq('modulo_id', moduloId).select();
+                    console.log('delete progresso_alunos result', res);
+                    if (res.error) {
+                        console.error('Supabase delete error', res.error);
+                        alert('Erro ao deletar progresso: ' + res.error.message);
+                        return;
+                    }
+                    modalEstado.checks[moduloId] = false;
+                }
+
+                await verificarLiberacaoProva(email);
+            } catch (err) {
+                console.error('toggleModuleImmediate error', err);
+                alert('Erro ao atualizar módulo: ' + (err.message || err));
+            }
+        }
+
+        async function salvarModulosModal() {
+            // Já salvamos a cada alteração, mas aproveitamos para recarregar a tabela e fechar
+            if (!modalEstado.email) return fecharModalModulos();
+            await verificarLiberacaoProva(modalEstado.email);
+            carregarAlunos();
+            fecharModalModulos();
+        }
+
+        async function verificarLiberacaoProva(email) {
+            try {
+                const userId = await fetchUserId(email);
+                if (!userId) {
+                    console.warn('verificarLiberacaoProva: user_id não encontrado');
+                    return;
+                }
+                const { data } = await _supabase.from('progresso_alunos').select('*').eq('user_id', userId).order('data_conclusao', { ascending: false });
+                // pegar o último estado por módulo (primeiro encontrado na listagem ordenada)
+                const latest = {};
+                (data || []).forEach(r => {
+                    const m = Number(r.modulo_id);
+                    if (latest[m] === undefined) latest[m] = !!r.concluido;
+                });
+                const liberado = Array.from({ length: TOTAL_MODULOS }, (_, moduloId) => latest[moduloId] === true).every(Boolean);
+                const { error } = await _supabase.from('perfil_alunos').update({ prova_liberada: liberado }).eq('user_id', userId);
+                if (error) console.warn('Não foi possível atualizar prova_liberada:', error);
+                carregarAlunos();
+            } catch (err) {
+                console.error('verificarLiberacaoProva error', err);
+            }
+        }
+
+        // --- CHAT ---
+        let ticketToEmail = {};
+        let emailToTicket = {};
+        let ticketStatusMap = {}; // status por ticket
+
+        function gerarTicketPorEmail(email) {
+            const base = [...email].reduce((acc, c) => acc + c.charCodeAt(0), 0);
+            const num = 10 + (base % 890);
+            return `TICKET-${String(num).padStart(4, '0')}`;
+        }
+
+        async function carregarContatos() {
+            let { data, error } = await _supabase.from('chat_suporte').select('aluno_email,ticket,status,conversation,lida').order('updated_at', { ascending: false });
+            if (error) {
+                // Se tabela antiga não tem conversation/status, mantemos compatibilidade
+                console.warn('carregarContatos: sem campo conversation/status, fallback antigo', error);
+                const response = await _supabase.from('chat_suporte').select('aluno_email,ticket,remetente,lida').order('created_at', { ascending: false });
+                data = response.data || [];
+            }
+
+            const unicos = [...new Set(data?.map(m => m.aluno_email))].sort();
+            const lista = document.getElementById('lista-contatos');
+
+            ticketToEmail = {};
+            emailToTicket = {};
+
+            unicos.forEach((email, index) => {
+                const existente = data.find(m => m.aluno_email === email && m.ticket);
+                const ticket = existente?.ticket || gerarTicketPorEmail(email);
+                ticketToEmail[ticket] = email;
+                emailToTicket[email] = ticket;
+                ticketStatusMap[ticket] = existente?.status || ticketStatusMap[ticket] || 'aguardando';
+            });
+
+            lista.innerHTML = unicos.map(email => {
+                const ticket = emailToTicket[email];
+                const activeClass = alunoSelecionado === email ? 'active' : '';
+
+                const ticketRow = data.find(m => (m.ticket || gerarTicketPorEmail(m.aluno_email)) === ticket);
+                const unreadCount = ticketRow
+                    ? ((ticketRow.conversation || []).filter(msg => msg.remetente === 'aluno' && !msg.lida).length || 0)
+                    : 0;
+
+                const badge = unreadCount > 0
+                    ? `<span style="background:#ef4444; color:white; border-radius:999px; padding:2px 7px; font-size:11px;">${unreadCount}</span>`
+                    : '';
+
+                const status = ticketStatusMap[ticket] || 'aguardando';
+
+                return `
+                    <div class="nav-item ${activeClass}" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                        <div style="display:flex; align-items:center; gap:8px; flex-grow:1;">
+                            <span style="cursor:pointer;" onclick="abrirChat('${ticket}')"><i class="fas fa-comment"></i> ${ticket} ${badge}</span>
+                            <span class="status-ticket ${status}">${status.replace(/-/g,' ')}</span>
+                        </div>
+                        <div style="display:flex; gap:5px; align-items:center;">
+                            <select onchange="atualizarStatusTicket('${ticket}', this.value)" style="padding:4px; font-size:11px;">
+                                <option value="">Status</option>
+                                <option value="aguardando">Aguardando</option>
+                                <option value="em-atendimento">Em Atendimento</option>
+                                <option value="concluido">Concluído</option>
+                                <option value="nao-atendido">Não Atendido</option>
+                            </select>
+                            <button class="btn-trash" onclick="deletarChat('${ticket}', event)"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function marcarMensagensLidasAdmin(ticket) {
+            const { data: existing } = await _supabase.from('chat_suporte').select('*').eq('ticket', ticket).single();
+            if (!existing) return;
+            if (existing.conversation) {
+                const nova = existing.conversation.map(msg => msg.remetente === 'aluno' ? { ...msg, lida: true } : msg);
+                await _supabase.from('chat_suporte').update({ conversation: nova, lida: true }).eq('ticket', ticket);
+            } else {
+                // modelo antigo: não precisa alteração (não lido não preserva em agro)
+                await _supabase.from('chat_suporte').update({ lida: true }).eq('ticket', ticket);
+            }
+        }
+
+        function abrirChat(ticket) {
+            const email = ticketToEmail[ticket];
+            if (!email) return;
+            alunoSelecionado = email;
+            document.getElementById('visao-chat').dataset.ticket = ticket;
+            exibirTela('visao-chat', null);
+            marcarMensagensLidasAdmin(ticket).then(() => {
+                carregarMensagens();
+                carregarContatos();
+            });
+        }
+
+        async function carregarMensagens() {
+            if (!alunoSelecionado) return;
+            const ticket = document.getElementById('visao-chat').dataset.ticket || emailToTicket[alunoSelecionado] || '----';
+            document.getElementById('chat-ticket-label').innerText = `Chat ${ticket}`;
+
+            const { data: ticketRow } = await _supabase.from('chat_suporte').select('*').eq('ticket', ticket).single();
+            let conversation = [];
+            if (ticketRow && ticketRow.conversation) {
+                conversation = ticketRow.conversation;
+            } else {
+                // fallback para modelo antigo: várias linhas por mensagem
+                const { data } = await _supabase.from('chat_suporte').select('*').eq('ticket', ticket).order('created_at', { ascending: true });
+                conversation = data;
+            }
+
+            const box = document.getElementById('box-mensagens');
+            box.innerHTML = conversation.map(m => `<div class="bubble ${m.remetente === 'aluno' ? 'aluno' : 'admin'}">${m.mensagem}</div>`).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function atualizarStatusTicket(ticket, status) {
+            if (!ticket || !status) return;
+            ticketStatusMap[ticket] = status;
+            const { error } = await _supabase.from('chat_suporte').update({ status }).eq('ticket', ticket);
+            if (error) {
+                console.warn('Não foi possível atualizar status no banco (talvez coluna não exista):', error);
+            }
+            carregarContatos();
+        }
+
+        async function deletarChat(ticket, event) {
+            event.stopPropagation();
+            const email = ticketToEmail[ticket];
+            if (!email) return;
+            if (!confirm(`Excluir todo histórico de ${ticket}?`)) return;
+            await _supabase.from('chat_suporte').delete().eq('ticket', ticket);
+            if (document.getElementById('visao-chat').dataset.ticket === ticket) {
+                exibirTela('visao-geral', document.getElementById('menu-geral'));
+            }
+            carregarContatos();
+        }
+
+        async function enviarMensagem() {
+            const input = document.getElementById('input-msg');
+            if (!input.value.trim()) return;
+            const ticket = document.getElementById('visao-chat').dataset.ticket || emailToTicket[alunoSelecionado];
+
+            const { data: existing } = await _supabase.from('chat_suporte').select('*').eq('ticket', ticket).single();
+            const mensagemObj = { remetente: 'instrutor', mensagem: input.value, created_at: new Date().toISOString(), lida: false };
+
+            if (existing && existing.conversation) {
+                const novaConversa = [...existing.conversation, mensagemObj];
+                await _supabase.from('chat_suporte').update({ conversation: novaConversa, lida: false }).eq('ticket', ticket);
+            } else if (existing) {
+                await _supabase.from('chat_suporte').upsert({ ticket, aluno_email: alunoSelecionado, status: ticketStatusMap[ticket] || 'em-atendimento', conversation: [mensagemObj], lida: false });
+            } else {
+                await _supabase.from('chat_suporte').insert([{ ticket, aluno_email: alunoSelecionado, status: 'em-atendimento', conversation: [mensagemObj], lida: false }]);
+            }
+
+            input.value = "";
+            carregarMensagens();
+            carregarContatos();
+        }
+
+        function iniciarRealtimeAdmin() {
+            try {
+                _supabase.channel('realtime-chat-admin')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_suporte' }, payload => {
+                        carregarContatos();
+                        const ticketAtual = document.getElementById('visao-chat').dataset.ticket;
+                        if (ticketAtual) {
+                            const novo = payload.new;
+                            if (novo.ticket === ticketAtual || novo.aluno_email === alunoSelecionado) {
+                                carregarMensagens();
+                            }
+                        }
+                    })
+                    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_suporte' }, payload => {
+                        carregarContatos();
+                        const ticketAtual = document.getElementById('visao-chat').dataset.ticket;
+                        if (ticketAtual) carregarMensagens();
+                    })
+                    .subscribe();
+            } catch (e) {
+                console.warn('Realtime Admin não disponível:', e);
+            }
+        }
+
+        // INIT
+        let emailAdminLogado = '';
+        async function carregarAdmins() {
+            const { data, error } = await _supabase.from('adm_mail').select('email,criado_em').order('criado_em');
+            if (error) { alert('Não foi possível carregar os administradores: ' + error.message); return; }
+            document.getElementById('tabela-admins').innerHTML = (data || []).map(a => {
+                const eu = a.email === emailAdminLogado;
+                return `<tr data-email="${escaparHtml(a.email)}">
+                    <td><b>${escaparHtml(a.email)}</b>${eu ? ' <span class="status-badge status-aprovado">você</span>' : ''}</td>
+                    <td>${new Date(a.criado_em).toLocaleDateString('pt-BR')}</td>
+                    <td>${eu ? '' : `<button class="btn" style="background:rgba(239,68,68,.16);color:#fca5a5;font-weight:700" onclick="removerAdmin(this.closest('tr').dataset.email)">Remover</button>`}</td>
+                </tr>`;
+            }).join('');
+        }
+        async function adicionarAdmin() {
+            const campo = document.getElementById('novo-adm');
+            const email = campo.value.trim().toLowerCase();
+            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('Digite um e-mail válido.'); return; }
+            const { error } = await _supabase.from('adm_mail').insert([{ email, criado_por: emailAdminLogado }]);
+            if (error) { alert(error.code === '23505' ? 'Este e-mail já é administrador.' : 'Erro ao adicionar: ' + error.message); return; }
+            campo.value = ''; carregarAdmins();
+        }
+        async function removerAdmin(email) {
+            if (!confirm(`Remover o acesso de administrador de ${email}?`)) return;
+            const { error } = await _supabase.from('adm_mail').delete().eq('email', email);
+            if (error) { alert('Erro ao remover: ' + error.message); return; }
+            carregarAdmins();
+        }
+
+        let painelIniciado = false;
+        function iniciarPainel() {
+            if (painelIniciado) return; painelIniciado = true;
+            carregarConfiguracoes(); carregarContatos(); carregarMetricas();
+            iniciarRealtimeAdmin(); iniciarRealtimeConfiguracoes();
+            setInterval(() => {
+                if (document.hidden) return;
+                if (alunoSelecionado) carregarMensagens();
+                carregarContatos();
+            }, 15000);
+        }
+        async function verificarAdmin() {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (!session) return;
+            emailAdminLogado = (session.user.email || '').toLowerCase();
+            const { data: ok } = await _supabase.rpc('is_admin');
+            if (ok === true) { document.getElementById('gate').style.display = 'none'; iniciarPainel(); return; }
+            await _supabase.auth.signOut();
+            document.getElementById('gate-msg').textContent = 'Esta conta não tem permissão de administrador.';
+        }
+        async function entrarAdmin() {
+            const btn = document.getElementById('gate-btn'), msg = document.getElementById('gate-msg');
+            btn.disabled = true; msg.textContent = '';
+            const { error } = await _supabase.auth.signInWithPassword({
+                email: document.getElementById('gate-email').value.trim(), password: document.getElementById('gate-senha').value });
+            btn.disabled = false;
+            if (error) { msg.textContent = 'E-mail ou senha incorretos.'; return; }
+            verificarAdmin();
+        }
+        async function sairAdmin() { await _supabase.auth.signOut(); location.reload(); }
+        document.getElementById('gate-senha').addEventListener('keydown', e => { if (e.key === 'Enter') entrarAdmin(); });
+        verificarAdmin();
+
+        async function iniciarRealtimeConfiguracoes() {
+            try {
+                _supabase
+                    .channel('realtime-config-admin')
+                    .on('postgres_changes', {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'configuracoes'
+                    }, (payload) => {
+                        console.log('Configuração atualizada:', payload);
+                    })
+                    .subscribe();
+            } catch (error) {
+                console.warn('Realtime configurações não disponível:', error);
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulos | Telecurso Montagem de PC</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="layout.css">
+<style>
+:root{--azul-escuro:var(--text-primary);--azul-claro:var(--hw-cyan);--verde:var(--hw-green);--vermelho:var(--hw-danger)}
+.continuar{display:flex;align-items:center;gap:16px;padding:20px 24px;margin-bottom:32px;border-radius:var(--radius-md);background:var(--hw-copper);color:#000;text-decoration:none;font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;transition:var(--transition)}
+.continuar small{display:block;font:500 .78rem 'JetBrains Mono',monospace;opacity:.8}
+.continuar:hover{background:#ff8c38;box-shadow:0 0 18px rgba(255,122,26,.4)}
+.continuar i{font-size:1.6rem}.continuar .seta{margin-left:auto}
+.trilha{margin-bottom:44px}
+.trilha-topo{display:flex;align-items:baseline;gap:14px;margin-bottom:16px;border-bottom:1px solid var(--border-tech);padding-bottom:8px}
+.trilha-topo h2{margin:0;font-family:'Rajdhani',sans-serif;font-size:1.5rem;color:var(--text-primary)}
+.trilha-topo span{font:500 .8rem 'JetBrains Mono',monospace;color:var(--text-muted)}
+.trilha-topo.ok span{color:var(--hw-green)}
+.grid-modulos{margin-bottom:0}
+a.card-modulo{text-decoration:none;color:inherit}
+.card-modulo:focus-visible,.continuar:focus-visible,.btn-ajuda:focus-visible{outline:2px solid var(--hw-cyan);outline-offset:3px}
+.painel-suporte{max-width:calc(100vw - 48px)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+
+<style id="visual-v2">
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&display=swap');
+:root{
+  --bg-main:#07142b;--hw-carbon:#081a36;--surface-card:#0d2142;--surface-hover:#12295a;--hw-pcb:#0d2142;
+  --border-tech:#1f3b66;--border-highlight:#2e528a;
+  --text-primary:#f1f6fd;--text-secondary:#c3d3ea;--text-muted:#92a9ca;
+  --hw-copper:#e0b04a;--hw-gold:#e0b04a;--hw-cyan:#2dd4bf;--hw-green:#34d399;
+}
+body{background:var(--bg-main)!important;background-image:none!important}
+.container{max-width:980px}
+h1,h2,h3,header strong,.continuar,.trilha-topo h2,.card-corpo h3,.info-aluno h2{font-family:'Sora',sans-serif;letter-spacing:0}
+
+/* Cabeçalho com o selo */
+header{display:flex;align-items:center;justify-content:flex-start;gap:14px;text-align:left;padding:12px 24px;background:rgba(7,20,43,.9);border-bottom:1px solid var(--border-tech);box-shadow:none}
+header .selo{width:44px;height:44px;object-fit:contain}
+header strong{display:block;font-size:1.15rem;color:var(--text-primary);line-height:1.1}
+header span{display:block;font-size:.78rem;color:var(--text-muted)}
+
+/* Painel do aluno */
+.painel-topo{overflow:hidden;background:var(--surface-card);border-color:var(--border-highlight)}
+.painel-topo::before{background:linear-gradient(90deg,var(--hw-cyan),var(--hw-gold))}
+.painel-topo::after{content:'';position:absolute;right:-24px;top:50%;width:190px;height:190px;transform:translateY(-50%);background:url(favicon.png) center/contain no-repeat;opacity:.09;pointer-events:none}
+.barra-fundo{height:10px;background:var(--hw-carbon);border-color:var(--border-tech)}
+.barra-preenchimento{background:linear-gradient(90deg,var(--hw-cyan),var(--hw-gold));box-shadow:none}
+.btn-acao{font-family:'Inter',sans-serif;text-transform:none;letter-spacing:0;font-size:.9rem}
+.btn-certificado.liberado{background:var(--hw-gold);box-shadow:none}
+
+/* Botão continuar */
+.continuar{background:var(--hw-gold);color:#07142b;border-radius:12px;font-size:1.15rem}
+.continuar:hover{background:#ecc063;box-shadow:0 6px 24px rgba(224,176,74,.25)}
+.continuar small{font-family:'Inter',sans-serif;font-weight:500}
+
+/* Trilhas como trilha de circuito */
+.trilha-topo{border-bottom:0;padding-bottom:0}
+.trilha-topo h2{font-size:1.25rem}
+.trilha-topo span{font-family:'Inter',sans-serif}
+#area-modulos .trilha .grid-modulos{display:flex;flex-direction:column;gap:12px;margin-left:12px;padding-left:34px;border-left:2px solid var(--border-highlight)}
+#area-modulos .card-modulo{position:relative;border-radius:12px;background:var(--surface-card)}
+#area-modulos .card-modulo::before{content:'';position:absolute;left:-44px;top:50%;width:14px;height:14px;transform:translateY(-50%);border-radius:50%;background:var(--bg-main);border:2px solid var(--border-highlight)}
+#area-modulos .card-modulo::after{content:'';position:absolute;left:-30px;top:50%;width:30px;height:2px;background:var(--border-highlight)}
+#area-modulos .card-modulo.concluido::before{background:var(--hw-cyan);border-color:var(--hw-cyan)}
+#area-modulos .card-modulo.concluido::after{background:var(--hw-cyan)}
+#area-modulos .card-modulo.atual{border-color:var(--hw-gold)}
+#area-modulos .card-modulo.atual::before{background:var(--hw-gold);border-color:var(--hw-gold);box-shadow:0 0 0 6px rgba(224,176,74,.2)}
+#area-modulos .card-modulo.atual::after{background:var(--hw-gold)}
+#area-modulos .card-modulo:not(.bloqueado):hover{transform:none;border-color:var(--hw-cyan);background:var(--surface-hover);box-shadow:none}
+#area-modulos .card-modulo.bloqueado{opacity:.5;filter:none}
+#area-modulos .card-modulo .card-banner{background:none;border:0;text-align:left;padding:14px 22px 0;font:500 .78rem 'JetBrains Mono',monospace;letter-spacing:0;text-transform:none;color:var(--text-muted)}
+#area-modulos .card-modulo.concluido .card-banner{color:var(--hw-cyan)}
+#area-modulos .card-modulo.ao-vivo .card-banner{color:#fca5a5}
+#area-modulos .card-modulo.ao-vivo{animation:none;border-color:rgba(239,68,68,.6)}
+#area-modulos .card-modulo.ferramenta-card{border:1px solid var(--border-tech)}
+#area-modulos .card-modulo.ferramenta-card .card-banner{color:var(--hw-cyan)}
+#area-modulos .card-corpo{padding:6px 22px 18px}
+#area-modulos .card-corpo h3{font-size:1.1rem;margin-bottom:6px}
+#area-modulos .card-corpo p{margin-bottom:12px}
+#area-modulos .status-aula{font-family:'Inter',sans-serif;font-weight:600;font-size:.82rem;color:var(--hw-gold)}
+#area-modulos .card-modulo.concluido .status-aula{color:var(--hw-cyan)}
+#area-modulos .card-modulo.bloqueado .status-aula{color:var(--text-muted)}
+
+/* Atalhos: grade simples, sem trilha */
+#area-modulos .trilha:first-child .grid-modulos{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin:0;padding:0;border:0}
+#area-modulos .trilha:first-child .card-modulo::before,#area-modulos .trilha:first-child .card-modulo::after{display:none}
+
+/* Suporte */
+.btn-ajuda{box-shadow:0 4px 18px rgba(224,176,74,.3)}
+.header-suporte{font-family:'Sora',sans-serif}
+.btn-chamada-topo{margin-left:auto;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:0;border-radius:var(--radius-md);background:var(--hw-copper);color:#000;font-family:'Sora',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:var(--transition)}
+.btn-chamada-topo:hover{filter:brightness(1.1)}
+.modal-chamada{display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:16px}
+.chamada-box{width:100%;max-width:420px;background:#0b1d3d;border:1px solid var(--border-tech);border-radius:14px;padding:20px;text-align:center;color:var(--text-primary)}
+.chamada-box h3{margin-bottom:8px;font-size:1.1rem}
+#chamada-msg{margin:0 0 14px;font-size:.92rem;color:var(--text-muted);min-height:20px}
+#chamada-msg.ok{color:#34d399;font-weight:700}
+#chamada-msg.erro{color:#f87171;font-weight:700}
+.chamada-video{position:relative;aspect-ratio:1/1;background:#000;border-radius:12px;overflow:hidden;margin-bottom:14px}
+.chamada-video video{width:100%;height:100%;object-fit:cover}
+.chamada-video::after{content:'';position:absolute;inset:18%;border:3px solid rgba(224,176,74,.9);border-radius:14px;pointer-events:none}
+@media (max-width:600px){
+  .btn-chamada-topo{padding:7px 10px;font-size:.78rem}
+}
+@media (max-width:600px){
+  #area-modulos .trilha .grid-modulos{padding-left:26px;margin-left:8px}
+  #area-modulos .card-modulo::before{left:-36px}
+  #area-modulos .card-modulo::after{left:-22px;width:22px}
+  header{padding:10px 16px}
+}
+</style>
+</head>
+<body>
+
+<header>
+    <img class="selo" src="favicon.png" alt="">
+    <div><strong>Telecurso</strong><span>Montagem e Manutenção de Computadores</span></div>
+    <button type="button" class="btn-chamada-topo" onclick="abrirScannerChamada()" aria-label="Fazer chamada lendo o QR Code"><i class="fas fa-qrcode"></i> Chamada</button>
+</header>
+
+<div id="modal-chamada" class="modal-chamada" role="dialog" aria-modal="true" aria-labelledby="titulo-chamada">
+    <div class="chamada-box">
+        <h3 id="titulo-chamada"><i class="fas fa-qrcode"></i> Chamada</h3>
+        <p id="chamada-msg">Aponte a câmera para o QR Code exibido pelo professor.</p>
+        <div class="chamada-video" id="chamada-video-box"><video id="chamada-video" playsinline muted></video></div>
+        <canvas id="chamada-canvas" hidden></canvas>
+        <button type="button" class="btn-acao" onclick="fecharScannerChamada()">Fechar</button>
+    </div>
+</div>
+
+<div class="container">
+    
+    <div id="alerta-professor">
+        <i class="fas fa-bullhorn" style="font-size: 24px;"></i>
+        <span id="texto-alerta">Carregando avisos importantes...</span>
+        <button onclick="this.parentElement.style.display='none'" style="margin-left: auto; background: none; border: none; cursor: pointer; color: var(--azul-escuro); font-size: 18px;">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div class="painel-topo">
+        <div class="info-aluno">
+            <h2 id="nome-aluno"><i class="fas fa-user-circle"></i> Aluno</h2>
+            <button class="btn-acao btn-sair" onclick="sair()">Sair da Sala</button>
+        </div>
+
+        <div class="progresso-sessao">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <strong style="color: var(--azul-escuro)">Seu Progresso</strong>
+                    <span id="status-prova-topo" style="display:block; font-size: 0.9rem; font-weight: bold; margin-top: 5px;"></span>
+                </div>
+                <span id="txt-porcentagem" style="color: var(--verde); font-weight: bold; font-size: 1.2rem;">0%</span>
+            </div>
+            <div class="barra-fundo">
+                <div id="barra-progresso" class="barra-preenchimento"></div>
+            </div>
+            <small style="color: var(--text-muted);"><i class="fas fa-info-circle"></i> Conclua as aulas e atinja 70 pontos na prova para o diploma.</small>
+        </div>
+
+        <div>
+            <button id="btn-certificado" class="btn-acao btn-certificado" disabled>
+                <i class="fas fa-certificate"></i> Certificado bloqueado
+            </button>
+            
+        </div>
+    </div>
+
+    <a id="continuar" class="continuar" hidden></a>
+    <div id="area-modulos"></div>
+</div>
+
+<!-- WIDGET SUPORTE FLUTUANTE -->
+<div id="suporte-flutuante">
+    <div id="painel-duvida" class="painel-suporte">
+        <div class="header-suporte">
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <span><i class="fas fa-comment-dots"></i> Suporte ao Aluno</span>
+                <div style="display:flex; align-items:center; gap:10px; font-size:12px; color:#f1f5f9;">
+                    <span style="background: rgba(255,255,255,0.15); padding: 3px 8px; border-radius: 6px;" id="ticket-info">Ticket: -</span>
+                    <span id="ticket-status" style="background: rgba(255,255,255,0.15); padding: 3px 8px; border-radius: 6px;">Status: aguardando</span>
+                </div>
+            </div>
+            <i class="fas fa-times" onclick="toggleDuvida()" style="cursor:pointer;"></i>
+        </div>
+        <div class="corpo-suporte">
+            <div id="chat-box-aluno" style="height:200px; overflow-y:auto; margin-bottom:10px; border-bottom:1px solid var(--border-tech);"></div>
+            <textarea id="txt-pergunta" class="input-suporte" rows="3" placeholder="Digite sua mensagem..." style="resize: none;"></textarea>
+            <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                <button id="btn-enviar-duvida" onclick="enviarDuvidaParaSupabase()" class="btn-enviar">ENVIAR</button>
+                <button id="btn-excluir-ticket" onclick="excluirTicketAluno()" class="btn-enviar" style="background:var(--hw-danger);color:#fff;">EXCLUIR TICKET</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-ajuda" onclick="toggleDuvida()" title="Dúvidas?" style="position:relative;">
+        <i class="fas fa-question"></i>
+        <span id="badge-novas-mensagens" style="display:none; position:absolute; top:-8px; right:-8px; background:#ef4444; color:white; border-radius:50%; width:20px; height:20px; font-size:12px; line-height:20px; text-align:center; font-weight:bold;"></span>
+    </button>
+</div>
+
+<div id="modal-dados" class="modal">
+    <div class="modal-content">
+        <h2 style="margin-top:0; color: var(--azul-escuro)"><i class="fas fa-id-card"></i> Dados do Diploma</h2>
+        <label><b>Nome Completo:</b></label>
+        <input type="text" id="input-nome">
+        <label><b>CPF:</b></label>
+        <input type="text" id="input-cpf" placeholder="000.000.000-00">
+        <label><b>Data de Nascimento:</b></label>
+        <input type="date" id="input-nasc">
+        <button class="btn-acao" style="background: var(--verde); color:white; width: 100%;" onclick="gerarPDF()">BAIXAR AGORA</button>
+        <button style="background:none; border:none; width:100%; margin-top:15px; cursor:pointer; color: var(--text-muted);" onclick="fecharModal()">Voltar</button>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const modulos = [
+        { id: 999, t: "SALA DE AULA AO VIVO", d: "Entre na chamada de vídeo para aulas em tempo real e compartilhamento de tela." },
+        { id: 998, t: "FERRAMENTAS TÉCNICAS", d: "Acesse a Calculadora de Sockets e outras utilidades para sua bancada." },
+        { id: 0, t: "Introdução ao Curso", d: "Boas-vindas e como aproveitar o Telecurso." },
+        { id: 1, t: "Conhecendo as peças", d: "Identificação de componentes e funções." },
+        { id: 2, t: "Separando ferramentas", d: "O que não pode faltar na bancada." },
+        { id: 3, t: "Cuidados de segurança", d: "Eletricidade estática e proteção." },
+        { id: 4, t: "Montando o processador", d: "Encaixe da CPU e pasta térmica." },
+        { id: 5, t: "Montando a memória RAM", d: "Dual Channel e travas de segurança." },
+        { id: 6, t: "Montando a placa no Gabinete", d: "Espelho e parafusos de fixação." },
+        { id: 7, t: "Fonte de alimentação", d: "Instalação da PSU e roteamento." },
+        { id: 8, t: "Montando armazenamento", d: "SSD SATA e M.2 NVMe." },
+        { id: 9, t: "Montando Placa de vídeo", d: "Slot PCI-e e alimentação extra." },
+        { id: 10, t: "Coolers de gabinete", d: "Configurando o fluxo de ar." },
+        { id: 11, t: "Primeiro boot de testes", d: "BIOS e conferência inicial." },
+        { id: 12, t: "Formatação com Windows", d: "Instalação do sistema operacional." },
+        { id: 13, t: "Vídeos Tutoriais", d: "Demonstrações práticas em vídeo passo a passo." },
+        { id: 14, t: "Conclusão", d: "Encerramento e orientações para o mercado." },
+        { id: 100, t: "PROVA FINAL", d: "Avaliação final de certificação técnica." }
+    ];
+
+    let inicializacaoEmAndamento = false;
+
+    async function inicializar() {
+        if (inicializacaoEmAndamento) return;
+        inicializacaoEmAndamento = true;
+        try {
+        // --- NOVO: CHECAGEM DE MANUTENÇÃO E AVISOS ---
+        const { data: config, error: errC } = await _supabase.from('configuracoes').select('*');
+        
+        if (!errC && config) {
+            if (config.find(c => c.chave === 'modo_manutencao')?.valor !== 'true') document.getElementById('manutencao')?.remove();
+            // Se modo manutenção estiver ligado, bloqueia tudo
+            const manutencao = config.find(c => c.chave === 'modo_manutencao')?.valor;
+            if (manutencao === "true") {
+                document.getElementById('manutencao')?.remove();
+                document.body.insertAdjacentHTML('beforeend', `
+                    <div id="manutencao" style="position:fixed; inset:0; z-index:10000; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #07142b; color: #f1f6fd; font-family: sans-serif; text-align: center; padding: 20px;">
+                    <i class="fas fa-tools" style="font-size: 80px; color: #e0b04a; margin-bottom: 20px;"></i>
+                        <h1>Manutenção em curso</h1>
+                        <p>Estamos a atualizar o Telecurso para uma melhor experiência.<br>Voltamos em poucos minutos!</p>
+                        <button onclick="location.reload()" style="margin-top:20px; padding:12px 25px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; background:#e0b04a; color:#07142b;">TENTAR NOVAMENTE</button>
+                    </div>`);
+                return;
+            }
+
+            // Exibe aviso global do professor
+            const aviso = config.find(c => c.chave === 'recado_geral_modulos')?.valor;
+            if (aviso && aviso.trim() !== "") {
+                document.getElementById('alerta-professor').style.display = 'flex';
+                document.getElementById('texto-alerta').innerText = aviso;
+            } else {
+                document.getElementById('alerta-professor').style.display = 'none';
+            }
+        }
+
+        // --- LÓGICA ORIGINAL DE USUÁRIO E PROGRESSO ---
+        const { data: userData, error: userError } = await _supabase.auth.getUser();
+        const user = userData?.user;
+        if (userError || !user) { window.location.href = "index.html"; return; }
+
+        localStorage.setItem('user_email', user.email);
+        processarPresencaPendente();
+
+        document.getElementById('nome-aluno').innerHTML = `<i class="fas fa-user-circle"></i> Olá, ${user.email.split('@')[0]}!`;
+        
+        const { data: progresso } = await _supabase.from('progresso_alunos').select('*').eq('user_id', user.id);
+        const concluidos = [...new Set((progresso || []).filter(p => p.concluido).map(p => Number(p.modulo_id)))];
+        
+        const concluidosConteudo = concluidos.filter(id => id >= 0 && id <= 14);
+        const pct = Math.round((concluidosConteudo.length / 15) * 100);
+        document.getElementById('barra-progresso').style.width = pct + "%";
+        document.getElementById('txt-porcentagem').innerText = pct + "%";
+        
+        const registroProva = progresso ? progresso.find(p => p.modulo_id === 100) : null;
+        if(registroProva) {
+            document.getElementById('status-prova-topo').innerHTML = `Nota da Prova: <span style="color:${registroProva.nota >= 70 ? 'var(--verde)' : 'var(--vermelho)'}">${registroProva.nota}/100</span>`;
+        }
+        
+        renderizar(concluidos, registroProva ? registroProva.nota : null);
+        await atualizarBadgeNovasMensagens();
+        await verificarLiberacaoCertificado();
+        } finally {
+            inicializacaoEmAndamento = false;
+        }
+    }
+
+    const trilhas = [
+        { t: 'Fundamentos', ids: [0, 1, 2, 3] },
+        { t: 'Montagem passo a passo', ids: [4, 5, 6, 7, 8, 9, 10, 11] },
+        { t: 'Sistema e prática', ids: [12, 13, 14] },
+        { t: 'Certificação', ids: [100] }
+    ];
+
+    function linkDoModulo(m) {
+        if (m.id === 999) return 'aula-viva.html';
+        if (m.id === 998) return 'ferramentas.html';
+        if (m.id === 100) return 'prova-final.html';
+        return `aulas/aula${m.id}.html`;
+    }
+
+    function bloqueado(m, concluidos) {
+        if (m.id === 999 || m.id === 998 || m.id === 0) return false;
+        if (m.id === 100) return !concluidos.includes(14);
+        return !concluidos.includes(m.id - 1);
+    }
+
+    function cardModulo(m, concluidos, nota) {
+        const isProva = m.id === 100, isAoVivo = m.id === 999, isFerr = m.id === 998;
+        const feito = concluidos.includes(m.id);
+        const reprovado = isProva && nota !== null && nota < 70;
+        const trava = bloqueado(m, concluidos);
+        let txt = feito ? 'Concluído' : (trava ? 'Conclua o módulo anterior' : 'Iniciar');
+        let ico = feito ? 'fa-check-circle' : (trava ? 'fa-lock' : (isAoVivo ? 'fa-video' : 'fa-play-circle'));
+        if (isAoVivo) txt = 'Entrar na sala';
+        if (isFerr) txt = 'Abrir ferramentas';
+        if (reprovado) { txt = 'Refazer prova'; ico = 'fa-redo'; }
+        const banner = isAoVivo ? 'Ao vivo' : isFerr ? 'Ferramentas' : isProva ? 'Avaliação' : `Módulo ${String(m.id).padStart(2, '0')}`;
+        const cls = `card-modulo ${trava ? 'bloqueado' : ''} ${isAoVivo ? 'ao-vivo' : ''} ${isFerr ? 'ferramenta-card' : ''} ${feito && !reprovado ? 'concluido' : ''}`;
+        const corpo = `<div class="card-banner">${banner}</div>
+            <div class="card-corpo"><h3>${m.t}</h3>
+            <p>${m.d}${isProva && nota !== null ? `<br><b>Última nota: ${nota}/100</b>` : ''}</p>
+            <span class="status-aula ${reprovado ? 'erro' : ''}" style="${reprovado ? 'background:none;border:0;padding:0;color:var(--hw-danger)' : ''}"><i class="fas ${ico}"></i> ${txt}</span></div>`;
+        return trava ? `<div class="${cls}" aria-disabled="true">${corpo}</div>` : `<a class="${cls}" href="${linkDoModulo(m)}">${corpo}</a>`;
+    }
+
+    function renderizar(concluidos, nota) {
+        const porId = id => modulos.find(m => m.id === id);
+        const atalhos = [999, 998].map(id => cardModulo(porId(id), concluidos, nota)).join('');
+        let html = `<section class="trilha"><div class="trilha-topo"><h2>Atalhos</h2></div><div class="grid-modulos">${atalhos}</div></section>`;
+        html += trilhas.map(tr => {
+            const feitos = tr.ids.filter(id => concluidos.includes(id)).length;
+            const cards = tr.ids.map(id => cardModulo(porId(id), concluidos, nota)).join('');
+            return `<section class="trilha"><div class="trilha-topo ${feitos === tr.ids.length ? 'ok' : ''}"><h2>${tr.t}</h2><span>${feitos}/${tr.ids.length} concluídos</span></div><div class="grid-modulos">${cards}</div></section>`;
+        }).join('');
+        document.getElementById('area-modulos').innerHTML = html;
+
+        // Botão "continuar de onde parou"
+        const proximo = [...Array(15).keys()].map(porId).concat(porId(100)).find(m => !concluidos.includes(m.id) || (m.id === 100 && (nota === null || nota < 70)));
+        const btn = document.getElementById('continuar');
+        if (proximo && !bloqueado(proximo, concluidos)) {
+            const nome = proximo.id === 100 ? 'Prova final' : `Módulo ${String(proximo.id).padStart(2, '0')}`;
+            btn.innerHTML = `<i class="fas fa-play-circle"></i><span><small>Continuar de onde parou</small>${nome}: ${proximo.t}</span><i class="fas fa-arrow-right seta"></i>`;
+            btn.href = linkDoModulo(proximo);
+            document.querySelector(`a.card-modulo[href="${linkDoModulo(proximo)}"]`)?.classList.add('atual');
+            btn.hidden = false;
+        } else { btn.hidden = true; }
+    }
+
+    async function toggleDuvida() {
+        const painel = document.getElementById('painel-duvida');
+        if (painel.style.display === 'none' || painel.style.display === '') {
+            painel.style.display = 'block';
+            carregarHistoricoAluno();
+        } else {
+            painel.style.display = 'none';
+        }
+    }
+
+    function iniciarRealtimeModulos() {
+        try {
+            _supabase.channel('realtime-chat-modulos')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_suporte' }, payload => {
+                    const userEmail = localStorage.getItem('user_email') || 'aluno@teste.com';
+                    const ticketAluno = gerarTicketAluno(userEmail);
+                    const novo = payload.new;
+                    if (novo.ticket === ticketAluno || novo.aluno_email === userEmail) {
+                        carregarHistoricoAluno();
+                    }
+                    atualizarBadgeNovasMensagens();
+                })
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_suporte' }, payload => {
+                    atualizarBadgeNovasMensagens();
+                    const userEmail = localStorage.getItem('user_email') || 'aluno@teste.com';
+                    const ticketAluno = gerarTicketAluno(userEmail);
+                    const upd = payload.new;
+                    if (upd.ticket === ticketAluno || upd.aluno_email === userEmail) {
+                        carregarHistoricoAluno();
+                    }
+                })
+                .subscribe();
+        } catch (e) {
+            console.warn('Realtime Modulos não disponível:', e);
+        }
+    }
+
+    function gerarTicketAluno(email) {
+        // ticket determinístico por email (mesmo aluno sempre recebe mesmo ticket)
+        const base = [...email].reduce((acc, c) => acc + c.charCodeAt(0), 0);
+        const num = 10 + (base % 890); // 0010-0899
+        return `TICKET-${String(num).padStart(4, '0')}`;
+    }
+
+    async function atualizarBadgeNovasMensagens() {
+        const userEmail = localStorage.getItem('user_email') || "aluno@teste.com";
+        const ticketAluno = gerarTicketAluno(userEmail);
+
+        let count = 0;
+        const { data: ticketRow, error } = await _supabase
+            .from('chat_suporte')
+            .select('conversation')
+            .eq('ticket', ticketAluno)
+            .maybeSingle();
+
+        if (!error && ticketRow && Array.isArray(ticketRow.conversation)) {
+            count = ticketRow.conversation.filter(msg => msg.remetente !== 'aluno' && !msg.lida).length;
+        } else {
+            // fallback antigo modelo (linhas individuais)
+            const { data, error: oldError } = await _supabase
+                .from('chat_suporte')
+                .select('id')
+                .eq('ticket', ticketAluno)
+                .neq('remetente', 'aluno')
+                .eq('lida', false);
+            count = (!oldError && data) ? data.length : 0;
+        }
+
+        const contadorElement = document.getElementById('badge-novas-mensagens');
+        if (count > 0) {
+            contadorElement.innerText = count;
+            contadorElement.style.display = 'inline-flex';
+        } else {
+            contadorElement.style.display = 'none';
+        }
+    }
+
+    function atualizarTicketLabel(ticket, status) {
+        document.getElementById('ticket-info').innerText = `Ticket: ${ticket}`;
+        document.getElementById('ticket-status').innerText = `Status: ${status}`;
+
+        const statusColor = {
+            aguardando: '#ef4444',
+            'em-atendimento': '#f59e0b',
+            concluido: '#16a34a',
+            'nao-atendido': '#7c3aed'
+        }[status] || '#6b7280';
+
+        document.getElementById('ticket-status').style.background = statusColor;
+        document.getElementById('ticket-status').style.color = 'white';
+    }
+
+    async function carregarHistoricoAluno() {
+        const userEmail = localStorage.getItem('user_email') || "aluno@teste.com";
+        const ticketAluno = gerarTicketAluno(userEmail);
+
+        const { data: ticketRow, error } = await _supabase
+            .from('chat_suporte')
+            .select('*')
+            .eq('ticket', ticketAluno)
+            .maybeSingle();
+
+        let chat = [];
+
+        if (!error && ticketRow && Array.isArray(ticketRow.conversation)) {
+            chat = ticketRow.conversation;
+
+            // marcar como lido apenas as mensagens do instrutor
+            const updatedConversation = chat.map(msg => msg.remetente !== 'aluno' ? { ...msg, lida: true } : msg);
+            await _supabase
+                .from('chat_suporte')
+                .update({ conversation: updatedConversation, lida: true, status: ticketRow.status || 'aguardando' })
+                .eq('ticket', ticketAluno);
+
+            chat = updatedConversation;
+        } else {
+            // suporte ao modelo antigo
+            let response = await _supabase
+                .from('chat_suporte')
+                .select('*')
+                .or(`ticket.eq.${ticketAluno},aluno_email.eq.${userEmail}`)
+                .order('created_at', { ascending: true });
+
+            if (response.error) {
+                console.warn('Consulta com ticket falhou, fallback para email:', response.error);
+                const fallback = await _supabase
+                    .from('chat_suporte')
+                    .select('*')
+                    .eq('aluno_email', userEmail)
+                    .order('created_at', { ascending: true });
+                chat = fallback.data || [];
+            } else {
+                chat = response.data || [];
+            }
+
+            // atualizar flag lida para mensagens do instrutor nesse modelo
+            await _supabase
+                .from('chat_suporte')
+                .update({ lida: true })
+                .eq('ticket', ticketAluno)
+                .neq('remetente', 'aluno');
+        }
+
+        const statusTicket = (ticketRow && ticketRow.status) ? ticketRow.status : 'aguardando';
+        atualizarTicketLabel(ticketAluno, statusTicket);
+
+        const corpo = document.querySelector('.corpo-suporte');
+        let chatBox = document.getElementById('chat-box-aluno');
+        if (!chatBox) {
+            corpo.innerHTML = `<div id="chat-box-aluno" style="height:200px; overflow-y:auto; margin-bottom:10px; border-bottom:1px solid var(--border-tech);"></div>` + corpo.innerHTML;
+            chatBox = document.getElementById('chat-box-aluno');
+        }
+
+        chatBox.innerHTML = (chat || []).map(m => `
+            <div style="text-align: ${m.remetente === 'aluno' ? 'right' : 'left'}; margin-bottom: 8px;">
+                <span style="display:inline-block; padding:8px; border-radius:8px; background:${m.remetente === 'aluno' ? 'rgba(34,197,94,.25)' : '#21262d'}; color:#fff; font-size:13px;">
+                    ${escaparHtml(m.mensagem)}
+                </span>
+            </div>
+        `).join('');
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        await atualizarBadgeNovasMensagens();
+    }
+
+    function escaparHtml(valor) {
+        return String(valor ?? '').replace(/[&<>"']/g, caractere => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+        }[caractere]));
+    }
+
+    async function enviarDuvidaParaSupabase() {
+        const msg = document.getElementById('txt-pergunta').value;
+        const userEmail = localStorage.getItem('user_email') || "aluno@teste.com";
+        if (!msg.trim()) return;
+
+        const ticketAluno = gerarTicketAluno(userEmail);
+        const now = new Date().toISOString();
+        const mensagemObj = { remetente: 'aluno', mensagem: msg, created_at: now, lida: false };
+
+        const { data: existing, error } = await _supabase
+            .from('chat_suporte')
+            .select('*')
+            .eq('ticket', ticketAluno)
+            .single();
+
+        if (error || !existing) {
+            // Criar novo ticket com conversa
+            const insert = await _supabase.from('chat_suporte').insert([{ ticket: ticketAluno, aluno_email: userEmail, status: 'aguardando', conversation: [mensagemObj], lida: false }]);
+            if (insert.error) {
+                console.error('Não foi possível enviar a mensagem:', insert.error);
+                alert('Erro ao enviar a mensagem. Tente novamente.');
+                return;
+            }
+        } else if (existing.conversation && Array.isArray(existing.conversation)) {
+            const novaConversa = [...existing.conversation, mensagemObj];
+            const update = await _supabase.from('chat_suporte').update({ conversation: novaConversa, status: existing.status || 'aguardando', lida: false }).eq('ticket', ticketAluno);
+            if (update.error) {
+                console.error('Não foi possível atualizar a mensagem:', update.error);
+                alert('Erro ao enviar a mensagem. Tente novamente.');
+                return;
+            }
+        } else {
+            // fallback: migrar modelo antigo para conversa única
+            let baseConversation = [];
+            if (existing.mensagem) {
+                baseConversation.push({ remetente: existing.remetente || 'aluno', mensagem: existing.mensagem, created_at: existing.created_at || now, lida: existing.lida || false });
+            }
+            const novaConversa = [...baseConversation, mensagemObj];
+            const upsert = await _supabase.from('chat_suporte').upsert({ ticket: ticketAluno, aluno_email: userEmail, status: existing.status || 'aguardando', conversation: novaConversa, lida: false }, { onConflict: 'ticket' });
+            if (upsert.error) {
+                console.error('Não foi possível enviar a mensagem:', upsert.error);
+                alert('Erro ao enviar a mensagem. Tente novamente.');
+                return;
+            }
+        }
+
+        document.getElementById('txt-pergunta').value = "";
+        carregarHistoricoAluno();
+        await atualizarBadgeNovasMensagens();
+    }
+
+    async function excluirTicketAluno() {
+        const userEmail = localStorage.getItem('user_email') || "aluno@teste.com";
+        const ticketAluno = gerarTicketAluno(userEmail);
+        if (!confirm(`Tem certeza de que deseja excluir o ticket ${ticketAluno}? Esta ação não pode ser desfeita.`)) return;
+
+        const { error } = await _supabase.from('chat_suporte').delete().eq('ticket', ticketAluno);
+        if (error) {
+            console.error('Erro ao excluir ticket:', error);
+            alert('Não foi possível excluir o ticket. Tente novamente.');
+            return;
+        }
+
+        document.getElementById('txt-pergunta').value = "";
+        carregarHistoricoAluno();
+        await atualizarBadgeNovasMensagens();
+        alert('Ticket excluído com sucesso.');
+    }
+
+    // --- CHAMADA POR QR CODE ---
+    let chamadaStream = null, chamadaAtiva = false, chamadaProcessando = false;
+
+    // QR lido pela câmera nativa do celular abre esta página com ?presenca=TOKEN
+    (function () {
+        const t = new URLSearchParams(location.search).get('presenca');
+        if (t) {
+            sessionStorage.setItem('presenca_pendente', t);
+            history.replaceState(null, '', location.pathname);
+        }
+    })();
+
+    function msgChamada(texto, tipo) {
+        const el = document.getElementById('chamada-msg');
+        el.textContent = texto;
+        el.className = tipo || '';
+    }
+
+    function extrairTokenPresenca(texto) {
+        try {
+            const t = new URL(texto).searchParams.get('presenca');
+            if (t) return t;
+        } catch (e) {}
+        return /^[a-f0-9]{32}$/i.test(String(texto).trim()) ? String(texto).trim() : null;
+    }
+
+    async function registrarPresencaQr(token) {
+        const { data, error } = await _supabase.rpc('registrar_presenca_qr', { p_token: token });
+        if (error) return { ok: false, erro: 'Não foi possível registrar a presença: ' + error.message };
+        return data || { ok: false, erro: 'Resposta inválida do servidor.' };
+    }
+
+    function pararCameraChamada() {
+        chamadaAtiva = false;
+        if (chamadaStream) chamadaStream.getTracks().forEach(t => t.stop());
+        chamadaStream = null;
+        const v = document.getElementById('chamada-video');
+        v.srcObject = null;
+    }
+
+    function fecharScannerChamada() {
+        pararCameraChamada();
+        document.getElementById('modal-chamada').style.display = 'none';
+    }
+
+    function mostrarResultadoChamada(r) {
+        if (r.ok) {
+            document.getElementById('chamada-video-box').style.display = 'none';
+            msgChamada('✔ Presença confirmada' + (r.modulo_id != null ? ' (módulo ' + r.modulo_id + ')' : '') + '!', 'ok');
+            if (typeof verificarLiberacaoCertificado === 'function') verificarLiberacaoCertificado();
+        } else {
+            msgChamada(r.erro || 'Não foi possível validar a presença.', 'erro');
+        }
+    }
+
+    async function abrirScannerChamada() {
+        const modal = document.getElementById('modal-chamada');
+        document.getElementById('chamada-video-box').style.display = 'block';
+        modal.style.display = 'flex';
+        msgChamada('Abrindo a câmera...');
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            document.getElementById('chamada-video-box').style.display = 'none';
+            msgChamada('Câmera indisponível neste navegador. Abra o site em HTTPS ou leia o QR Code com a câmera do celular.', 'erro');
+            return;
+        }
+        try {
+            chamadaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+        } catch (e) {
+            document.getElementById('chamada-video-box').style.display = 'none';
+            msgChamada('Permita o acesso à câmera para ler o QR Code.', 'erro');
+            return;
+        }
+        const video = document.getElementById('chamada-video');
+        video.srcObject = chamadaStream;
+        await video.play().catch(() => {});
+        chamadaAtiva = true;
+        chamadaProcessando = false;
+        msgChamada('Aponte a câmera para o QR Code exibido pelo professor.');
+        requestAnimationFrame(lerFrameChamada);
+    }
+
+    function lerFrameChamada() {
+        if (!chamadaAtiva) return;
+        const video = document.getElementById('chamada-video');
+        if (!chamadaProcessando && video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth) {
+            const canvas = document.getElementById('chamada-canvas');
+            const escala = Math.min(1, 640 / video.videoWidth);
+            canvas.width = Math.round(video.videoWidth * escala);
+            canvas.height = Math.round(video.videoHeight * escala);
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const codigo = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+            if (codigo && codigo.data) {
+                const token = extrairTokenPresenca(codigo.data);
+                if (token) {
+                    chamadaProcessando = true;
+                    msgChamada('Validando presença...');
+                    registrarPresencaQr(token).then(r => {
+                        if (r.ok) pararCameraChamada();
+                        mostrarResultadoChamada(r);
+                        if (!r.ok) setTimeout(() => { if (chamadaAtiva) { chamadaProcessando = false; msgChamada('Aponte a câmera para o QR Code exibido pelo professor.'); } }, 3000);
+                    });
+                } else {
+                    msgChamada('Este QR Code não é de chamada.', 'erro');
+                }
+            }
+        }
+        requestAnimationFrame(lerFrameChamada);
+    }
+
+    async function processarPresencaPendente() {
+        const token = sessionStorage.getItem('presenca_pendente');
+        if (!token) return;
+        sessionStorage.removeItem('presenca_pendente');
+        document.getElementById('chamada-video-box').style.display = 'none';
+        document.getElementById('modal-chamada').style.display = 'flex';
+        msgChamada('Validando presença...');
+        mostrarResultadoChamada(await registrarPresencaQr(token));
+    }
+
+    async function sair() { await _supabase.auth.signOut(); window.location.href = "index.html"; }
+
+    inicializar();
+    iniciarRealtimeModulos();
+
+    // Verifica atualizações do professor (manutenção/avisos) e notificações a cada 3 segundos
+    setInterval(() => {
+        if (document.hidden) return;
+        inicializar();
+        atualizarBadgeNovasMensagens();
+        const painel = document.getElementById('painel-duvida');
+        if (painel.style.display === 'block') carregarHistoricoAluno();
+    }, 30000);
+
+
+
+
+async function verificarLiberacaoCertificado() {
+    const { data: userData, error: userError } = await _supabase.auth.getUser();
+    const user = userData?.user;
+    if (userError || !user) return;
+
+    const btn = document.getElementById('btn-certificado');
+    btn.disabled = true;
+    btn.classList.remove('liberado');
+    btn.style.cursor = 'not-allowed';
+    btn.style.pointerEvents = 'none';
+    btn.innerHTML = '<i class="fas fa-certificate"></i> Certificado bloqueado';
+
+    // Verificar prova final
+    const { data: prova, error: provaError } = await _supabase
+        .from('progresso_alunos')
+        .select('nota, concluido')
+        .eq('user_id', user.id)
+        .eq('modulo_id', 100)
+        .single();
+
+    // Verificar presença registrada pelo instrutor em uma turma
+    const { data: presenca, error: presencaError } = await _supabase
+        .from('chamada_turmas')
+        .select('id')
+        .eq('email', user.email)
+        .eq('status', 'presente')
+        .limit(1);
+
+    console.log('Verificação certificado:', { prova, presenca, provaError, presencaError });
+
+const statusEl = document.getElementById('status-prova-topo');
+        const provaAprovada = !provaError && !!prova?.concluido && Number(prova.nota) >= 70;
+        const temPresenca = !presencaError && Array.isArray(presenca) && presenca.length > 0;
+        const notaHtml = (prova && prova.nota != null)
+            ? `Nota da Prova: <span style="color:${prova.nota >= 70 ? 'var(--verde)' : 'var(--vermelho)'}">${prova.nota}/100</span>`
+            : '';
+
+        if (provaAprovada && temPresenca) {
+            btn.disabled = false;
+            btn.classList.add('liberado');
+            btn.style.cursor = 'pointer';
+            btn.style.pointerEvents = 'auto';
+            btn.innerHTML = '<i class="fas fa-certificate"></i> Emitir Certificado';
+            btn.onclick = () => {
+                window.location.href = 'certificado.html';
+            };
+            statusEl.innerHTML = `${notaHtml} <strong style="color:var(--verde);">(Certificado liberado)</strong>`;
+        } else {
+            let motivo = '';
+            if (!provaAprovada) {
+                motivo = 'Prova final não aprovada';
+            } else if (!temPresenca) {
+                motivo = 'Presença em uma turma não registrada';
+            }
+            statusEl.innerHTML = `${notaHtml} <strong style="color:var(--vermelho);">(${motivo})</strong>`;
+    }
+}
+
+</script>
+</body>
+</html>

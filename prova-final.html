@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exame Final | Telecurso</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root{--bg:#07142b;--card:#0d2142;--card2:#12295a;--line:#1f3b66;--line2:#2e528a;--tx:#f1f6fd;--tx2:#c3d3ea;--mut:#92a9ca;--teal:#2dd4bf;--gold:#e0b04a;--red:#f87171;--green:#34d399}
+        *{box-sizing:border-box}
+        body{margin:0;background:var(--bg);color:var(--tx2);font:16px/1.55 'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+        h1,h2,h3,.topo strong,legend{font-family:'Sora',sans-serif;color:var(--tx)}
+        [hidden]{display:none!important}
+        .topo{display:flex;align-items:center;gap:14px;padding:12px 24px;border-bottom:1px solid var(--line)}
+        .topo img{width:42px;height:42px;object-fit:contain}
+        .topo strong{display:block;line-height:1.1}.topo span{font-size:.78rem;color:var(--mut)}
+        .topo a{margin-left:auto;color:var(--teal);text-decoration:none;font-weight:600;font-size:.9rem}
+        main{max-width:820px;margin:0 auto;padding:28px 20px 80px}
+        .painel{background:var(--card);border:1px solid var(--line2);border-radius:14px;padding:28px}
+        .painel h1{margin:0 0 6px;font-size:1.7rem}
+        .regras{margin:18px 0 24px;padding:0;list-style:none;display:grid;gap:10px}
+        .regras li{padding:12px 14px;background:var(--bg);border:1px solid var(--line);border-radius:10px;font-size:.93rem}
+        .regras b{color:var(--tx)}
+        .btn{display:inline-block;width:100%;padding:15px;border:0;border-radius:10px;background:var(--gold);color:#07142b;font:600 1rem 'Inter',sans-serif;cursor:pointer;text-align:center;text-decoration:none}
+        .btn:hover{background:#ecc063}.btn:disabled{opacity:.5;cursor:wait}
+        .btn.sec{background:transparent;color:var(--tx);border:1px solid var(--line2);margin-top:10px}
+        .btn.sec:hover{background:var(--card2)}
+        .erro{color:var(--red);min-height:1.4em;margin:12px 0 0;font-size:.9rem}
+        :focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+        .barra{position:sticky;top:0;z-index:20;background:rgba(7,20,43,.94);backdrop-filter:blur(8px);padding:12px 0;margin-bottom:8px}
+        .barra-linha{display:flex;justify-content:space-between;font-size:.88rem;color:var(--mut);margin-bottom:6px}
+        .barra-linha b{color:var(--tx)}
+        .trilho{height:8px;background:var(--card);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+        #preenche{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--gold));transition:width .3s}
+        #navegador{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+        #navegador button{flex:none;width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--mut);cursor:pointer;font:600 .82rem 'Inter',sans-serif}
+        #navegador button:hover{border-color:var(--tx)}
+        #navegador button.ok{background:var(--teal);border-color:var(--teal);color:#07142b}
+        #navegador button.falta{border:1px dashed var(--gold);color:var(--gold)}
+        #navegador button.atual{border:2px solid var(--tx);box-shadow:0 0 0 3px rgba(241,246,253,.15);color:var(--tx)}
+        #navegador button.ok.atual{color:#07142b}
+
+        .questao{display:none;margin:18px 0;padding:20px;background:var(--card);border:1px solid var(--line);border-radius:12px;user-select:none}
+        .questao.atual{display:block}
+        .acoes{display:flex;gap:12px;margin-top:6px}
+        .acoes .btn{width:auto;flex:1;margin:0}
+        .acoes .btn:disabled{opacity:.35;cursor:default}
+        legend{float:left;width:100%;padding:0;margin-bottom:14px;font-size:1.02rem;line-height:1.4;font-weight:600}
+        legend+*{clear:both}
+        .num{display:inline-block;min-width:30px;margin-right:10px;padding:2px 8px;border-radius:6px;background:var(--bg);border:1px solid var(--line2);color:var(--gold);font-size:.82rem;text-align:center}
+        .questao label{display:flex;gap:12px;align-items:flex-start;padding:11px 13px;margin-top:8px;background:var(--bg);border:1px solid var(--line);border-radius:10px;cursor:pointer}
+        .questao label:hover{border-color:var(--line2)}
+        .questao label:has(input:checked){border-color:var(--teal);background:rgba(45,212,191,.1);color:var(--tx)}
+        .questao input{appearance:none;flex:none;width:18px;height:18px;margin-top:3px;border:2px solid var(--line2);border-radius:50%}
+        .questao input:checked{border-color:var(--teal);background:radial-gradient(var(--teal) 45%,transparent 50%)}
+
+        #tela-resultado{text-align:center}
+        .nota{font:700 4.2rem/1 'Sora',sans-serif;margin:14px 0 4px}
+        .nota.ok{color:var(--green)}.nota.no{color:var(--red)}
+        .revisar{text-align:left;margin:24px 0;padding:16px 18px;background:var(--bg);border:1px solid var(--line);border-radius:10px}
+        .revisar h3{margin:0 0 8px;font-size:1rem}.revisar ul{margin:0;padding-left:20px}.revisar li{margin:6px 0;font-size:.92rem}
+
+        #anti{position:fixed;inset:0;z-index:100;background:rgba(3,8,18,.96);display:grid;place-items:center;padding:20px;text-align:center}
+        #anti .painel{max-width:460px;border-color:var(--red)}
+        @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+        @media (max-width:520px){.painel{padding:20px}.topo{padding:10px 16px}.barra{position:static;background:none;backdrop-filter:none}}
+    </style>
+</head>
+<body>
+<header class="topo">
+    <img src="favicon.png" alt="">
+    <div><strong>Exame final</strong><span>Montagem e Manutenção de Computadores</span></div>
+    <a href="modulos.html" id="link-voltar">Voltar aos módulos</a>
+</header>
+
+<main>
+    <section class="painel" id="tela-inicio">
+        <h1>Antes de começar</h1>
+        <p>O exame tem 30 questões sorteadas, com as alternativas embaralhadas.</p>
+        <ul class="regras">
+            <li><b>Nota mínima:</b> 70% (21 acertos) para ser aprovado. Se refizer, vale a sua melhor nota.</li>
+            <li><b>Sem sair da página:</b> trocar de janela ou aba trava o exame e ele recomeça com novas questões.</li>
+            <li><b>Sem atualizar:</b> recarregar a página reinicia o exame e apaga as respostas.</li>
+            <li><b>Sem limite de tempo,</b> mas a tentativa expira em 6 horas.</li>
+            <li><b>Repetição:</b> se não passar, você pode refazer quantas vezes quiser.</li>
+        </ul>
+        <button class="btn" id="btn-iniciar" onclick="iniciar()">Iniciar exame</button>
+        <p class="erro" id="erro-inicio" role="alert"></p>
+    </section>
+
+    <section id="tela-prova" hidden>
+        <div class="barra">
+            <div class="barra-linha"><span><b id="n-resp">0</b> de <span id="n-total">30</span> respondidas</span><span id="faltam"></span></div>
+            <div class="trilho"><div id="preenche"></div></div>
+            <nav id="navegador" aria-label="Ir para a questão"></nav>
+        </div>
+        <form id="lista" onsubmit="return false"></form>
+        <div class="acoes">
+            <button type="button" class="btn sec" id="btn-voltar" onclick="ir(atual - 1)">Voltar</button>
+            <button type="button" class="btn" id="btn-proximo" onclick="proximo()">Próximo</button>
+        </div>
+        <p class="erro" id="erro-envio" role="alert"></p>
+    </section>
+
+    <section class="painel" id="tela-resultado" hidden>
+        <h2 id="res-titulo"></h2>
+        <div class="nota" id="res-nota">0</div>
+        <p id="res-detalhe"></p>
+        <div class="revisar" id="res-revisar" hidden><h3>Temas para revisar</h3><ul id="res-lista"></ul></div>
+        <a class="btn" href="modulos.html">Voltar aos módulos</a>
+        <button class="btn sec" id="btn-refazer" onclick="location.reload()" hidden>Refazer o exame</button>
+    </section>
+</main>
+
+<div id="anti" hidden>
+    <div class="painel">
+        <h2>Exame bloqueado</h2>
+        <p>Detectamos que você saiu desta janela. Por segurança, esta tentativa foi encerrada.</p>
+        <button class="btn" onclick="location.reload()">Começar de novo</button>
+    </div>
+</div>
+
+<script>
+    const _supabase = supabase.createClient('https://ityqcemfbdzgsfmyisqc.supabase.co', 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA');
+    const $ = id => document.getElementById(id);
+    const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c]));
+
+    let provaAtiva = false, tentativa = null, total = 30, atual = 0;
+    const respostas = {};
+
+    function embaralhar(a) {
+        for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+        return a;
+    }
+    function mostrar(id) {
+        ['tela-inicio', 'tela-prova', 'tela-resultado'].forEach(t => $(t).hidden = t !== id);
+        $('link-voltar').hidden = id === 'tela-prova';
+    }
+
+    async function iniciar() {
+        const btn = $('btn-iniciar'); btn.disabled = true; $('erro-inicio').textContent = '';
+        const { data: u } = await _supabase.auth.getUser();
+        if (!u?.user) { location.href = 'index.html'; return; }
+        const { data, error } = await _supabase.rpc('iniciar_prova');
+        if (error) {
+            $('erro-inicio').textContent = error.code === 'PGRST202'
+                ? 'O exame ainda não foi configurado no banco de dados. Avise o instrutor.'
+                : error.message;
+            btn.disabled = false; return;
+        }
+        tentativa = data.tentativa; total = data.questoes.length;
+        $('n-total').textContent = total;
+        $('lista').innerHTML = data.questoes.map((q, i) => {
+            const alts = embaralhar(['a', 'b', 'c', 'd', 'e'].map(l => ({ l, t: q[l] })));
+            return `<fieldset class="questao" id="q${q.id}" data-id="${q.id}">
+                <legend><span class="num">${i + 1}</span>${esc(q.q)}</legend>
+                ${alts.map(o => `<label><input type="radio" name="q${q.id}" value="${o.l}"><span>${esc(o.t)}</span></label>`).join('')}
+            </fieldset>`;
+        }).join('');
+        $('navegador').innerHTML = data.questoes.map((q, i) => `<button type="button" data-i="${i}" data-id="${q.id}" aria-label="Questão ${i + 1}">${i + 1}</button>`).join('');
+        mostrar('tela-prova'); window.scrollTo(0, 0);
+        provaAtiva = true; atualizar(); ir(0);
+    }
+
+    function ir(i) {
+        const qs = document.querySelectorAll('.questao');
+        if (i < 0 || i >= qs.length) return;
+        atual = i;
+        qs.forEach((q, k) => q.classList.toggle('atual', k === i));
+        document.querySelectorAll('#navegador button').forEach((b, k) => {
+            b.classList.toggle('atual', k === i);
+            if (k === i) b.setAttribute('aria-current', 'step');
+            else b.removeAttribute('aria-current');
+        });
+        $('btn-voltar').disabled = i === 0;
+        $('btn-proximo').textContent = i === qs.length - 1 ? 'Finalizar exame' : 'Próximo';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function proximo() { atual < total - 1 ? ir(atual + 1) : finalizar(); }
+    $('navegador').addEventListener('click', e => { const b = e.target.closest('button'); if (b) ir(+b.dataset.i); });
+
+    $('lista').addEventListener('change', e => {
+        const id = e.target.closest('.questao')?.dataset.id; if (!id) return;
+        respostas[id] = e.target.value;
+        const nb = document.querySelector(`#navegador button[data-id="${id}"]`); nb?.classList.add('ok'); nb?.classList.remove('falta');
+        atualizar();
+    });
+
+    function atualizar() {
+        const n = Object.keys(respostas).length;
+        $('n-resp').textContent = n;
+        $('preenche').style.width = (n / total * 100) + '%';
+        $('faltam').textContent = n === total ? 'Tudo respondido' : `Faltam ${total - n}`;
+    }
+
+    async function finalizar() {
+        provaAtiva = false; // os diálogos abaixo tiram o foco da janela; não pode travar
+        const faltam = total - Object.keys(respostas).length;
+        if (faltam > 0) {
+            const qs = [...document.querySelectorAll('.questao')];
+            document.querySelectorAll('#navegador button').forEach((b, k) => b.classList.toggle('falta', !respostas[qs[k].dataset.id]));
+            ir(qs.findIndex(q => !respostas[q.dataset.id]));
+        }
+        const ok = confirm(faltam > 0
+            ? `Faltam ${faltam} questão(ões) sem resposta (marcadas com borda dourada na barra). Enviar assim mesmo?`
+            : 'Enviar o exame agora? Depois do envio não é possível alterar as respostas.');
+        if (!ok) { provaAtiva = true; return; }
+
+        const btn = $('btn-proximo'); btn.disabled = true; $('erro-envio').textContent = '';
+        const { data, error } = await _supabase.rpc('enviar_prova', { p_tentativa: tentativa, p_respostas: respostas });
+        if (error) {
+            $('erro-envio').textContent = 'Não foi possível enviar: ' + error.message;
+            btn.disabled = false; provaAtiva = true; return;
+        }
+        resultado(data);
+    }
+
+    function resultado(r) {
+        mostrar('tela-resultado'); window.scrollTo(0, 0);
+        $('res-titulo').textContent = r.aprovado ? 'Você foi aprovado!' : 'Ainda não foi desta vez';
+        const n = $('res-nota'); n.textContent = r.nota; n.className = 'nota ' + (r.aprovado ? 'ok' : 'no');
+        let txt = `${r.acertos} de ${total} questões corretas.`;
+        txt += r.aprovado ? ' Veja em Módulos se o seu certificado já está liberado.' : ' A nota mínima é 70. Revise os temas abaixo e tente de novo.';
+        if (r.melhor > r.nota) txt += ` Sua melhor nota continua sendo ${r.melhor}.`;
+        $('res-detalhe').textContent = txt;
+        if (r.erradas?.length) {
+            $('res-lista').innerHTML = r.erradas.map(q => `<li>${esc(q)}</li>`).join('');
+            $('res-revisar').hidden = false;
+        }
+        $('btn-refazer').hidden = r.aprovado;
+    }
+
+    // Anti-cola: sair da janela trava a tentativa
+    function travar() { if (provaAtiva) { $('anti').hidden = false; $('tela-prova').style.filter = 'blur(14px)'; $('tela-prova').style.pointerEvents = 'none'; provaAtiva = false; } }
+    window.addEventListener('blur', travar);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') travar(); });
+    document.addEventListener('contextmenu', e => { if (provaAtiva) e.preventDefault(); });
+    window.addEventListener('beforeunload', e => { if (provaAtiva) { e.preventDefault(); e.returnValue = ''; } });
+</script>
+</body>
+</html>

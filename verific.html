@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validação de Certificado | Telecurso</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="layout.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: var(--surface-card); border: 1px solid var(--border-highlight); border-radius: var(--radius-lg); padding: 36px; width: 100%; max-width: 560px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,.7); }
+        .card::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--cor, var(--hw-cyan)); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+        .card.ok { --cor: var(--hw-green); } .card.fail { --cor: var(--hw-danger); }
+        .icone { font-size: 3.2rem; text-align: center; color: var(--cor, var(--hw-cyan)); }
+        h1 { font-family: 'Rajdhani', sans-serif; font-size: 1.7rem; text-align: center; color: var(--text-primary); margin: 8px 0 12px; }
+        .texto { text-align: center; margin-bottom: 22px; }
+        .dados { border-left: 4px solid var(--cor, var(--hw-cyan)); background: var(--hw-carbon); border-radius: var(--radius-sm); padding: 16px 18px; margin-bottom: 22px; }
+        .dados dt { font-size: .78rem; color: var(--text-muted); margin-top: 10px; }
+        .dados dt:first-child { margin-top: 0; }
+        .dados dd { margin: 2px 0 0; font: 700 1rem 'JetBrains Mono', monospace; color: var(--text-primary); word-break: break-word; }
+        .busca { display: flex; gap: 10px; }
+        .busca input { text-transform: uppercase; }
+        .busca button, #scan-btn { width: auto; padding: 0 18px; margin: 0; background: var(--hw-copper); color: #000; }
+        #scan-btn { width: 100%; margin-top: 12px; padding: 12px; background: transparent; color: var(--hw-cyan); border: 1px solid var(--border-tech); }
+        #video { width: 100%; max-height: 260px; border-radius: var(--radius-sm); margin-top: 12px; background: #000; }
+        .nota { font-size: .8rem; color: var(--text-muted); text-align: center; margin-top: 18px; }
+    </style>
+</head>
+<body>
+    <main class="card" id="card">
+        <div class="icone" id="icone"><i class="fas fa-shield-halved"></i></div>
+        <h1 id="titulo">Validar certificado</h1>
+        <p class="texto" id="texto">Digite o código impresso no certificado ou escaneie o QR Code.</p>
+
+        <dl class="dados" id="dados" hidden>
+            <dt>Código</dt><dd id="r-codigo"></dd>
+            <dt>Nome do formando</dt><dd id="r-nome"></dd>
+            <dt>CPF</dt><dd id="r-cpf"></dd>
+            <dt>Emitido em</dt><dd id="r-data"></dd>
+        </dl>
+
+        <form class="busca" id="form-busca">
+            <input id="codigo" maxlength="12" placeholder="Código do certificado" autocomplete="off" aria-label="Código do certificado">
+            <button class="btn" type="submit">Validar</button>
+        </form>
+        <button id="scan-btn" type="button"><i class="fas fa-qrcode"></i> Escanear QR Code</button>
+        <video id="video" playsinline hidden></video>
+        <canvas id="canvas" hidden></canvas>
+        <p class="nota">Por segurança, o CPF é exibido parcialmente.</p>
+    </main>
+
+    <script>
+        const _supabase = supabase.createClient('https://ityqcemfbdzgsfmyisqc.supabase.co', 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA');
+        const $ = id => document.getElementById(id);
+        let stream = null;
+
+        function mostrar(ok, titulo, texto, dados) {
+            $('card').className = 'card ' + (ok ? 'ok' : 'fail');
+            $('icone').innerHTML = `<i class="fas ${ok ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>`;
+            $('titulo').textContent = titulo;
+            $('texto').textContent = texto;
+            $('dados').hidden = !dados;
+            if (dados) {
+                $('r-codigo').textContent = dados.codigo;
+                $('r-nome').textContent = dados.nome;
+                $('r-cpf').textContent = dados.cpf_mascarado;
+                $('r-data').textContent = new Date(dados.emitido_em).toLocaleDateString('pt-BR');
+            }
+        }
+
+        async function validar(codigo) {
+            codigo = String(codigo || '').trim().toUpperCase();
+            if (!/^[A-Z0-9]{12}$/.test(codigo)) {
+                mostrar(false, 'Código inválido', 'O código tem 12 letras e números. Confira e tente de novo.');
+                return;
+            }
+            $('codigo').value = codigo;
+            const { data, error } = await _supabase.rpc('verificar_certificado', { p_codigo: codigo });
+            if (error) { mostrar(false, 'Falha na consulta', 'Não foi possível consultar agora. Tente novamente em instantes.'); return; }
+            if (!data || !data.length) { mostrar(false, 'Certificado não encontrado', 'Nenhum certificado emitido pelo Telecurso tem esse código.'); return; }
+            mostrar(true, 'Certificado autêntico', 'Emitido pelo Telecurso Montagem e Manutenção de Computadores.', data[0]);
+        }
+
+        function pararCamera() {
+            if (stream) stream.getTracks().forEach(t => t.stop());
+            stream = null; $('video').hidden = true;
+        }
+
+        function lerQR() {
+            if (!stream) return;
+            const v = $('video'), c = $('canvas');
+            if (v.readyState === v.HAVE_ENOUGH_DATA) {
+                c.width = v.videoWidth; c.height = v.videoHeight;
+                const ctx = c.getContext('2d');
+                ctx.drawImage(v, 0, 0);
+                const img = ctx.getImageData(0, 0, c.width, c.height);
+                const qr = jsQR(img.data, img.width, img.height);
+                if (qr) {
+                    pararCamera();
+                    try { validar(new URL(qr.data).searchParams.get('c')); }
+                    catch { mostrar(false, 'QR Code inválido', 'Esse QR Code não é de um certificado do Telecurso.'); }
+                    return;
+                }
+            }
+            requestAnimationFrame(lerQR);
+        }
+
+        $('scan-btn').addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                $('video').srcObject = stream; $('video').hidden = false;
+                await $('video').play(); lerQR();
+            } catch (e) {
+                pararCamera();
+                mostrar(false, 'Câmera indisponível', 'Permita o acesso à câmera ou digite o código manualmente.');
+            }
+        });
+
+        $('form-busca').addEventListener('submit', e => { e.preventDefault(); validar($('codigo').value); });
+
+        const c = new URLSearchParams(location.search).get('c');
+        if (c) validar(c);
+    </script>
+</body>
+</html>
