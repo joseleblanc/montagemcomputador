@@ -638,7 +638,7 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
             const t = new URL(texto).searchParams.get('presenca');
             if (t) return t;
         } catch (e) {}
-        return /^[a-f0-9]{32}$/i.test(String(texto).trim()) ? String(texto).trim() : null;
+        return /^[a-f0-9]{16,32}$/i.test(String(texto).trim()) ? String(texto).trim() : null;
     }
 
     async function registrarPresencaQr(token) {
@@ -696,20 +696,35 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
         requestAnimationFrame(lerFrameChamada);
     }
 
-    function lerFrameChamada() {
+    const detectorQr = ('BarcodeDetector' in window) ? new BarcodeDetector({ formats: ['qr_code'] }) : null;
+    let lendoFrame = false;
+
+    async function lerFrameChamada() {
         if (!chamadaAtiva) return;
         const video = document.getElementById('chamada-video');
-        if (!chamadaProcessando && video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth) {
-            const canvas = document.getElementById('chamada-canvas');
-            const escala = Math.min(1, 1280 / video.videoWidth);
-            canvas.width = Math.round(video.videoWidth * escala);
-            canvas.height = Math.round(video.videoHeight * escala);
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const codigo = jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' });
-            if (codigo && codigo.data) {
-                const token = extrairTokenPresenca(codigo.data);
+        if (!chamadaProcessando && !lendoFrame && video.readyState >= 2 && video.videoWidth) {
+            lendoFrame = true;
+            let texto = null;
+            try {
+                if (detectorQr) {
+                    const achados = await detectorQr.detect(video);
+                    if (achados.length) texto = achados[0].rawValue;
+                }
+                if (!texto && typeof jsQR === 'function') {
+                    const canvas = document.getElementById('chamada-canvas');
+                    const escala = Math.min(1, 1280 / video.videoWidth);
+                    canvas.width = Math.round(video.videoWidth * escala);
+                    canvas.height = Math.round(video.videoHeight * escala);
+                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const codigo = jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' });
+                    if (codigo && codigo.data) texto = codigo.data;
+                }
+            } catch (e) { console.warn('Leitura QR:', e); }
+            lendoFrame = false;
+            if (texto && chamadaAtiva) {
+                const token = extrairTokenPresenca(texto);
                 if (token) {
                     chamadaProcessando = true;
                     msgChamada('Validando presença...');
@@ -723,7 +738,7 @@ header span{display:block;font-size:.78rem;color:var(--text-muted)}
                 }
             }
         }
-        requestAnimationFrame(lerFrameChamada);
+        if (chamadaAtiva) requestAnimationFrame(lerFrameChamada);
     }
 
     async function processarPresencaPendente() {

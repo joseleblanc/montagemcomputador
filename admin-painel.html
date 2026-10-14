@@ -132,7 +132,7 @@
         .btn-presenca.falta { background:var(--danger); }
         .badge-qr { display:inline-flex; align-items:center; gap:6px; margin-left:10px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; background:rgba(45,212,191,.16); color:#2dd4bf; white-space:nowrap; }
         .qr-card { display:flex; gap:24px; align-items:center; flex-wrap:wrap; margin:0 0 20px; padding:18px; border:1px solid var(--border); border-radius:12px; background:rgba(255,255,255,.03); }
-        .qr-box { background:#fff; padding:12px; border-radius:12px; line-height:0; min-width:120px; min-height:120px; display:flex; align-items:center; justify-content:center; }
+        .qr-box { background:#fff; padding:12px; border-radius:12px; line-height:0; min-width:120px; min-height:120px; max-width:100%; display:flex; align-items:center; justify-content:center; }
         .qr-box img, .qr-box canvas { max-width:100%; height:auto; }
         .qr-info { flex:1; min-width:220px; color:var(--text-muted); font-size:14px; }
         .qr-info h4 { color:var(--text-main); font-size:16px; margin-bottom:6px; }
@@ -311,7 +311,7 @@
                     <div id="qr-code" class="qr-box" aria-label="QR Code da chamada"></div>
                     <div class="qr-info">
                         <h4><i class="fas fa-qrcode"></i> Chamada por QR Code</h4>
-                        <p>Os alunos abrem <b>Chamada</b> no topo da página de módulos e apontam a câmera para este código (ou leem com a câmera do celular). Cada aluno confirma a própria presença com o e-mail logado.</p>
+                        <p>Os alunos abrem <b>Chamada</b> no topo da página de módulos e apontam a câmera para este código. Cada aluno confirma a própria presença com o e-mail logado.</p>
                         <p style="margin-top:8px;">O código muda em <span id="qr-contador" class="qr-contador">30</span>s, para não funcionar em foto repassada.</p>
                         <div class="qr-acoes">
                             <button type="button" class="btn btn-primary" onclick="alternarQrAmpliado()"><i class="fas fa-expand"></i> <span id="qr-ampliar-txt">Ampliar para projetar</span></button>
@@ -615,7 +615,7 @@
         let qrTimer = null, qrRestante = 0, qrTick = 0, qrAmpliado = false, qrUrlAtual = '', qrContagem = 0, qrVistos = new Set();
 
         function novoTokenQr() {
-            const bytes = new Uint8Array(16);
+            const bytes = new Uint8Array(8);
             crypto.getRandomValues(bytes);
             return [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
         }
@@ -661,8 +661,7 @@
                 box.innerHTML = '<div class="qr-erro">Não foi possível gerar o QR Code. Execute o arquivo supabase-chamada-qr.sql no Supabase.<br><small>' + escaparHtml(error.message) + '</small></div>';
                 return;
             }
-            const base = location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, '');
-            qrUrlAtual = base + 'modulos.html?presenca=' + token;
+            qrUrlAtual = token; // conteúdo curto = QR simples e fácil de ler
             desenharQr();
         }
 
@@ -670,8 +669,8 @@
             const box = document.getElementById('qr-code');
             box.innerHTML = '';
             if (!qrUrlAtual) return;
-            const tamanho = qrAmpliado ? Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.6) : 220;
-            new QRCode(box, { text: qrUrlAtual, width: tamanho, height: tamanho, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+            const tamanho = qrAmpliado ? Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.7) : 300;
+            new QRCode(box, { text: qrUrlAtual, width: tamanho, height: tamanho, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.L });
         }
 
         function alternarQrAmpliado() {
