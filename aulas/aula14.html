@@ -126,57 +126,37 @@
             return;
         }
 
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('aprovado') === 'true') {
-            document.getElementById('status-aprovacao').style.display = 'none';
-            document.getElementById('box-concluir').style.display = 'block';
-            document.getElementById('btn-finalizar').style.display = 'inline-block';
-        }
     }
 
-    function iniciarProvaFinal() {
-        window.location.href = '../prova-final.html';
-    }
-
-    function irParaQuiz() {
-        // ⚠️ ATENÇÃO: Altere o final de "?modulo=1" para o número correspondente da aula
-        window.location.href = `../quiz.html?modulo=14`; 
-    }
-
-    async function concluirModulo() {
+    async function iniciarProvaFinal() {
+        const botao = document.querySelector('.btn-prova');
+        botao.disabled = true;
         try {
-            // Captura o usuário logado e puxa os dados do perfil dele
             const { data: { user }, error: userError } = await _supabase.auth.getUser();
-            
             if (userError || !user) {
                 alert("Sessão expirada ou usuário inválido. Faça login novamente.");
                 window.location.href = "../index.html";
                 return;
             }
 
-            // Envia todos os dados obrigatórios para salvar na tabela 'progresso_alunos'
-            const { error } = await _supabase
+            const { error: erroSalvamento } = await _supabase
                 .from('progresso_alunos')
-                .upsert({ 
-                    user_id: user.id, 
-                    modulo_id: 14,           // ⚠️ ATENÇÃO: Altere este número de acordo com o módulo da aula
-                    concluido: true, 
-                    email: user.email,      // 🌟 CORREÇÃO: Preenche o email obrigatório exigido pelo banco
-                    data_conclusao: new Date().toISOString() // Preenche o horário atual no formato correto do Postgres
-                }, { 
-                    onConflict: 'user_id, modulo_id' 
+                .upsert({
+                    user_id: user.id,
+                    modulo_id: 14,
+                    concluido: true,
+                    email: user.email,
+                    data_conclusao: new Date().toISOString()
+                }, {
+                    onConflict: 'user_id, modulo_id'
                 });
 
-            if (!error) {
-                alert("Progresso salvo com sucesso!");
-                window.location.href = "../modulos.html";
-            } else {
-                console.error("Erro do Supabase:", error);
-                alert("Erro ao salvar no banco de dados: " + error.message);
-            }
+            if (erroSalvamento) throw erroSalvamento;
+            window.location.href = '../prova-final.html';
         } catch (err) {
             console.error("Erro inesperado:", err);
-            alert("Ocorreu um erro inesperado ao salvar o progresso.");
+            alert("Não foi possível salvar a conclusão da aula. Tente novamente.");
+            botao.disabled = false;
         }
     }
 

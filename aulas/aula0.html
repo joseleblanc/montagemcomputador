@@ -117,29 +117,19 @@ async function concluirAula(id) {
             return;
         }
 
-        // 1. Verifica se o registro já existe para este usuário e módulo
-        const { data: existe, error: erroBusca } = await _supabase
+        const { error: erroSalvamento } = await _supabase
             .from('progresso_alunos')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('modulo_id', id);
+            .upsert({
+                user_id: user.id,
+                modulo_id: id,
+                concluido: true,
+                data_conclusao: new Date().toISOString(),
+                email: user.email
+            }, {
+                onConflict: 'user_id, modulo_id'
+            });
 
-        if (erroBusca) throw erroBusca;
-
-        // 2. Se não existir, faz a inserção preenchendo TODOS os campos obrigatórios
-        if (!existe || existe.length === 0) {
-            const { error: erroInsert } = await _supabase
-                .from('progresso_alunos')
-                .insert([{ 
-                    user_id: user.id, 
-                    modulo_id: id,
-                    concluido: true, 
-                    data_conclusao: new Date().toISOString(),
-                    email: user.email // <--- ADICIONADO: Preenche a coluna obrigatória detectada pelo erro!
-                }]);
-                
-            if (erroInsert) throw erroInsert;
-        }
+        if (erroSalvamento) throw erroSalvamento;
 
         window.location.href = '../modulos.html';
     } catch (error) {

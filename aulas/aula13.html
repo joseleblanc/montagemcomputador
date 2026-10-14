@@ -429,17 +429,6 @@
             return;
         }
 
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('aprovado') === 'true') {
-            document.getElementById('status-aprovacao').style.display = 'none';
-            document.getElementById('box-concluir').style.display = 'block';
-            document.getElementById('btn-finalizar').style.display = 'inline-block';
-        }
-    }
-
-    function irParaQuiz() {
-        // ⚠️ ATENÇÃO: Altere o final de "?modulo=1" para o número correspondente da aula
-        window.location.href = `../quiz.html?modulo=13`; 
     }
 
     async function concluirModulo() {
