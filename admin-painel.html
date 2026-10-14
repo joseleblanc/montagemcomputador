@@ -610,7 +610,7 @@
                     data: dataChamada,
                     user_id: campo.dataset.userId,
                     email: campo.dataset.email,
-                    status: presencaQr && campo.dataset.manual !== 'true' ? 'presente' : campo.dataset.status,
+                    status: presencaQr ? 'presente' : campo.dataset.status,
                     anotacao: document.querySelector(`.anotacao-input[data-user-id="${campo.dataset.userId}"]`).value.trim(),
                     updated_at: new Date().toISOString(),
                     metodo: registroAtual.metodo,
@@ -704,9 +704,9 @@
                 registrosChamada[registro.user_id] = {
                     ...(registrosChamada[registro.user_id] || {}),
                     ...registro,
-                    status: botao.dataset.manual === 'true' ? botao.dataset.status : 'presente'
+                    status: 'presente'
                 };
-                if (botao.dataset.manual !== 'true' && botao.dataset.status !== 'presente') alternarPresenca(botao, true);
+                if (botao.dataset.status !== 'presente') alternarPresenca(botao, true);
                 if (!botao.parentElement.querySelector('.badge-qr')) botao.insertAdjacentHTML('afterend', badgeQr(registro));
             });
             atualizarResumoChamada();
