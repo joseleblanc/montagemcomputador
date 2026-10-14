@@ -5,9 +5,10 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Desafio Técnico | Telecurso PC</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --bg-main: #07142b; --surface-card: #0d2142; --surface-hover: #12295a; --text-primary: #f1f6fd; --text-secondary: #c3d3ea; --text-muted: #92a9ca; --border-tech: #1f3b66; --hw-gold: #e0b04a; --hw-cyan: #2dd4bf; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-secondary); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-main); color: var(--text-secondary); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; }
         .quiz-card { background: var(--surface-card); color: var(--text-secondary); padding: 40px; border: 1px solid var(--border-tech); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 550px; width: 90%; }
         h2 { color: var(--text-primary); font-family: 'Sora', sans-serif; text-align: center; margin-top: 0; }
         .pergunta { margin-top: 20px; margin-bottom: 10px; font-weight: bold; color: var(--hw-cyan); }
@@ -18,6 +19,7 @@
         .btn-verificar:hover { background: #ecc063; }
         .resultado-tela { display: none; text-align: center; }
     </style>
+    <link rel="stylesheet" href="aulas/layout-aulas.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap">
 </head>
 <body>
@@ -26,6 +28,7 @@
         <h2 id="titulo-quiz">Desafio de Conhecimento</h2>
         <div id="conteudo-questoes">
             </div>
+        <p id="mensagem-erro" class="mensagem-erro" role="alert" hidden></p>
         <button class="btn-verificar" onclick="verificarRespostas()">Finalizar Desafio</button>
     </div>
 
@@ -36,6 +39,10 @@
     </div>
 
     <script>
+        const SUPABASE_URL = 'https://ityqcemfbdzgsfmyisqc.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         // BANCO DE DADOS DE TODOS OS MÓDULOS
         const bancoDeDados = {
             "1": [
@@ -199,10 +206,34 @@
             });
         }
 
-        function verificarRespostas() {
+        async function salvarProgresso() {
+            const { data: { user }, error: erroUsuario } = await _supabase.auth.getUser();
+            if (erroUsuario) throw erroUsuario;
+            if (!user) throw new Error('Sua sessão expirou. Entre novamente para salvar o progresso.');
+
+            const { error } = await _supabase
+                .from('progresso_alunos')
+                .upsert({
+                    user_id: user.id,
+                    modulo_id: Number(moduloAtual),
+                    concluido: true,
+                    data_conclusao: new Date().toISOString(),
+                    email: user.email
+                }, {
+                    onConflict: 'user_id, modulo_id'
+                });
+
+            if (error) throw error;
+        }
+
+        async function verificarRespostas() {
             if (!perguntas.length) return;
             let acertos = 0;
             let todasRespondidas = true;
+            const botaoVerificar = document.querySelector('#caixa-quiz .btn-verificar');
+            const mensagemErro = document.getElementById('mensagem-erro');
+            mensagemErro.hidden = true;
+            mensagemErro.textContent = '';
 
             perguntas.forEach((p, i) => {
                 const marcada = document.querySelector(`input[name="q${i}"]:checked`);
@@ -221,6 +252,23 @@
             }
 
             const percentual = Math.round((acertos / perguntas.length) * 100);
+            if (percentual >= 60) {
+                botaoVerificar.disabled = true;
+                botaoVerificar.textContent = 'Salvando progresso...';
+                try {
+                    await salvarProgresso();
+                } catch (error) {
+                    console.error('Erro ao salvar o progresso do módulo:', error);
+                    mensagemErro.textContent = error.message
+                        ? `Não foi possível salvar seu progresso: ${error.message}`
+                        : 'Não foi possível salvar seu progresso. Tente novamente.';
+                    mensagemErro.hidden = false;
+                    botaoVerificar.disabled = false;
+                    botaoVerificar.textContent = 'Tentar salvar novamente';
+                    return;
+                }
+            }
+
             mostrarResultado(percentual);
         }
 
@@ -232,14 +280,15 @@
             const titulo = document.getElementById('titulo-res');
             const texto = document.getElementById('texto-res');
             const btn = document.getElementById('btn-acao');
+            titulo.classList.toggle('aprovado', nota >= 60);
+            titulo.classList.toggle('reprovado', nota < 60);
 
             if (nota >= 60) {
                 titulo.innerText = "Mandou bem! 🎉";
                 titulo.style.color = "#28a745";
-                texto.innerText = `Você acertou ${nota}%. Conhecimento validado!`;
-                btn.innerText = "Voltar para a Aula";
-                // Redireciona para a aula correspondente com o parâmetro de aprovação
-                btn.onclick = () => window.location.href = `aulas/aula${moduloAtual}.html?aprovado=true`;
+                texto.innerText = `Você acertou ${nota}%. Progresso salvo automaticamente e módulo liberado!`;
+                btn.innerText = "Continuar para os módulos";
+                btn.onclick = () => window.location.href = 'modulos.html';
             } else {
                 titulo.innerText = "Não foi dessa vez... ❌";
                 titulo.style.color = "#dc3545";
