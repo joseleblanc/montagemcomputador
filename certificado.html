@@ -132,7 +132,7 @@
 
             const perfilQuery = await _supabase
                 .from('perfil_alunos')
-                .select('email, status')
+                .select('email, status, nome_completo, cpf, data_nascimento')
                 .eq('email', user.email)
                 .maybeSingle();
             perfil = perfilQuery.data;
@@ -177,13 +177,16 @@
 
             const nomeBase = perfil?.email ? perfil.email.split('@')[0] : (user.email ? user.email.split('@')[0] : 'Aluno do Telecurso');
             dadosAluno = {
-                nome: nomeBase || "Aluno do Telecurso",
+                nome: perfil?.nome_completo || user.user_metadata?.nome_completo || nomeBase || "Aluno do Telecurso",
+                cpf: perfil?.cpf || user.user_metadata?.cpf || '',
                 id: user.id
             };
 
             document.getElementById('loading-area').style.display = 'none';
             document.getElementById('ready-area').style.display = 'block';
             document.getElementById('input-nome').value = dadosAluno.nome;
+            document.getElementById('input-cpf').value = dadosAluno.cpf;
+            document.getElementById('input-nasc').value = perfil?.data_nascimento || '';
             document.getElementById('msg-aluno').innerText = `Confirme seus dados para emissão.`;
         }
 

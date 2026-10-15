@@ -80,6 +80,21 @@
         @media(max-width:1100px) { .dashboard-graficos { grid-template-columns:1fr; } }
         @media(max-width:520px) { .dashboard-cabecalho { align-items:flex-start; flex-direction:column; } .status-grafico { flex-direction:column; } .status-legenda { width:100%; } }
         .lista-contatos { flex: 1; overflow-y: auto; }
+        .contato-ticket { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px; padding:10px 12px; margin:4px 10px; border:1px solid transparent; border-radius:9px; background:transparent; color:var(--text-main); }
+        .contato-ticket.ativo { border-color:var(--border); background:#12295a; }
+        .contato-ticket.tem-nao-lidas { border-color:rgba(239,68,68,.45); background:rgba(239,68,68,.08); }
+        .contato-ticket-identificacao { display:grid; gap:3px; min-width:0; }
+        .contato-ticket-identificacao strong,.contato-ticket-identificacao span { display:block; overflow-wrap:anywhere; }
+        .contato-ticket-identificacao strong { color:#f1f6fd; font-size:12px; }
+        .contato-ticket-identificacao span { color:var(--text-muted); font-size:10px; }
+        .contato-ticket-numero { display:inline-flex; align-items:center; gap:5px; margin-top:3px; color:#e0b04a!important; font:700 10px 'Inter',sans-serif; }
+        .contato-ticket-acoes { display:grid; justify-items:end; gap:6px; }
+        .contato-ticket-acoes select { max-width:118px; padding:4px; font-size:10px; }
+        .contato-ticket-abrir { padding:0; border:0; background:none; color:inherit; text-align:left; cursor:pointer; }
+        .contato-ticket-abrir:focus-visible,.contato-ticket-acoes button:focus-visible { outline:2px solid var(--purple); outline-offset:2px; }
+        .badge-nao-lidas { min-width:20px; padding:2px 6px; border-radius:999px; background:#ef4444; color:white; text-align:center; font-size:10px; font-weight:800; animation:pulso-ticket 1.2s ease-in-out infinite; }
+        @keyframes pulso-ticket { 50% { box-shadow:0 0 0 5px rgba(239,68,68,.18); } }
+        @media(prefers-reduced-motion:reduce) { .badge-nao-lidas { animation:none; } }
 
         /* CONTEÚDO PRINCIPAL */
         .main-content { flex: 1; display: flex; flex-direction: column; position: relative; }
@@ -93,6 +108,10 @@
         .evento-admin-info strong,.evento-admin-info span { display:block; overflow-wrap:anywhere; }
         .evento-admin-info span { margin-top:4px; color:var(--text-muted); font-size:12px; }
         .evento-admin-acoes { display:flex; flex:0 0 auto; gap:8px; }
+        .identificacao-aluno { display:grid; gap:4px; min-width:220px; }
+        .identificacao-aluno b { color:#f1f6fd; font-size:14px; }
+        .identificacao-aluno span { color:var(--text-muted); font-size:12px; overflow-wrap:anywhere; }
+        .identificacao-aluno span strong { color:var(--text-main); }
         @media(max-width:600px) { .scroll-container { padding:18px; } .evento-admin { align-items:flex-start; flex-direction:column; } }
 
         /* BARRA DE PESQUISA (LUPA) */
@@ -243,20 +262,20 @@
             <div class="nav-item active" id="menu-geral" onclick="exibirTela('visao-geral', this)">
                 <i class="fas fa-home"></i> Visão Geral
             </div>
-            <div class="nav-item" id="menu-aula-viva" onclick="exibirTela('visao-aula-viva', this)">
-                <i class="fas fa-broadcast-tower"></i> Aula ao vivo
-            </div>
             <div class="nav-item" id="menu-alunos" onclick="exibirTela('visao-alunos', this)">
                 <i class="fas fa-users"></i> Alunos Cadastrados
             </div>
             <div class="nav-item" id="menu-turmas" onclick="exibirTela('visao-turmas', this)">
                 <i class="fas fa-clipboard-list"></i> Turmas e Chamada
             </div>
+            <div class="nav-item" id="menu-aula-viva" onclick="exibirTela('visao-aula-viva', this)">
+                <i class="fas fa-broadcast-tower"></i> Aula ao vivo
+            </div>
             <div class="nav-item" onclick="exibirTela('visao-certificados', this)">
                 <i class="fas fa-certificate"></i> Certificados
             </div>
-            <div class="nav-item" onclick="exibirTela('visao-admins', this)">
-                <i class="fas fa-user-shield"></i> Administradores
+            <div class="nav-item" id="menu-avaliacoes" onclick="exibirTela('visao-avaliacoes', this)">
+                <i class="fas fa-star"></i> Avaliações do curso
             </div>
             <button type="button" class="nav-item submenu-toggle" id="menu-comunicacao" onclick="toggleSubmenuComunicacao()" aria-expanded="false" aria-controls="submenu-comunicacao">
                 <i class="fas fa-bullhorn"></i> Recados e calendário <i class="fas fa-chevron-down submenu-chevron"></i>
@@ -264,6 +283,10 @@
             <div id="submenu-comunicacao" class="nav-submenu">
                 <div class="nav-subitem" onclick="exibirTela('visao-recados', this)"><i class="fas fa-bullhorn"></i> Alerta global</div>
                 <div class="nav-subitem" onclick="exibirTela('visao-calendario', this)"><i class="fas fa-calendar-alt"></i> Calendário alunos</div>
+                <div class="nav-subitem" onclick="exibirTela('visao-changelog', this)"><i class="fas fa-sparkles"></i> Novidades da plataforma</div>
+            </div>
+            <div class="nav-item" onclick="exibirTela('visao-admins', this)">
+                <i class="fas fa-user-shield"></i> Administradores
             </div>
             <div class="nav-item" style="background:#12295a; color:#2dd4bf; font-weight:700;" onclick="window.open('https://supabase.com', '_blank')">
                 <i class="fas fa-database"></i> Banco no Supabase
@@ -321,6 +344,14 @@
                     <p>Distribuição dos tickets por status atual.</p>
                     <div id="grafico-chamados" aria-live="polite"></div>
                 </section>
+                <section class="dashboard-card" aria-labelledby="titulo-avaliacoes-dashboard">
+                    <h2 id="titulo-avaliacoes-dashboard"><i class="fas fa-star" style="color:var(--warning);"></i> Avaliações do curso</h2>
+                    <p id="resumo-avaliacoes-dashboard">Carregando avaliações...</p>
+                    <div id="grafico-avaliacoes-dashboard" aria-live="polite"></div>
+                    <button type="button" class="btn btn-primary" style="margin-top:16px;" onclick="exibirTela('visao-avaliacoes', document.getElementById('menu-avaliacoes'))">
+                        Ver todas as avaliações
+                    </button>
+                </section>
             </div>
         </div>
 
@@ -375,6 +406,27 @@
                 <div id="lista-eventos-admin" aria-live="polite" style="margin-top:18px;">Carregando eventos...</div>
             </div>
         </div>
+
+        <div id="visao-changelog" class="alunos-view scroll-container">
+            <div class="admin-card" style="border-top-color: var(--purple);">
+                <div class="card-header"><i class="fas fa-sparkles"></i> Novidades da plataforma</div>
+                <p style="margin:0 0 18px;color:var(--text-muted);font-size:13px;">Publique as atualizações que os alunos verão ao entrar na plataforma. Cada aluno verá a tela novamente quando uma novidade for publicada ou atualizada.</p>
+                <label style="display:flex;align-items:center;gap:10px;margin-bottom:20px;font-weight:700;">
+                    <input id="changelog-ativo" type="checkbox" style="width:auto;margin:0;accent-color:var(--success);" onchange="alternarChangelog()">
+                    Exibir a tela de novidades aos alunos
+                </label>
+                <input type="hidden" id="changelog-id">
+                <label for="changelog-titulo">Título da atualização</label>
+                <input type="text" id="changelog-titulo" maxlength="100" placeholder="Ex.: Novo chat de suporte">
+                <label for="changelog-descricao">O que foi atualizado?</label>
+                <textarea id="changelog-descricao" rows="4" maxlength="1000" placeholder="Descreva a novidade em linguagem simples..."></textarea>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+                    <button class="btn btn-primary" id="btn-salvar-changelog" type="button" onclick="salvarNovidadeChangelog()"><i class="fas fa-plus"></i> PUBLICAR NOVIDADE</button>
+                    <button class="btn" id="btn-cancelar-changelog" type="button" style="display:none;background:#12295a;color:#c3d3ea;" onclick="limparFormularioChangelog()">CANCELAR EDIÇÃO</button>
+                </div>
+                <div id="lista-changelog-admin" aria-live="polite" style="margin-top:18px;">Carregando novidades...</div>
+            </div>
+        </div>
         
         <div id="visao-alunos" class="alunos-view scroll-container">
             <div class="admin-card" style="border-top-color: var(--purple);">
@@ -391,7 +443,7 @@
                 </div>
                 <div class="search-container">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="input-pesquisa" placeholder="Procurar aluno por e-mail..." onkeyup="filtrarAlunos()">
+                    <input type="text" id="input-pesquisa" placeholder="Procurar por nome, CPF, nascimento, telefone ou e-mail..." onkeyup="filtrarAlunos()">
                 </div>
 
                 <div class="table-container">
@@ -399,7 +451,7 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 50px;">Excluir</th>
-                                        <th>Aluno (Email)</th>
+                                        <th>Identificação do aluno</th>
                                         <th>Status</th>
                                         <th>Ações</th>
                                     </tr>
@@ -457,6 +509,21 @@
                     <thead><tr><th>Código</th><th>Nome</th><th>CPF</th><th>Emitido em</th><th>Ação</th></tr></thead>
                     <tbody id="tabela-certificados"></tbody>
                 </table></div>
+            </div>
+        </div>
+
+        <div id="visao-avaliacoes" class="alunos-view scroll-container">
+            <div class="admin-card" style="border-top-color:var(--warning);">
+                <div class="card-header"><i class="fas fa-star"></i> Avaliações do curso</div>
+                <p style="margin:0 0 16px;color:var(--text-muted);font-size:13px;">Notas e comentários enviados pelos alunos. Cada aluno pode atualizar a própria avaliação.</p>
+                <div id="resumo-avaliacoes" class="dashboard-legenda" aria-live="polite" style="margin-bottom:16px;"></div>
+                <div id="estado-avaliacoes" class="dashboard-vazio" aria-live="polite">Carregando avaliações...</div>
+                <div id="tabela-avaliacoes-container" class="table-container" hidden>
+                    <table>
+                        <thead><tr><th>Aluno</th><th>Nota</th><th>Comentário</th><th>Atualizada em</th></tr></thead>
+                        <tbody id="tabela-avaliacoes"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -538,13 +605,14 @@
             if(elemento) elemento.classList.add('active');
             const submenu = document.getElementById('submenu-comunicacao');
             const menuComunicacao = document.getElementById('menu-comunicacao');
-            if (id === 'visao-recados' || id === 'visao-calendario') {
+            if (id === 'visao-recados' || id === 'visao-calendario' || id === 'visao-changelog') {
                 submenu.classList.add('aberto');
                 menuComunicacao.setAttribute('aria-expanded', 'true');
                 menuComunicacao.classList.add('active');
             }
             if(id === 'visao-alunos') carregarAlunos();
             if(id === 'visao-certificados') carregarCertificados();
+            if(id === 'visao-avaliacoes') carregarAvaliacoesCurso();
             if(id === 'visao-admins') carregarAdmins();
             if(id === 'visao-geral') carregarMetricas();
             if(id !== 'visao-turmas') pararQrChamada();
@@ -561,6 +629,8 @@
         // --- FUNÇÕES DE AULA E AVISO ---
         let eventosCalendario = [];
         let materiaisAula = [];
+        let novidadesChangelog = [];
+        let changelogAtivo = false;
 
         function linkMaterialSeguro(valor) {
             try {
@@ -657,6 +727,19 @@
             });
         }
 
+        function lerNovidadesChangelog(valor) {
+            if (!valor) return [];
+            const novidades = JSON.parse(valor);
+            if (!Array.isArray(novidades) || !novidades.every(item =>
+                item && typeof item.id === 'string' && typeof item.titulo === 'string' &&
+                typeof item.descricao === 'string' && typeof item.data === 'string' &&
+                !Number.isNaN(Date.parse(item.data))
+            )) {
+                throw new Error('As novidades salvas estão em um formato inválido.');
+            }
+            return novidades;
+        }
+
         async function carregarConfiguracoes() {
             try {
                 const { data, error } = await _supabase.from('configuracoes').select('*');
@@ -672,9 +755,14 @@
                 atualizarInterfaceManutencao();
                 eventosCalendario = lerEventosCalendario(configuracoes.find(c => c.chave === 'calendario_modulos')?.valor);
                 renderizarEventosAdmin();
+                novidadesChangelog = lerNovidadesChangelog(configuracoes.find(c => c.chave === 'novidades_itens')?.valor);
+                changelogAtivo = configuracoes.find(c => c.chave === 'novidades_ativo')?.valor === 'true';
+                document.getElementById('changelog-ativo').checked = changelogAtivo;
+                renderizarNovidadesChangelogAdmin();
             } catch (error) {
                 console.error('Erro ao carregar configurações:', error);
                 document.getElementById('lista-eventos-admin').textContent = 'Não foi possível carregar os eventos. Tente novamente.';
+                document.getElementById('lista-changelog-admin').textContent = 'Não foi possível carregar as novidades. Tente novamente.';
                 alert('Erro ao carregar configurações: ' + (error.message || error));
             }
         }
@@ -685,6 +773,124 @@
                 .upsert({ chave, valor }, { onConflict: 'chave' });
             if (error) throw error;
         }
+
+        function renderizarNovidadesChangelogAdmin() {
+            const lista = document.getElementById('lista-changelog-admin');
+            const novidadesOrdenadas = [...novidadesChangelog].sort((a, b) => Date.parse(b.data) - Date.parse(a.data));
+            if (!novidadesOrdenadas.length) {
+                lista.textContent = 'Nenhuma novidade publicada.';
+                return;
+            }
+            lista.innerHTML = novidadesOrdenadas.map(item => `
+                <div class="evento-admin">
+                    <div class="evento-admin-info">
+                        <strong>${escaparHtml(item.titulo)}</strong>
+                        <span>${escaparHtml(new Date(item.data).toLocaleString('pt-BR'))}</span>
+                        <span>${escaparHtml(item.descricao)}</span>
+                    </div>
+                    <div class="evento-admin-acoes">
+                        <button class="btn btn-primary" type="button" data-changelog-editar="${escaparHtml(item.id)}" aria-label="Editar ${escaparHtml(item.titulo)}"><i class="fas fa-edit"></i> Editar</button>
+                        <button class="btn btn-danger" type="button" data-changelog-excluir="${escaparHtml(item.id)}" aria-label="Excluir ${escaparHtml(item.titulo)}"><i class="fas fa-trash"></i> Excluir</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function limparFormularioChangelog() {
+            document.getElementById('changelog-id').value = '';
+            document.getElementById('changelog-titulo').value = '';
+            document.getElementById('changelog-descricao').value = '';
+            document.getElementById('btn-salvar-changelog').innerHTML = '<i class="fas fa-plus"></i> PUBLICAR NOVIDADE';
+            document.getElementById('btn-cancelar-changelog').style.display = 'none';
+        }
+
+        function editarNovidadeChangelog(id) {
+            const item = novidadesChangelog.find(novidade => novidade.id === id);
+            if (!item) {
+                alert('A novidade selecionada não foi encontrada. Atualize a página e tente novamente.');
+                return;
+            }
+            document.getElementById('changelog-id').value = item.id;
+            document.getElementById('changelog-titulo').value = item.titulo;
+            document.getElementById('changelog-descricao').value = item.descricao;
+            document.getElementById('btn-salvar-changelog').innerHTML = '<i class="fas fa-save"></i> SALVAR ALTERAÇÕES';
+            document.getElementById('btn-cancelar-changelog').style.display = 'inline-flex';
+            document.getElementById('changelog-titulo').focus();
+        }
+
+        async function salvarNovidadeChangelog() {
+            const id = document.getElementById('changelog-id').value;
+            const titulo = document.getElementById('changelog-titulo').value.trim();
+            const descricao = document.getElementById('changelog-descricao').value.trim();
+            if (!titulo || !descricao) {
+                alert('Preencha o título e a descrição da atualização.');
+                return;
+            }
+            const agora = new Date().toISOString();
+            const novidade = {
+                id: id || (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`),
+                titulo,
+                descricao,
+                data: agora
+            };
+            const atualizadas = id
+                ? novidadesChangelog.map(item => item.id === id ? novidade : item)
+                : [novidade, ...novidadesChangelog];
+            const botao = document.getElementById('btn-salvar-changelog');
+            botao.disabled = true;
+            try {
+                await salvarConfiguracao('novidades_itens', JSON.stringify(atualizadas));
+                novidadesChangelog = atualizadas;
+                renderizarNovidadesChangelogAdmin();
+                limparFormularioChangelog();
+            } catch (error) {
+                console.error('Erro ao salvar novidade da plataforma:', error);
+                alert('Não foi possível publicar a novidade: ' + (error.message || error));
+            } finally {
+                botao.disabled = false;
+            }
+        }
+
+        async function excluirNovidadeChangelog(id) {
+            const novidade = novidadesChangelog.find(item => item.id === id);
+            if (!novidade || !confirm(`Excluir a novidade "${novidade.titulo}"?`)) return;
+            const atualizadas = novidadesChangelog.filter(item => item.id !== id);
+            try {
+                await salvarConfiguracao('novidades_itens', JSON.stringify(atualizadas));
+                novidadesChangelog = atualizadas;
+                renderizarNovidadesChangelogAdmin();
+                if (document.getElementById('changelog-id').value === id) limparFormularioChangelog();
+            } catch (error) {
+                console.error('Erro ao excluir novidade da plataforma:', error);
+                alert('Não foi possível excluir a novidade: ' + (error.message || error));
+            }
+        }
+
+        async function alternarChangelog() {
+            const controle = document.getElementById('changelog-ativo');
+            const ativoSolicitado = controle.checked;
+            controle.disabled = true;
+            try {
+                await salvarConfiguracao('novidades_ativo', String(ativoSolicitado));
+                changelogAtivo = ativoSolicitado;
+            } catch (error) {
+                console.error('Erro ao alterar exibição das novidades:', error);
+                controle.checked = changelogAtivo;
+                alert('Não foi possível alterar a exibição das novidades: ' + (error.message || error));
+            } finally {
+                controle.disabled = false;
+            }
+        }
+
+        document.getElementById('lista-changelog-admin').addEventListener('click', event => {
+            const editar = event.target.closest('[data-changelog-editar]');
+            if (editar) {
+                editarNovidadeChangelog(editar.dataset.changelogEditar);
+                return;
+            }
+            const excluir = event.target.closest('[data-changelog-excluir]');
+            if (excluir) excluirNovidadeChangelog(excluir.dataset.changelogExcluir);
+        });
 
         function renderizarEventosAdmin() {
             const lista = document.getElementById('lista-eventos-admin');
@@ -849,6 +1055,89 @@
             const { data } = await _supabase.from('perfil_alunos').select('*');
             todosAlunos = data ? [...data].reverse() : []; // Inverte para novos no topo
             filtrarAlunos();
+        }
+
+        async function carregarAvaliacoesCurso() {
+            const estado = document.getElementById('estado-avaliacoes');
+            const container = document.getElementById('tabela-avaliacoes-container');
+            estado.hidden = false;
+            estado.classList.remove('dashboard-erro');
+            estado.textContent = 'Carregando avaliações...';
+            container.hidden = true;
+
+            const { data, error } = await _supabase
+                .from('avaliacoes_curso')
+                .select('user_id, nota, comentario, updated_at')
+                .order('updated_at', { ascending: false });
+            if (error) {
+                console.error('Erro ao carregar avaliações do curso:', error);
+                mostrarErroAvaliacoes();
+                estado.classList.add('dashboard-erro');
+                estado.textContent = 'Não foi possível carregar as avaliações. Confira se avaliacoes-curso.sql foi executado e as permissões do administrador estão ativas.';
+                return;
+            }
+
+            const avaliacoes = data || [];
+            const resumo = document.getElementById('resumo-avaliacoes');
+            renderizarResumoAvaliacoesDashboard(avaliacoes);
+            if (!avaliacoes.length) {
+                resumo.textContent = 'Nenhuma avaliação recebida.';
+                estado.textContent = 'As avaliações enviadas pelos alunos aparecerão aqui.';
+                return;
+            }
+
+            const media = avaliacoes.reduce((total, item) => total + Number(item.nota), 0) / avaliacoes.length;
+            resumo.textContent = `${avaliacoes.length} ${avaliacoes.length === 1 ? 'avaliação' : 'avaliações'} · média ${media.toFixed(1)} de 5 estrelas`;
+            document.getElementById('tabela-avaliacoes').innerHTML = avaliacoes.map(item => {
+                const nota = Number(item.nota);
+                const aluno = todosAlunos.find(registro =>
+                    registro.user_id === item.user_id
+                );
+                const nome = aluno?.nome_completo || 'Nome não informado';
+                const email = aluno?.email || 'E-mail não encontrado no cadastro';
+                const data = new Date(item.updated_at);
+                const dataTexto = Number.isNaN(data.getTime()) ? 'Data indisponível' : data.toLocaleString('pt-BR');
+                return `
+                    <tr>
+                        <td><strong>${escaparHtml(nome)}</strong><br><small>${escaparHtml(email)}</small></td>
+                        <td><span style="color:var(--warning);white-space:nowrap;" aria-label="${nota} de 5 estrelas">${'★'.repeat(nota)}${'☆'.repeat(5 - nota)}</span></td>
+                        <td style="white-space:pre-wrap;min-width:220px;">${item.comentario ? escaparHtml(item.comentario) : '<span style="color:var(--text-muted)">Sem comentário</span>'}</td>
+                        <td>${escaparHtml(dataTexto)}</td>
+                    </tr>`;
+            }).join('');
+            estado.hidden = true;
+            container.hidden = false;
+        }
+
+        function mostrarErroAvaliacoes() {
+            document.getElementById('resumo-avaliacoes-dashboard').textContent = 'Não foi possível carregar as avaliações.';
+            document.getElementById('grafico-avaliacoes-dashboard').innerHTML =
+                '<div class="dashboard-vazio dashboard-erro">Confira se a tabela e as permissões de avaliações foram configuradas no Supabase.</div>';
+        }
+
+        function renderizarResumoAvaliacoesDashboard(avaliacoes) {
+            const resumo = document.getElementById('resumo-avaliacoes-dashboard');
+            const lista = document.getElementById('grafico-avaliacoes-dashboard');
+            if (!avaliacoes.length) {
+                resumo.textContent = 'Nenhuma avaliação recebida.';
+                lista.innerHTML = '<div class="dashboard-vazio">As avaliações dos alunos aparecerão aqui.</div>';
+                return;
+            }
+            const media = avaliacoes.reduce((total, item) => total + Number(item.nota), 0) / avaliacoes.length;
+            resumo.textContent = `${avaliacoes.length} ${avaliacoes.length === 1 ? 'avaliação' : 'avaliações'} · média ${media.toFixed(1)} de 5 estrelas`;
+            lista.innerHTML = avaliacoes.slice(0, 3).map(item => {
+                const nota = Number(item.nota);
+                const aluno = todosAlunos.find(registro => registro.user_id === item.user_id);
+                const nome = aluno?.nome_completo || 'Aluno';
+                return `
+                    <article style="padding:12px 0;border-top:1px solid var(--border);">
+                        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
+                            <strong style="color:var(--text-main);font-size:13px;">${escaparHtml(nome)}</strong>
+                            <span style="color:var(--warning);white-space:nowrap;" aria-label="${nota} de 5 estrelas">${'★'.repeat(nota)}${'☆'.repeat(5 - nota)}</span>
+                        </div>
+                        <p style="margin:6px 0 0;color:var(--text-muted);font-size:12px;line-height:1.5;white-space:pre-wrap;">${item.comentario ? escaparHtml(item.comentario) : 'Sem comentário.'}</p>
+                    </article>`;
+            }).join('');
         }
 
         const modulosTurmas = [
@@ -1117,10 +1406,20 @@
 
         function renderizarTabela(lista) {
             const tbody = document.getElementById('tabela-alunos');
+            if (!lista.length) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Nenhum aluno encontrado.</td></tr>';
+                return;
+            }
             tbody.innerHTML = lista.map(aluno => {
                 const statusText = aluno.status || '';
                 const isApproved = statusText.toLowerCase() === 'aprovado';
                 const provaLiberada = !!aluno.prova_liberada;
+                const nome = aluno.nome_completo || 'Não informado';
+                const cpf = aluno.cpf || 'Não informado';
+                const telefone = aluno.telefone || 'Não informado';
+                const nascimento = aluno.data_nascimento
+                    ? new Date(`${aluno.data_nascimento}T00:00:00`).toLocaleDateString('pt-BR')
+                    : 'Não informado';
                 const actionButton = isApproved
                     ? `<button class="btn" style="background:rgba(239,68,68,.16); color:#fca5a5; font-weight:700; padding:8px 12px;" onclick="toggleApproval(this.closest(\'tr\').dataset.email)">Reprovar</button>`
                     : `<button class="btn btn-primary" style="padding:8px 12px;" onclick="toggleApproval(this.closest(\'tr\').dataset.email)">Aprovar</button>`;
@@ -1131,7 +1430,15 @@
                 return `
                 <tr data-email="${escaparHtml(aluno.email)}">
                     <td><button class="btn-trash" onclick="deletarAluno(this.closest(\'tr\').dataset.email)"><i class="fas fa-trash-alt"></i></button></td>
-                    <td><b>${escaparHtml(aluno.email)}</b></td>
+                    <td>
+                        <div class="identificacao-aluno">
+                            <b>${escaparHtml(nome)}</b>
+                            <span><strong>CPF:</strong> ${escaparHtml(cpf)}</span>
+                            <span><strong>Telefone:</strong> ${escaparHtml(telefone)}</span>
+                            <span><strong>Nascimento:</strong> ${escaparHtml(nascimento)}</span>
+                            <span><strong>E-mail:</strong> ${escaparHtml(aluno.email)}</span>
+                        </div>
+                    </td>
                     <td><span class="status-badge status-${escaparHtml(aluno.status)}">${escaparHtml(statusText)}</span></td>
                     <td>
                         <div style="display:flex; gap:8px; align-items:center;">
@@ -1140,6 +1447,7 @@
                             <button class="btn" style="padding:8px; background:rgba(224,176,74,.16); color:#e0b04a; font-weight:700;" onclick="enviarResetSenha(this.closest(\'tr\').dataset.email)"><i class="fas fa-key"></i> Resetar senha</button>
                             <button class="btn" style="padding:8px; background:rgba(45,212,191,.16); color:#2dd4bf; font-weight:700;" onclick="abrirVerificacaoModulos(this.closest(\'tr\').dataset.email)">Verificar Módulos</button>
                             <button class="btn" style="padding:8px; background:rgba(52,211,153,.16); color:#34d399; font-weight:700;" onclick="abrirAnotacoes(this.closest(\'tr\').dataset.email)"><i class="fas fa-sticky-note"></i> Consultar anotações</button>
+                            <button class="btn btn-primary" style="padding:8px;" onclick="iniciarChatDireto(this.closest(\'tr\').dataset.email)"><i class="fas fa-comment-dots"></i> Chat direto</button>
                         </div>
                     </td>
                 </tr>
@@ -1154,8 +1462,18 @@
         }
         function filtrarAlunos() {
             const termo = document.getElementById('input-pesquisa').value.trim().toLowerCase();
-            const lista = todosAlunos.filter(a => (a.email || '').toLowerCase().includes(termo)
-                && (filtroStatus === 'todos' || (a.status || '').toLowerCase() === filtroStatus));
+            const termoNumerico = termo.replace(/\D/g, '');
+            const lista = todosAlunos.filter(a => {
+                const nascimento = a.data_nascimento
+                    ? new Date(`${a.data_nascimento}T00:00:00`).toLocaleDateString('pt-BR')
+                    : '';
+                const correspondeTexto = [a.nome_completo, a.cpf, a.data_nascimento, nascimento, a.telefone, a.email]
+                    .some(valor => String(valor || '').toLowerCase().includes(termo));
+                const correspondeNumero = termoNumerico && [a.cpf, a.telefone]
+                    .some(valor => String(valor || '').replace(/\D/g, '').includes(termoNumerico));
+                return (correspondeTexto || correspondeNumero)
+                    && (filtroStatus === 'todos' || (a.status || '').toLowerCase() === filtroStatus);
+            });
             renderizarTabela(lista);
             document.getElementById('contagem-alunos').textContent = `${lista.length} de ${todosAlunos.length} alunos`;
         }
@@ -1173,8 +1491,8 @@
         }
         function exportarCSV() {
             const esc = v => { v = String(v ?? ''); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
-            const linhas = [['email', 'status', 'modulo', 'prova_liberada'],
-                ...todosAlunos.map(a => [a.email, a.status, a.modulo, a.prova_liberada ? 'sim' : 'nao'])];
+            const linhas = [['nome', 'cpf', 'data_nascimento', 'telefone', 'email', 'status', 'modulo', 'prova_liberada'],
+                ...todosAlunos.map(a => [a.nome_completo || '', a.cpf || '', a.data_nascimento || '', a.telefone || '', a.email, a.status, a.modulo, a.prova_liberada ? 'sim' : 'nao'])];
             const blob = new Blob(['\ufeff' + linhas.map(l => l.map(esc).join(';')).join('\n')], { type: 'text/csv;charset=utf-8' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob); link.download = 'alunos-telecurso.csv'; link.click();
@@ -1453,6 +1771,7 @@
                     console.error('Erro ao carregar chamados para o dashboard:', error);
                     document.getElementById('grafico-chamados').innerHTML = '<div class="dashboard-vazio dashboard-erro">Não foi possível carregar os chamados por status.</div>';
                 }
+                await carregarAvaliacoesCurso();
                 document.getElementById('dashboard-atualizado').textContent = `Dados atualizados às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}.`;
             } catch (error) {
                 console.error('Erro ao carregar métricas do dashboard:', error);
@@ -1749,6 +2068,7 @@
         }
 
         async function carregarContatos() {
+            if (!todosAlunos.length) await carregarAlunos();
             let { data, error } = await _supabase.from('chat_suporte').select('aluno_email,ticket,status,conversation,lida').order('updated_at', { ascending: false });
             if (error) {
                 // Se tabela antiga não tem conversation/status, mantemos compatibilidade
@@ -1757,7 +2077,7 @@
                 data = response.data || [];
             }
 
-            const unicos = [...new Set(data?.map(m => m.aluno_email))].sort();
+            const unicos = [...new Set((data || []).map(m => m.aluno_email).filter(Boolean))].sort();
             const lista = document.getElementById('lista-contatos');
 
             ticketToEmail = {};
@@ -1773,39 +2093,61 @@
 
             lista.innerHTML = unicos.map(email => {
                 const ticket = emailToTicket[email];
-                const activeClass = alunoSelecionado === email ? 'active' : '';
+                const activeClass = alunoSelecionado?.toLowerCase() === email.toLowerCase() ? 'ativo' : '';
+                const aluno = todosAlunos.find(item => item.email?.toLowerCase() === email.toLowerCase());
+                const nomeAluno = aluno?.nome_completo || 'Nome não informado';
 
                 const ticketRow = data.find(m => (m.ticket || gerarTicketPorEmail(m.aluno_email)) === ticket);
-                const unreadCount = ticketRow
-                    ? ((ticketRow.conversation || []).filter(msg => msg.remetente === 'aluno' && !msg.lida).length || 0)
-                    : 0;
+                const unreadCount = Array.isArray(ticketRow?.conversation)
+                    ? ticketRow.conversation.filter(msg => msg.remetente === 'aluno' && !msg.lida).length
+                    : data.filter(msg => msg.aluno_email === email && msg.remetente === 'aluno' && !msg.lida).length;
 
                 const badge = unreadCount > 0
-                    ? `<span style="background:#ef4444; color:white; border-radius:999px; padding:2px 7px; font-size:11px;">${unreadCount}</span>`
+                    ? `<span class="badge-nao-lidas" aria-label="${unreadCount} mensagens não lidas">${unreadCount}</span>`
                     : '';
 
                 const status = ticketStatusMap[ticket] || 'aguardando';
 
                 return `
-                    <div class="nav-item ${activeClass}" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                        <div style="display:flex; align-items:center; gap:8px; flex-grow:1;">
-                            <span style="cursor:pointer;" onclick="abrirChat('${ticket}')"><i class="fas fa-comment"></i> ${ticket} ${badge}</span>
-                            <span class="status-ticket ${status}">${status.replace(/-/g,' ')}</span>
-                        </div>
-                        <div style="display:flex; gap:5px; align-items:center;">
-                            <select onchange="atualizarStatusTicket('${ticket}', this.value)" style="padding:4px; font-size:11px;">
+                    <div class="contato-ticket ${activeClass} ${unreadCount ? 'tem-nao-lidas' : ''}">
+                        <button type="button" class="contato-ticket-abrir" data-abrir-ticket="${escaparHtml(ticket)}" aria-label="Abrir conversa com ${escaparHtml(nomeAluno)}, ${escaparHtml(email)}, ticket ${escaparHtml(ticket)}">
+                            <span class="contato-ticket-identificacao">
+                                <strong>${escaparHtml(nomeAluno)}</strong>
+                                <span>${escaparHtml(email)}</span>
+                                <span class="contato-ticket-numero"><i class="fas fa-ticket-alt" aria-hidden="true"></i> ${escaparHtml(ticket)}</span>
+                            </span>
+                        </button>
+                        <div class="contato-ticket-acoes">
+                            ${badge}
+                            <span class="status-ticket ${escaparHtml(status)}">${escaparHtml(status.replace(/-/g,' '))}</span>
+                            <select data-status-ticket="${escaparHtml(ticket)}" aria-label="Status do ticket ${escaparHtml(ticket)}">
                                 <option value="">Status</option>
-                                <option value="aguardando">Aguardando</option>
-                                <option value="em-atendimento">Em Atendimento</option>
-                                <option value="concluido">Concluído</option>
-                                <option value="nao-atendido">Não Atendido</option>
+                                <option value="aguardando" ${status === 'aguardando' ? 'selected' : ''}>Aguardando</option>
+                                <option value="em-atendimento" ${status === 'em-atendimento' ? 'selected' : ''}>Em atendimento</option>
+                                <option value="concluido" ${status === 'concluido' ? 'selected' : ''}>Concluído</option>
+                                <option value="nao-atendido" ${status === 'nao-atendido' ? 'selected' : ''}>Não atendido</option>
                             </select>
-                            <button class="btn-trash" onclick="deletarChat('${ticket}', event)"><i class="fas fa-trash-alt"></i></button>
+                            <button type="button" class="btn-trash" data-excluir-ticket="${escaparHtml(ticket)}" aria-label="Excluir ticket ${escaparHtml(ticket)}"><i class="fas fa-trash-alt"></i></button>
                         </div>
                     </div>
                 `;
             }).join('');
         }
+
+        document.getElementById('lista-contatos').addEventListener('click', event => {
+            const abrir = event.target.closest('[data-abrir-ticket]');
+            if (abrir) {
+                abrirChat(abrir.dataset.abrirTicket);
+                return;
+            }
+            const excluir = event.target.closest('[data-excluir-ticket]');
+            if (excluir) deletarChat(excluir.dataset.excluirTicket, event);
+        });
+
+        document.getElementById('lista-contatos').addEventListener('change', event => {
+            const seletor = event.target.closest('[data-status-ticket]');
+            if (seletor && seletor.value) atualizarStatusTicket(seletor.dataset.statusTicket, seletor.value);
+        });
 
         async function marcarMensagensLidasAdmin(ticket) {
             const { data: existing } = await _supabase.from('chat_suporte').select('*').eq('ticket', ticket).single();
@@ -1831,13 +2173,85 @@
             });
         }
 
+        async function iniciarChatDireto(email) {
+            const aluno = todosAlunos.find(item => item.email.toLowerCase() === email.toLowerCase());
+            if (!aluno) {
+                alert('Não foi possível localizar os dados deste aluno. Atualize a lista e tente novamente.');
+                return;
+            }
+
+            let ticketRow = null;
+            const ticketCalculado = gerarTicketPorEmail(email);
+            const buscaTicket = await _supabase
+                .from('chat_suporte')
+                .select('ticket, aluno_email')
+                .eq('ticket', ticketCalculado)
+                .maybeSingle();
+            if (buscaTicket.error) {
+                console.error('Erro ao procurar a conversa do aluno:', buscaTicket.error);
+                alert('Não foi possível abrir a conversa. Tente novamente.');
+                return;
+            }
+            if (buscaTicket.data?.aluno_email?.toLowerCase() === email.toLowerCase()) {
+                ticketRow = buscaTicket.data;
+            } else if (buscaTicket.data) {
+                console.error('O ticket calculado já está associado a outro aluno:', ticketCalculado);
+                alert('Não foi possível abrir a conversa: conflito no identificador do ticket.');
+                return;
+            }
+
+            if (!ticketRow) {
+                const buscaEmail = await _supabase
+                    .from('chat_suporte')
+                    .select('ticket, aluno_email')
+                    .eq('aluno_email', email)
+                    .limit(1)
+                    .maybeSingle();
+                if (buscaEmail.error) {
+                    console.error('Erro ao procurar conversa por e-mail:', buscaEmail.error);
+                    alert('Não foi possível abrir a conversa. Tente novamente.');
+                    return;
+                }
+                ticketRow = buscaEmail.data;
+            }
+
+            if (!ticketRow) {
+                const novoTicket = {
+                    ticket: ticketCalculado,
+                    aluno_email: email,
+                    status: 'em-atendimento',
+                    conversation: [],
+                    lida: true
+                };
+                const criacao = await _supabase.from('chat_suporte').insert([novoTicket]);
+                if (criacao.error) {
+                    console.error('Erro ao iniciar conversa direta:', criacao.error);
+                    alert('Não foi possível iniciar a conversa. Verifique se a tabela de suporte está disponível.');
+                    return;
+                }
+                ticketRow = { ticket: ticketCalculado, aluno_email: email };
+            }
+
+            emailToTicket[email] = ticketRow.ticket;
+            ticketToEmail[ticketRow.ticket] = email;
+            ticketStatusMap[ticketRow.ticket] = 'em-atendimento';
+            abrirChat(ticketRow.ticket);
+        }
+
         async function carregarMensagens() {
             if (!alunoSelecionado) return;
             const ticket = document.getElementById('visao-chat').dataset.ticket || emailToTicket[alunoSelecionado] || '----';
-            document.getElementById('chat-ticket-label').innerText = `Chat ${ticket}`;
+            const aluno = todosAlunos.find(item => item.email.toLowerCase() === alunoSelecionado.toLowerCase());
+            const nome = aluno?.nome_completo || alunoSelecionado;
+            document.getElementById('chat-ticket-label').innerText = `${nome} · ${alunoSelecionado} · ${ticket}`;
 
-            const { data: ticketRow } = await _supabase.from('chat_suporte').select('*').eq('ticket', ticket).single();
+            const { data: ticketRow, error: ticketError } = await _supabase.from('chat_suporte').select('*').eq('ticket', ticket).maybeSingle();
             let conversation = [];
+            if (ticketError) {
+                console.error('Erro ao carregar conversa:', ticketError);
+                document.getElementById('box-mensagens').textContent = 'Não foi possível carregar as mensagens.';
+                return;
+            }
             if (ticketRow && ticketRow.conversation) {
                 conversation = ticketRow.conversation;
             } else {
@@ -1847,7 +2261,7 @@
             }
 
             const box = document.getElementById('box-mensagens');
-            box.innerHTML = conversation.map(m => `<div class="bubble ${m.remetente === 'aluno' ? 'aluno' : 'admin'}">${m.mensagem}</div>`).join('');
+            box.innerHTML = (conversation || []).map(m => `<div class="bubble ${m.remetente === 'aluno' ? 'aluno' : 'admin'}">${escaparHtml(m.mensagem)}</div>`).join('');
             box.scrollTop = box.scrollHeight;
         }
 
@@ -1875,25 +2289,51 @@
 
         async function enviarMensagem() {
             const input = document.getElementById('input-msg');
-            if (!input.value.trim()) return;
+            const texto = input.value.trim();
+            if (!texto || !alunoSelecionado) return;
             const ticket = document.getElementById('visao-chat').dataset.ticket || emailToTicket[alunoSelecionado];
+            if (!ticket) {
+                alert('Selecione um aluno antes de enviar a mensagem.');
+                return;
+            }
 
-            const { data: existing } = await _supabase.from('chat_suporte').select('*').eq('ticket', ticket).single();
-            const mensagemObj = { remetente: 'instrutor', mensagem: input.value, created_at: new Date().toISOString(), lida: false };
+            const { data: existing, error: buscaError } = await _supabase.from('chat_suporte').select('*').eq('ticket', ticket).maybeSingle();
+            if (buscaError) {
+                console.error('Erro ao carregar ticket para envio:', buscaError);
+                alert('Não foi possível enviar a mensagem. Tente novamente.');
+                return;
+            }
+            const mensagemObj = { remetente: 'instrutor', mensagem: texto, created_at: new Date().toISOString(), lida: false };
+            let resultado;
 
             if (existing && existing.conversation) {
                 const novaConversa = [...existing.conversation, mensagemObj];
-                await _supabase.from('chat_suporte').update({ conversation: novaConversa, lida: false }).eq('ticket', ticket);
+                resultado = await _supabase.from('chat_suporte').update({ conversation: novaConversa, status: existing.status || 'em-atendimento', lida: false }).eq('ticket', ticket);
             } else if (existing) {
-                await _supabase.from('chat_suporte').upsert({ ticket, aluno_email: alunoSelecionado, status: ticketStatusMap[ticket] || 'em-atendimento', conversation: [mensagemObj], lida: false });
+                const conversaLegada = existing.mensagem
+                    ? [{ remetente: existing.remetente || 'aluno', mensagem: existing.mensagem, created_at: existing.created_at, lida: existing.lida || false }, mensagemObj]
+                    : [mensagemObj];
+                resultado = await _supabase.from('chat_suporte').update({ conversation: conversaLegada, status: existing.status || 'em-atendimento', lida: false }).eq('ticket', ticket);
             } else {
-                await _supabase.from('chat_suporte').insert([{ ticket, aluno_email: alunoSelecionado, status: 'em-atendimento', conversation: [mensagemObj], lida: false }]);
+                resultado = await _supabase.from('chat_suporte').insert([{ ticket, aluno_email: alunoSelecionado, status: 'em-atendimento', conversation: [mensagemObj], lida: false }]);
             }
 
+            if (resultado.error) {
+                console.error('Erro ao enviar mensagem direta:', resultado.error);
+                alert('Não foi possível enviar a mensagem. Tente novamente.');
+                return;
+            }
             input.value = "";
             carregarMensagens();
             carregarContatos();
         }
+
+        document.getElementById('input-msg').addEventListener('keydown', event => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                enviarMensagem();
+            }
+        });
 
         function iniciarRealtimeAdmin() {
             try {
@@ -1951,7 +2391,7 @@
         let painelIniciado = false;
         function iniciarPainel() {
             if (painelIniciado) return; painelIniciado = true;
-            carregarConfiguracoes(); carregarContatos(); carregarMetricas();
+            carregarConfiguracoes(); carregarAlunos(); carregarContatos(); carregarMetricas();
             iniciarRealtimeAdmin(); iniciarRealtimeConfiguracoes();
             setInterval(() => {
                 if (document.hidden) return;

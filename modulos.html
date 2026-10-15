@@ -25,6 +25,55 @@
 a.card-modulo{text-decoration:none;color:inherit}
 .card-modulo:focus-visible,.continuar:focus-visible,.btn-ajuda:focus-visible{outline:2px solid var(--hw-cyan);outline-offset:3px}
 .painel-suporte{max-width:calc(100vw - 48px)}
+.btn-ajuda.tem-notificacao{animation:alerta-ajuda 1.5s ease-in-out infinite;box-shadow:0 0 0 6px rgba(251,113,133,.18),0 0 26px rgba(251,113,133,.75)!important}
+#badge-novas-mensagens{display:none;position:absolute;top:-8px;right:-8px;min-width:23px;height:23px;align-items:center;justify-content:center;padding:0 6px;border:2px solid var(--bg-main);border-radius:999px;background:var(--hw-danger);color:#fff;font:800 .72rem 'Inter',sans-serif;box-shadow:0 0 0 3px rgba(251,113,133,.2)}
+#badge-novas-mensagens.ativo{display:inline-flex;animation:pulso-notificacao 1.2s ease-in-out infinite}
+#notificacao-chat{position:fixed;right:24px;bottom:92px;z-index:9998;display:flex;align-items:center;gap:12px;width:min(360px,calc(100vw - 32px));padding:15px 17px;border:1px solid rgba(251,113,133,.65);border-radius:14px;background:linear-gradient(130deg,#4b1e35,#17243a);color:#fff;text-align:left;box-shadow:0 12px 38px rgba(0,0,0,.4);cursor:pointer}
+#notificacao-chat[hidden]{display:none}
+#notificacao-chat i{color:#fda4af;font-size:1.35rem}
+#notificacao-chat strong,#notificacao-chat small{display:block}
+#notificacao-chat small{margin-top:3px;color:#fbc7cf;font-size:.76rem}
+@keyframes pulso-notificacao{50%{transform:scale(1.13);box-shadow:0 0 0 7px rgba(251,113,133,.15)}}
+@keyframes alerta-ajuda{50%{transform:translateY(-4px)}}
+@media(prefers-reduced-motion:reduce){.btn-ajuda.tem-notificacao,#badge-novas-mensagens.ativo{animation:none}}
+.changelog-modal{position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(3,12,24,.86);backdrop-filter:blur(8px)}
+.changelog-modal[hidden]{display:none}
+.changelog-conteudo{width:min(100%,620px);max-height:min(88vh,760px);overflow:auto;padding:clamp(20px,4vw,32px);border:1px solid var(--border-highlight);border-radius:20px;background:linear-gradient(145deg,#102b47,#0b1d32);color:var(--text-primary);box-shadow:0 26px 80px rgba(0,0,0,.55)}
+.changelog-etiqueta{display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;padding:7px 11px;border:1px solid rgba(94,234,212,.26);border-radius:999px;background:rgba(94,234,212,.08);color:var(--hw-cyan);font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.changelog-conteudo h2{margin:0 0 8px;font:800 clamp(1.35rem,4vw,1.8rem)/1.2 'Sora',sans-serif}
+.changelog-intro{margin:0 0 20px;color:var(--text-muted);font-size:.9rem;line-height:1.6}
+.changelog-lista{display:grid;gap:12px;margin:0 0 22px;padding:0;list-style:none}
+.changelog-item{padding:15px 16px;border:1px solid var(--border-tech);border-radius:12px;background:rgba(7,20,38,.55)}
+.changelog-item h3{margin:0 0 5px;color:var(--hw-gold);font:700 .98rem 'Sora',sans-serif}
+.changelog-item time{display:block;margin-bottom:8px;color:var(--text-muted);font-size:.72rem}
+.changelog-item p{margin:0;color:var(--text-secondary);font-size:.86rem;line-height:1.65;white-space:pre-wrap}
+.changelog-confirmar{width:100%;min-height:46px;border:0;border-radius:11px;background:var(--hw-gold);color:#071426;font:800 .92rem 'Inter',sans-serif;cursor:pointer}
+.changelog-confirmar:focus-visible{outline:3px solid var(--hw-cyan);outline-offset:3px}
+.perfil-identificacao{display:flex;align-items:center;gap:13px;margin-bottom:12px}
+.perfil-avatar-atual{width:52px;height:52px;flex:0 0 52px;border:1px solid var(--border-highlight);border-radius:50%;object-fit:cover;background:var(--hw-carbon)}
+.perfil-identificacao h2{margin:0!important}
+.btn-perfil{padding:8px 12px;border:1px solid var(--border-tech);border-radius:9px;background:rgba(255,255,255,.04);color:var(--text-secondary);font:600 .8rem 'Inter',sans-serif;cursor:pointer}
+.btn-perfil:hover{border-color:var(--hw-cyan);color:var(--hw-cyan)}
+.perfil-modal{display:none;position:fixed;inset:0;z-index:4000;align-items:center;justify-content:center;padding:18px;background:rgba(3,12,24,.82);backdrop-filter:blur(8px)}
+.perfil-conteudo{width:min(100%,540px);max-height:min(90vh,780px);overflow:auto;padding:24px;border:1px solid var(--border-highlight);border-radius:18px;background:#0d2038;color:var(--text-primary);box-shadow:0 24px 70px rgba(0,0,0,.45)}
+.perfil-conteudo h2{margin:0 0 5px;font:700 1.2rem 'Sora',sans-serif}
+.perfil-intro{margin:0 0 20px;color:var(--text-muted);font-size:.85rem}
+.perfil-campo{margin:0 0 16px}
+.perfil-campo label,.perfil-label{display:block;margin:0 0 7px;color:var(--text-secondary);font-size:.82rem;font-weight:700}
+.perfil-campo input{margin:0;font-family:'Inter',sans-serif}
+.perfil-avatares{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:10px 0 18px}
+.perfil-opcao-avatar{display:grid;place-items:center;gap:5px;padding:8px;border:1px solid var(--border-tech);border-radius:12px;background:rgba(255,255,255,.025);color:var(--text-muted);cursor:pointer}
+.perfil-opcao-avatar img{width:54px;height:54px;border-radius:50%;object-fit:cover;background:var(--hw-carbon)}
+.perfil-opcao-avatar.selecionado{border-color:var(--hw-cyan);box-shadow:0 0 0 2px rgba(94,234,212,.15);color:var(--hw-cyan)}
+.perfil-opcao-avatar:focus-visible,.btn-perfil:focus-visible,.perfil-fechar:focus-visible{outline:2px solid var(--hw-cyan);outline-offset:3px}
+.perfil-preferencias{display:flex;flex-wrap:wrap;gap:10px 18px;margin:0 0 18px}
+.perfil-preferencias label{display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:.85rem}
+.perfil-preferencias input{width:auto;margin:0;accent-color:var(--hw-cyan)}
+.perfil-status{min-height:1.4em;margin:0 0 12px;color:var(--text-muted);font-size:.82rem}
+.perfil-acoes{display:flex;gap:10px}
+.perfil-acoes button{flex:1;min-height:42px}
+.perfil-fechar{float:right;border:0;background:none;color:var(--text-muted);font-size:1.1rem;cursor:pointer}
+@media(max-width:480px){.perfil-conteudo{padding:19px}.perfil-avatares{grid-template-columns:repeat(3,minmax(0,1fr))}.perfil-identificacao{align-items:flex-start}.perfil-avatar-atual{width:44px;height:44px;flex-basis:44px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -72,6 +121,18 @@ a.card-modulo{text-decoration:none;color:inherit}
 .calendario-evento{padding:11px 12px;border:1px solid var(--border-tech);border-radius:10px;background:rgba(7,20,38,.55)}
 .calendario-evento strong{display:block;margin-bottom:5px;color:var(--hw-cyan);font-size:.82rem}
 .calendario-evento p,.calendario-sem-eventos{margin:0;color:var(--text-muted);font-size:.78rem;line-height:1.55;white-space:pre-wrap}
+.avaliacao-curso{margin-top:20px;padding:16px;border:1px solid var(--border-tech);border-radius:14px;background:rgba(7,20,38,.5)}
+.avaliacao-curso h3{margin:0 0 7px;color:var(--text-primary);font:700 .95rem 'Sora',sans-serif}
+.avaliacao-curso>p{margin:0 0 14px;color:var(--text-muted);font-size:.78rem;line-height:1.55}
+.avaliacao-estrelas{display:flex;gap:5px;margin:0 0 13px}
+.avaliacao-estrela{display:grid;place-items:center;width:42px;height:42px;border:1px solid var(--border-tech);border-radius:10px;background:rgba(255,255,255,.03);color:#8095aa;font-size:1.05rem;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.avaliacao-estrela.selecionada{border-color:rgba(231,185,87,.5);background:rgba(231,185,87,.12);color:var(--hw-gold)}
+.avaliacao-estrela:focus-visible,.avaliacao-enviar:focus-visible{outline:2px solid var(--hw-cyan);outline-offset:3px}
+.avaliacao-curso label{display:block;margin:0 0 6px;color:var(--text-secondary);font-size:.75rem;font-weight:700}
+.avaliacao-curso textarea{width:100%;min-height:88px;margin:0 0 10px;padding:10px;border:1px solid var(--border-tech);border-radius:9px;background:#071426;color:var(--text-primary);font:400 .8rem/1.5 'Inter',sans-serif;resize:vertical}
+.avaliacao-enviar{width:100%;min-height:40px;border:0;border-radius:9px;background:var(--hw-gold);color:#071426;font:800 .8rem 'Inter',sans-serif;cursor:pointer}
+.avaliacao-enviar:disabled{cursor:wait;opacity:.65}
+.avaliacao-status{min-height:1.3em;margin:9px 0 0;color:var(--text-muted);font-size:.74rem;line-height:1.45}
 
 @media(max-width:700px){.calendario-painel{padding:15px}.calendario-corpo{grid-template-columns:1fr;gap:18px}.calendario-lista{padding:16px 0 0;border-left:0;border-top:1px solid var(--border-tech)}.calendario-dia,.calendario-dia-vazio{min-height:38px}.calendario-cabecalho{align-items:flex-start;flex-direction:column}}
 #painel-aluno .mensagem-conclusao{display:flex;flex:0 0 100%;align-items:center;justify-content:space-between;gap:20px;padding-top:20px;border-top:1px solid var(--border-tech)}
@@ -119,7 +180,11 @@ a.card-modulo{text-decoration:none;color:inherit}
 
     <div id="painel-aluno" class="painel-topo">
         <div class="info-aluno">
-            <h2 id="nome-aluno"><i class="fas fa-user-circle"></i> Aluno</h2>
+            <div class="perfil-identificacao">
+                <img id="avatar-aluno" class="perfil-avatar-atual" alt="" hidden>
+                <h2 id="nome-aluno"><i class="fas fa-user-circle"></i> Aluno</h2>
+            </div>
+            <button type="button" class="btn-perfil" onclick="abrirPerfil()"><i class="fas fa-user-edit"></i> Meu perfil</button>
             <button class="btn-acao btn-sair" onclick="sair()">Sair da Sala</button>
         </div>
 
@@ -173,6 +238,21 @@ a.card-modulo{text-decoration:none;color:inherit}
                     <div id="calendario-eventos-dia" aria-live="polite"><p class="calendario-sem-eventos">Carregando eventos...</p></div>
                 </div>
             </div>
+            <section id="avaliacao-curso" class="avaliacao-curso" aria-labelledby="titulo-avaliacao-curso">
+                <h3 id="titulo-avaliacao-curso"><i class="fas fa-star" aria-hidden="true"></i> Avalie o curso</h3>
+                <p>Sua opinião ajuda a melhorar a experiência. A avaliação é visível apenas para a equipe administrativa.</p>
+                <div id="avaliacao-estrelas" class="avaliacao-estrelas" role="group" aria-label="Nota do curso, de 1 a 5 estrelas">
+                    <button class="avaliacao-estrela" type="button" data-nota="1" aria-label="1 estrela" aria-pressed="false"><i class="fas fa-star" aria-hidden="true"></i></button>
+                    <button class="avaliacao-estrela" type="button" data-nota="2" aria-label="2 estrelas" aria-pressed="false"><i class="fas fa-star" aria-hidden="true"></i></button>
+                    <button class="avaliacao-estrela" type="button" data-nota="3" aria-label="3 estrelas" aria-pressed="false"><i class="fas fa-star" aria-hidden="true"></i></button>
+                    <button class="avaliacao-estrela" type="button" data-nota="4" aria-label="4 estrelas" aria-pressed="false"><i class="fas fa-star" aria-hidden="true"></i></button>
+                    <button class="avaliacao-estrela" type="button" data-nota="5" aria-label="5 estrelas" aria-pressed="false"><i class="fas fa-star" aria-hidden="true"></i></button>
+                </div>
+                <label for="avaliacao-comentario">Comentário (opcional)</label>
+                <textarea id="avaliacao-comentario" maxlength="1000" placeholder="Conte o que achou do curso..."></textarea>
+                <button id="btn-enviar-avaliacao" class="avaliacao-enviar" type="button">Enviar avaliação</button>
+                <p id="avaliacao-status" class="avaliacao-status" role="status" aria-live="polite"></p>
+            </section>
         </aside>
     </div>
 </div>
@@ -200,11 +280,15 @@ a.card-modulo{text-decoration:none;color:inherit}
         </div>
     </div>
 
-    <button class="btn-ajuda" onclick="toggleDuvida()" title="Dúvidas?" style="position:relative;">
+    <button class="btn-ajuda" onclick="toggleDuvida()" title="Dúvidas?" aria-label="Abrir suporte ao aluno" aria-describedby="badge-novas-mensagens" style="position:relative;">
         <i class="fas fa-question"></i>
-        <span id="badge-novas-mensagens" style="display:none; position:absolute; top:-8px; right:-8px; background:#ef4444; color:white; border-radius:50%; width:20px; height:20px; font-size:12px; line-height:20px; text-align:center; font-weight:bold;"></span>
+        <span id="badge-novas-mensagens" aria-live="polite" aria-atomic="true"></span>
     </button>
 </div>
+<button id="notificacao-chat" type="button" onclick="abrirSuportePorNotificacao()" hidden role="alert">
+    <i class="fas fa-bell" aria-hidden="true"></i>
+    <span><strong>Nova mensagem do suporte</strong><small id="texto-notificacao-chat">Clique para abrir a conversa.</small></span>
+</button>
 
 <div id="modal-dados" class="modal">
     <div class="modal-content">
@@ -218,6 +302,57 @@ a.card-modulo{text-decoration:none;color:inherit}
         <button class="btn-acao" style="background: var(--verde); color:white; width: 100%;" onclick="gerarPDF()">BAIXAR AGORA</button>
         <button style="background:none; border:none; width:100%; margin-top:15px; cursor:pointer; color: var(--text-muted);" onclick="fecharModal()">Voltar</button>
     </div>
+</div>
+
+<div id="modal-perfil" class="perfil-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-perfil">
+    <form id="form-perfil" class="perfil-conteudo">
+        <button type="button" class="perfil-fechar" onclick="fecharPerfil()" aria-label="Fechar perfil"><i class="fas fa-times"></i></button>
+        <h2 id="titulo-perfil"><i class="fas fa-user-edit"></i> Meu perfil</h2>
+        <p class="perfil-intro">Atualize seus dados e escolha como prefere ser contatado.</p>
+        <div class="perfil-campo">
+            <label for="perfil-nome">Nome completo</label>
+            <input id="perfil-nome" name="nome" type="text" maxlength="100" autocomplete="name" required>
+        </div>
+        <div class="perfil-campo">
+            <label for="perfil-email">E-mail da conta</label>
+            <input id="perfil-email" name="email" type="email" autocomplete="email" readonly aria-describedby="perfil-email-ajuda">
+            <small id="perfil-email-ajuda" style="display:block;margin-top:5px;color:var(--text-muted)">O e-mail usado para entrar não pode ser alterado por aqui.</small>
+        </div>
+        <div class="perfil-campo">
+            <label for="perfil-cpf">CPF</label>
+            <input id="perfil-cpf" name="cpf" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" required>
+        </div>
+        <div class="perfil-campo">
+            <label for="perfil-telefone">Telefone</label>
+            <input id="perfil-telefone" name="telefone" type="tel" maxlength="30" autocomplete="tel" placeholder="(00) 00000-0000">
+        </div>
+        <div class="perfil-campo">
+            <label for="perfil-data-nascimento">Data de nascimento</label>
+            <input id="perfil-data-nascimento" name="data_nascimento" type="date" autocomplete="bday" required>
+        </div>
+        <span class="perfil-label">Foto do perfil</span>
+        <div id="perfil-avatares" class="perfil-avatares" role="group" aria-label="Escolha um avatar"></div>
+        <span class="perfil-label">Preferências de contato</span>
+        <div class="perfil-preferencias">
+            <label><input id="perfil-contato-email" type="checkbox"> E-mail</label>
+            <label><input id="perfil-contato-whatsapp" type="checkbox"> WhatsApp</label>
+        </div>
+        <p id="perfil-status" class="perfil-status" role="status" aria-live="polite"></p>
+        <div class="perfil-acoes">
+            <button type="button" class="btn-perfil" onclick="fecharPerfil()">Cancelar</button>
+            <button id="btn-salvar-perfil" type="submit" class="btn-acao" style="background:var(--hw-gold);color:#071426">Salvar perfil</button>
+        </div>
+    </form>
+</div>
+
+<div id="modal-changelog" class="changelog-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-changelog" aria-describedby="texto-intro-changelog" hidden>
+    <section class="changelog-conteudo">
+        <span class="changelog-etiqueta"><i class="fas fa-sparkles" aria-hidden="true"></i> Atualizações da plataforma</span>
+        <h2 id="titulo-changelog">Novidades para você</h2>
+        <p id="texto-intro-changelog" class="changelog-intro">Confira o que mudou desde a sua última visita.</p>
+        <ul id="lista-changelog" class="changelog-lista"></ul>
+        <button id="btn-fechar-changelog" class="changelog-confirmar" type="button">Entendi, continuar</button>
+    </section>
 </div>
 
 <script>
@@ -249,6 +384,136 @@ a.card-modulo{text-decoration:none;color:inherit}
     let eventosCalendarioAluno = [];
     let dataCalendarioAtual = new Date();
     let dataCalendarioSelecionada = dataLocalISO(new Date());
+    let usuarioAtual = null;
+    let avataresPerfil = [];
+    let avatarPerfilSelecionado = null;
+    let ultimaContagemMensagens = null;
+    let timerNotificacaoChat = null;
+    let ultimaNovidadeChangelog = null;
+    let usuarioChangelog = null;
+    let notaAvaliacaoCurso = 0;
+    let avaliacaoCursoCarregada = false;
+
+    function lerNovidadesChangelog(valor) {
+        if (!valor) return [];
+        const novidades = JSON.parse(valor);
+        if (!Array.isArray(novidades) || !novidades.every(item =>
+            item && typeof item.id === 'string' && typeof item.titulo === 'string' &&
+            typeof item.descricao === 'string' && typeof item.data === 'string' &&
+            !Number.isNaN(Date.parse(item.data))
+        )) {
+            throw new Error('As novidades salvas estão em um formato inválido.');
+        }
+        return novidades.sort((a, b) => Date.parse(b.data) - Date.parse(a.data));
+    }
+
+    function fecharChangelog() {
+        const modal = document.getElementById('modal-changelog');
+        if (ultimaNovidadeChangelog && usuarioChangelog) {
+            localStorage.setItem(`changelog_visto_${usuarioChangelog.id}`, ultimaNovidadeChangelog);
+        }
+        modal.hidden = true;
+        document.body.style.overflow = '';
+    }
+
+    function mostrarChangelogSeNecessario(usuario, configuracoes) {
+        const ativo = configuracoes.find(item => item.chave === 'novidades_ativo')?.valor === 'true';
+        if (!ativo) return;
+        const novidades = lerNovidadesChangelog(
+            configuracoes.find(item => item.chave === 'novidades_itens')?.valor
+        );
+        if (!novidades.length) return;
+
+        const maisRecente = novidades[0];
+        const versaoMaisRecente = `${maisRecente.id}:${maisRecente.data}`;
+        const chaveVisto = `changelog_visto_${usuario.id}`;
+        if (localStorage.getItem(chaveVisto) === versaoMaisRecente) return;
+        const modal = document.getElementById('modal-changelog');
+        if (!modal.hidden) return;
+
+        ultimaNovidadeChangelog = versaoMaisRecente;
+        usuarioChangelog = usuario;
+        document.getElementById('lista-changelog').innerHTML = novidades.map(item => `
+            <li class="changelog-item">
+                <h3>${escaparTextoHtml(item.titulo)}</h3>
+                <time datetime="${escaparTextoHtml(item.data)}">${new Date(item.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</time>
+                <p>${escaparTextoHtml(item.descricao)}</p>
+            </li>
+        `).join('');
+        modal.hidden = false;
+        document.body.style.overflow = 'hidden';
+        document.getElementById('btn-fechar-changelog').focus();
+    }
+
+    document.getElementById('btn-fechar-changelog').addEventListener('click', fecharChangelog);
+    document.getElementById('modal-changelog').addEventListener('keydown', event => {
+        if (event.key === 'Escape') fecharChangelog();
+    });
+
+    function atualizarEstrelasAvaliacao(nota) {
+        notaAvaliacaoCurso = nota;
+        document.querySelectorAll('#avaliacao-estrelas [data-nota]').forEach(botao => {
+            const selecionada = Number(botao.dataset.nota) <= nota;
+            botao.classList.toggle('selecionada', selecionada);
+            botao.setAttribute('aria-pressed', String(Number(botao.dataset.nota) === nota));
+        });
+    }
+
+    document.getElementById('avaliacao-estrelas').addEventListener('click', event => {
+        const botao = event.target.closest('[data-nota]');
+        if (botao) atualizarEstrelasAvaliacao(Number(botao.dataset.nota));
+    });
+
+    async function carregarAvaliacaoCurso(user) {
+        if (avaliacaoCursoCarregada) return;
+        avaliacaoCursoCarregada = true;
+        const status = document.getElementById('avaliacao-status');
+        const { data, error } = await _supabase
+            .from('avaliacoes_curso')
+            .select('nota, comentario')
+            .eq('user_id', user.id)
+            .maybeSingle();
+        if (error) {
+            console.error('Erro ao carregar avaliação do curso:', error);
+            status.textContent = 'Não foi possível carregar sua avaliação. Confira se o script avaliacoes-curso.sql foi executado.';
+            document.getElementById('btn-enviar-avaliacao').disabled = true;
+            return;
+        }
+        if (data) {
+            atualizarEstrelasAvaliacao(Number(data.nota));
+            document.getElementById('avaliacao-comentario').value = data.comentario || '';
+            document.getElementById('btn-enviar-avaliacao').textContent = 'Atualizar avaliação';
+            status.textContent = 'Você já avaliou o curso. Se quiser, atualize sua resposta.';
+        }
+    }
+
+    document.getElementById('btn-enviar-avaliacao').addEventListener('click', async event => {
+        const botao = event.currentTarget;
+        const status = document.getElementById('avaliacao-status');
+        if (!usuarioAtual || notaAvaliacaoCurso < 1 || notaAvaliacaoCurso > 5) {
+            status.textContent = 'Selecione de 1 a 5 estrelas antes de enviar.';
+            return;
+        }
+        botao.disabled = true;
+        status.textContent = 'Salvando sua avaliação...';
+        const avaliacao = {
+            user_id: usuarioAtual.id,
+            nota: notaAvaliacaoCurso,
+            comentario: document.getElementById('avaliacao-comentario').value.trim(),
+            updated_at: new Date().toISOString()
+        };
+        const { error } = await _supabase
+            .from('avaliacoes_curso')
+            .upsert(avaliacao, { onConflict: 'user_id' });
+        botao.disabled = false;
+        if (error) {
+            console.error('Erro ao salvar avaliação do curso:', error);
+            status.textContent = 'Não foi possível salvar sua avaliação. Tente novamente.';
+            return;
+        }
+        botao.textContent = 'Atualizar avaliação';
+        status.textContent = 'Avaliação salva. Obrigado pelo seu feedback!';
+    });
 
     function dataLocalISO(data) {
         return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`;
@@ -354,6 +619,196 @@ a.card-modulo{text-decoration:none;color:inherit}
 
     let inicializacaoEmAndamento = false;
 
+    function renderizarIdentificacaoAluno(user) {
+        const metadados = user.user_metadata || {};
+        const nome = typeof metadados.nome_completo === 'string' && metadados.nome_completo.trim()
+            ? metadados.nome_completo.trim()
+            : user.email.split('@')[0];
+        document.getElementById('nome-aluno').textContent = `Olá, ${nome}!`;
+        const avatar = avataresPerfil.find(item => item.id === Number(metadados.avatar_id));
+        const imagem = document.getElementById('avatar-aluno');
+        if (avatar && avatar.link) {
+            imagem.src = avatar.link;
+            imagem.hidden = false;
+        } else {
+            imagem.removeAttribute('src');
+            imagem.hidden = true;
+        }
+    }
+
+    function cpfValidoPerfil(valor) {
+        const cpf = valor.replace(/\D/g, '');
+        if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+        const calcularDigito = tamanho => {
+            let soma = 0;
+            for (let i = 0; i < tamanho; i++) soma += Number(cpf[i]) * (tamanho + 1 - i);
+            const resto = (soma * 10) % 11;
+            return resto === 10 ? 0 : resto;
+        };
+        return calcularDigito(9) === Number(cpf[9]) && calcularDigito(10) === Number(cpf[10]);
+    }
+
+    function formatarCpfPerfil(valor) {
+        const digitos = valor.replace(/\D/g, '').slice(0, 11);
+        return digitos.replace(/^(\d{3})(\d)/, '$1.$2')
+            .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+            .replace(/\.(\d{3})(\d)/, '.$1-$2');
+    }
+
+    async function carregarAvataresPerfil() {
+        if (avataresPerfil.length) return;
+        const { data, error } = await _supabase.from('avatares').select('id, link').order('id');
+        if (error) {
+            console.error('Erro ao carregar avatares:', error);
+            document.getElementById('perfil-status').textContent =
+                'Não foi possível carregar os avatares. Verifique se o script avatares.sql foi executado no Supabase.';
+            throw error;
+        }
+        avataresPerfil = (data || []).filter(item => {
+            if (!Number.isInteger(Number(item.id)) || typeof item.link !== 'string') return false;
+            try {
+                return new URL(item.link).protocol === 'https:';
+            } catch (error) {
+                return false;
+            }
+        }).map(item => ({ ...item, id: Number(item.id) }));
+    }
+
+    function renderizarOpcoesAvatar() {
+        const grade = document.getElementById('perfil-avatares');
+        grade.replaceChildren();
+        if (!avataresPerfil.length) {
+            grade.textContent = 'Nenhum avatar disponível.';
+            return;
+        }
+        avataresPerfil.forEach(avatar => {
+            const botao = document.createElement('button');
+            botao.type = 'button';
+            botao.className = `perfil-opcao-avatar${avatar.id === avatarPerfilSelecionado ? ' selecionado' : ''}`;
+            botao.setAttribute('aria-pressed', String(avatar.id === avatarPerfilSelecionado));
+            botao.setAttribute('aria-label', `Selecionar avatar ${avatar.id}`);
+            const imagem = document.createElement('img');
+            imagem.src = avatar.link;
+            imagem.alt = '';
+            imagem.loading = 'lazy';
+            botao.append(imagem, document.createTextNode(`Opção ${avatar.id}`));
+            botao.addEventListener('click', () => {
+                avatarPerfilSelecionado = avatar.id;
+                grade.querySelectorAll('.perfil-opcao-avatar').forEach(opcao => {
+                    const selecionado = opcao === botao;
+                    opcao.classList.toggle('selecionado', selecionado);
+                    opcao.setAttribute('aria-pressed', String(selecionado));
+                });
+            });
+            grade.appendChild(botao);
+        });
+    }
+
+    async function abrirPerfil() {
+        if (!usuarioAtual) return;
+        const status = document.getElementById('perfil-status');
+        status.textContent = '';
+        try {
+            await carregarAvataresPerfil();
+        } catch (error) {
+            document.getElementById('modal-perfil').style.display = 'flex';
+            return;
+        }
+        renderizarIdentificacaoAluno(usuarioAtual);
+        const metadados = usuarioAtual.user_metadata || {};
+        const { data: perfil, error: erroPerfil } = await _supabase
+            .from('perfil_alunos')
+            .select('nome_completo, cpf, telefone, data_nascimento')
+            .eq('user_id', usuarioAtual.id)
+            .maybeSingle();
+        if (erroPerfil) {
+            console.error('Erro ao carregar dados do perfil:', erroPerfil);
+            status.textContent = 'Não foi possível carregar os dados do perfil. Tente novamente.';
+            document.getElementById('modal-perfil').style.display = 'flex';
+            return;
+        }
+        document.getElementById('perfil-nome').value = perfil?.nome_completo || metadados.nome_completo || '';
+        document.getElementById('perfil-email').value = usuarioAtual.email || '';
+        document.getElementById('perfil-cpf').value = perfil?.cpf || metadados.cpf || '';
+        document.getElementById('perfil-telefone').value = perfil?.telefone || metadados.telefone || '';
+        document.getElementById('perfil-data-nascimento').value = perfil?.data_nascimento || '';
+        const preferencias = metadados.preferencias_contato || {};
+        document.getElementById('perfil-contato-email').checked = preferencias.email !== false;
+        document.getElementById('perfil-contato-whatsapp').checked = preferencias.whatsapp === true;
+        const avatarSalvo = Number(metadados.avatar_id);
+        avatarPerfilSelecionado = avataresPerfil.some(avatar => avatar.id === avatarSalvo) ? avatarSalvo : null;
+        renderizarOpcoesAvatar();
+        document.getElementById('modal-perfil').style.display = 'flex';
+        document.getElementById('perfil-nome').focus();
+    }
+
+    function fecharPerfil() {
+        document.getElementById('modal-perfil').style.display = 'none';
+    }
+
+    document.getElementById('form-perfil').addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!usuarioAtual) return;
+        const nome = document.getElementById('perfil-nome').value.trim();
+        const cpf = document.getElementById('perfil-cpf').value;
+        const dataNascimento = document.getElementById('perfil-data-nascimento').value;
+        const dataNascimentoObj = new Date(`${dataNascimento}T00:00:00`);
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        if (nome.length < 2 || !cpfValidoPerfil(cpf) || !dataNascimento ||
+            Number.isNaN(dataNascimentoObj.getTime()) || dataNascimentoObj > hoje ||
+            dataNascimentoObj.toISOString().slice(0, 10) !== dataNascimento) {
+            document.getElementById('perfil-status').textContent = 'Informe nome, CPF válido e uma data de nascimento válida.';
+            return;
+        }
+        const salvar = document.getElementById('btn-salvar-perfil');
+        const status = document.getElementById('perfil-status');
+        salvar.disabled = true;
+        status.textContent = 'Salvando...';
+        const metadadosAtuais = usuarioAtual.user_metadata || {};
+        const { error: erroDados } = await _supabase.rpc('atualizar_perfil_aluno', {
+            p_nome_completo: nome,
+            p_cpf: formatarCpfPerfil(cpf),
+            p_telefone: document.getElementById('perfil-telefone').value.trim(),
+            p_data_nascimento: dataNascimento
+        });
+        if (erroDados) {
+            salvar.disabled = false;
+            console.error('Erro ao salvar dados do perfil:', erroDados);
+            status.textContent = 'Não foi possível salvar os dados. Verifique se perfil-alunos.sql foi executado no Supabase.';
+            return;
+        }
+
+        const metadadosPerfil = { ...metadadosAtuais };
+        delete metadadosPerfil.cpf;
+        const { data, error } = await _supabase.auth.updateUser({
+            data: {
+                ...metadadosPerfil,
+                nome_completo: nome,
+                telefone: document.getElementById('perfil-telefone').value.trim(),
+                avatar_id: avatarPerfilSelecionado,
+                preferencias_contato: {
+                    email: document.getElementById('perfil-contato-email').checked,
+                    whatsapp: document.getElementById('perfil-contato-whatsapp').checked
+                }
+            }
+        });
+        salvar.disabled = false;
+        if (error) {
+            console.error('Erro ao atualizar preferências do perfil:', error);
+            status.textContent = 'Dados pessoais salvos, mas não foi possível atualizar avatar e preferências.';
+            return;
+        }
+        usuarioAtual = data.user;
+        renderizarIdentificacaoAluno(usuarioAtual);
+        status.textContent = 'Perfil salvo com sucesso.';
+        setTimeout(fecharPerfil, 700);
+    });
+
+    document.getElementById('perfil-cpf').addEventListener('input', event => {
+        event.target.value = formatarCpfPerfil(event.target.value);
+    });
+
     async function inicializar() {
         if (inicializacaoEmAndamento) return;
         inicializacaoEmAndamento = true;
@@ -397,11 +852,17 @@ a.card-modulo{text-decoration:none;color:inherit}
         const user = userData?.user;
         if (userError || !user) { window.location.href = "index.html"; return; }
 
+        usuarioAtual = user;
+        renderizarIdentificacaoAluno(user);
         localStorage.setItem('user_email', user.email);
+        await carregarAvaliacaoCurso(user);
+        try {
+            mostrarChangelogSeNecessario(user, config || []);
+        } catch (error) {
+            console.error('Não foi possível exibir as novidades da plataforma:', error);
+        }
         processarPresencaPendente();
 
-        document.getElementById('nome-aluno').innerHTML = `<i class="fas fa-user-circle"></i> Olá, ${user.email.split('@')[0]}!`;
-        
         const { data: progresso } = await _supabase.from('progresso_alunos').select('*').eq('user_id', user.id);
         const concluidos = [...new Set((progresso || []).filter(p => p.concluido).map(p => Number(p.modulo_id)))];
         
@@ -520,10 +981,35 @@ a.card-modulo{text-decoration:none;color:inherit}
         const painel = document.getElementById('painel-duvida');
         if (painel.style.display === 'none' || painel.style.display === '') {
             painel.style.display = 'block';
+            ocultarNotificacaoChat();
             carregarHistoricoAluno();
         } else {
             painel.style.display = 'none';
         }
+    }
+
+    function ocultarNotificacaoChat() {
+        document.getElementById('notificacao-chat').hidden = true;
+        if (timerNotificacaoChat) clearTimeout(timerNotificacaoChat);
+        timerNotificacaoChat = null;
+    }
+
+    function abrirSuportePorNotificacao() {
+        ocultarNotificacaoChat();
+        document.getElementById('painel-duvida').style.display = 'block';
+        carregarHistoricoAluno();
+        document.getElementById('txt-pergunta').focus();
+    }
+
+    function mostrarNotificacaoChat(count) {
+        const notificacao = document.getElementById('notificacao-chat');
+        const texto = document.getElementById('texto-notificacao-chat');
+        texto.textContent = count > 1
+            ? `Você tem ${count} mensagens não lidas. Clique para abrir.`
+            : 'Você tem uma mensagem não lida. Clique para abrir.';
+        notificacao.hidden = false;
+        if (timerNotificacaoChat) clearTimeout(timerNotificacaoChat);
+        timerNotificacaoChat = setTimeout(ocultarNotificacaoChat, 8000);
     }
 
     function iniciarRealtimeModulos() {
@@ -585,12 +1071,27 @@ a.card-modulo{text-decoration:none;color:inherit}
         }
 
         const contadorElement = document.getElementById('badge-novas-mensagens');
+        const botaoAjuda = document.querySelector('.btn-ajuda');
+        const painelAberto = document.getElementById('painel-duvida').style.display === 'block';
         if (count > 0) {
             contadorElement.innerText = count;
-            contadorElement.style.display = 'inline-flex';
+            contadorElement.classList.add('ativo');
+            botaoAjuda.classList.add('tem-notificacao');
+            botaoAjuda.setAttribute('aria-label', `Abrir suporte ao aluno. ${count} mensagens não lidas.`);
+            botaoAjuda.title = `${count} mensagens não lidas`;
         } else {
-            contadorElement.style.display = 'none';
+            contadorElement.innerText = '';
+            contadorElement.classList.remove('ativo');
+            botaoAjuda.classList.remove('tem-notificacao');
+            botaoAjuda.setAttribute('aria-label', 'Abrir suporte ao aluno');
+            botaoAjuda.title = 'Dúvidas?';
         }
+        if (ultimaContagemMensagens === null) {
+            if (count > 0 && !painelAberto) mostrarNotificacaoChat(count);
+        } else if (count > ultimaContagemMensagens && !painelAberto) {
+            mostrarNotificacaoChat(count);
+        }
+        ultimaContagemMensagens = count;
     }
 
     function atualizarTicketLabel(ticket, status) {
