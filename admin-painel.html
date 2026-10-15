@@ -333,8 +333,15 @@
                 <input type="text" id="horario_aula" placeholder="Ex: Hoje às 19:30">
                 <label>Recado da Sala</label>
                 <textarea id="recado_aula" rows="2" placeholder="Mensagem para os alunos..."></textarea>
-                
-                <button class="btn btn-primary" onclick="salvarAula()" style="width: 100%; margin-top: 20px;"><i class="fas fa-save"></i> ATUALIZAR AULA</button>
+                <div class="card-header" style="margin:18px 0 8px;"><i class="fas fa-folder-open"></i> Materiais de aula</div>
+                <p style="margin:0 0 14px;color:var(--text-muted);font-size:12px;">Adicione links para documentos, slides ou outros materiais que os alunos poderão abrir.</p>
+                <label for="material-aula-titulo">Nome do material</label>
+                <input type="text" id="material-aula-titulo" maxlength="100" placeholder="Ex.: Apostila da aula">
+                <label for="material-aula-link">Link do documento</label>
+                <input type="url" id="material-aula-link" placeholder="https://...">
+                <button class="btn" type="button" onclick="adicionarMaterialAula()" style="margin:0 0 14px;background:#12295a;color:#c3d3ea;"><i class="fas fa-plus"></i> ADICIONAR MATERIAL</button>
+                <div id="lista-materiais-aula" aria-live="polite"></div>
+                <button id="btn-salvar-aula" class="btn btn-primary" onclick="salvarAula()" style="width: 100%; margin-top: 20px;"><i class="fas fa-save"></i> ATUALIZAR AULA</button>
             </div>
         </div>
 
@@ -553,6 +560,78 @@
 
         // --- FUNÇÕES DE AULA E AVISO ---
         let eventosCalendario = [];
+        let materiaisAula = [];
+
+        function linkMaterialSeguro(valor) {
+            try {
+                const url = new URL(valor);
+                return ['https:', 'http:'].includes(url.protocol) ? url.href : '';
+            } catch (_) {
+                return '';
+            }
+        }
+
+        function lerMateriaisAula(valor) {
+            if (!valor) return [];
+            const materiais = JSON.parse(valor);
+            if (!Array.isArray(materiais) || !materiais.every(material =>
+                material && typeof material.titulo === 'string' &&
+                typeof material.url === 'string' && linkMaterialSeguro(material.url)
+            )) {
+                throw new Error('Os materiais da aula salvos estão em um formato inválido.');
+            }
+            return materiais;
+        }
+
+        function renderizarMateriaisAula() {
+            const lista = document.getElementById('lista-materiais-aula');
+            lista.replaceChildren();
+            if (!materiaisAula.length) {
+                lista.textContent = 'Nenhum material adicionado.';
+                return;
+            }
+            materiaisAula.forEach((material, indice) => {
+                const item = document.createElement('div');
+                item.className = 'evento-admin';
+                const info = document.createElement('div');
+                info.className = 'evento-admin-info';
+                const titulo = document.createElement('strong');
+                titulo.textContent = material.titulo;
+                const link = document.createElement('span');
+                link.textContent = material.url;
+                info.append(titulo, link);
+                const acoes = document.createElement('div');
+                acoes.className = 'evento-admin-acoes';
+                const remover = document.createElement('button');
+                remover.type = 'button';
+                remover.className = 'btn btn-danger';
+                remover.innerHTML = '<i class="fas fa-trash"></i> Remover';
+                remover.setAttribute('aria-label', `Remover ${material.titulo}`);
+                remover.addEventListener('click', () => {
+                    materiaisAula.splice(indice, 1);
+                    renderizarMateriaisAula();
+                });
+                acoes.append(remover);
+                item.append(info, acoes);
+                lista.append(item);
+            });
+        }
+
+        function adicionarMaterialAula() {
+            const tituloInput = document.getElementById('material-aula-titulo');
+            const linkInput = document.getElementById('material-aula-link');
+            const titulo = tituloInput.value.trim();
+            const url = linkMaterialSeguro(linkInput.value.trim());
+            if (!titulo || !url) {
+                alert('Informe o nome do material e um link válido iniciado por http:// ou https://.');
+                return;
+            }
+            materiaisAula.push({ titulo, url });
+            tituloInput.value = '';
+            linkInput.value = '';
+            renderizarMateriaisAula();
+            tituloInput.focus();
+        }
 
         function lerEventosCalendario(valor) {
             if (!valor) return [];
@@ -586,6 +665,8 @@
                 document.getElementById('link_aula').value = configuracoes.find(c => c.chave === 'link_aula_ao_vivo')?.valor || "";
                 document.getElementById('horario_aula').value = configuracoes.find(c => c.chave === 'horario_aula')?.valor || "";
                 document.getElementById('recado_aula').value = configuracoes.find(c => c.chave === 'recado_aula')?.valor || "";
+                materiaisAula = lerMateriaisAula(configuracoes.find(c => c.chave === 'materiais_aula')?.valor);
+                renderizarMateriaisAula();
                 document.getElementById('aviso_global').value = configuracoes.find(c => c.chave === 'recado_geral_modulos')?.valor || "";
                 emManutencao = configuracoes.find(c => c.chave === 'modo_manutencao')?.valor === "true";
                 atualizarInterfaceManutencao();
@@ -709,13 +790,14 @@
         }
 
         async function salvarAula() {
-            const botao = document.querySelector('#visao-aula-viva .btn-primary');
+            const botao = document.getElementById('btn-salvar-aula');
             botao.disabled = true;
             try {
                 await Promise.all([
                     salvarConfiguracao('link_aula_ao_vivo', document.getElementById('link_aula').value.trim()),
                     salvarConfiguracao('horario_aula', document.getElementById('horario_aula').value.trim()),
-                    salvarConfiguracao('recado_aula', document.getElementById('recado_aula').value.trim())
+                    salvarConfiguracao('recado_aula', document.getElementById('recado_aula').value.trim()),
+                    salvarConfiguracao('materiais_aula', JSON.stringify(materiaisAula))
                 ]);
                 alert("Configurações da aula ao vivo atualizadas.");
             } catch (error) {

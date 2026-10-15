@@ -59,6 +59,14 @@
     .info-value { margin:0; font-size:17px; line-height:1.55; font-weight:650; overflow-wrap:anywhere; }
     .info-sub { color:var(--muted); font-size:12px; line-height:1.6; margin:9px 0 0; }
     .divider { height:1px; background:var(--line); margin:20px 0; }
+    .materials-card { margin-top:24px; padding:25px; border:1px solid var(--line); border-radius:var(--radius); background:linear-gradient(145deg,rgba(18,37,61,.96),rgba(10,25,43,.97)); box-shadow:0 22px 70px #00000026; }
+    .materials-card .card-heading { margin-bottom:14px; }
+    .materials-list { display:grid; gap:10px; }
+    .material-link { display:flex; align-items:center; gap:12px; padding:14px 16px; border:1px solid var(--line); border-radius:12px; background:#ffffff04; color:var(--text); font-size:14px; font-weight:700; text-decoration:none; transition:background .18s ease,border-color .18s ease; }
+    .material-link:hover { background:#ffffff0a; border-color:#e7b65355; }
+    .material-link i:first-child { color:var(--gold); }
+    .material-link i:last-child { margin-left:auto; color:var(--muted); font-size:12px; }
+    .materials-empty { margin:0; color:var(--muted); font-size:13px; line-height:1.6; }
     .bottom-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:24px; }
     .tip { padding:20px; display:flex; gap:13px; border:1px solid var(--line); background:#ffffff04; border-radius:17px; }
     .tip i { color:var(--gold); margin-top:3px; font-size:15px; }
@@ -138,6 +146,16 @@
       </div>
     </section>
 
+    <section class="materials-card" aria-labelledby="titulo-materiais">
+      <div class="card-heading">
+        <div class="icon-box"><i class="fa-solid fa-folder-open"></i></div>
+        <div><h2 id="titulo-materiais">Materiais de aula</h2><p>Documentos e links compartilhados pelo instrutor</p></div>
+      </div>
+      <div id="lista-materiais" class="materials-list" aria-live="polite">
+        <p class="materials-empty">Carregando materiais...</p>
+      </div>
+    </section>
+
     <section class="bottom-grid" aria-label="Dicas para participar">
       <div class="tip"><i class="fa-solid fa-headphones"></i><div><strong>Prepare seu áudio</strong><p>Se possível, use fones de ouvido para escutar o instrutor com clareza.</p></div></div>
       <div class="tip"><i class="fa-solid fa-wifi"></i><div><strong>Confira sua conexão</strong><p>Uma conexão estável ajuda a evitar travamentos durante a transmissão.</p></div></div>
@@ -172,6 +190,45 @@
       } catch (_) { return ''; }
     }
 
+    function lerMateriaisAula(valor) {
+      if (!valor) return [];
+      const materiais = JSON.parse(valor);
+      if (!Array.isArray(materiais) || !materiais.every(material =>
+        material && typeof material.titulo === 'string' &&
+        typeof material.url === 'string' && linkSeguro(material.url)
+      )) {
+        throw new Error('Os materiais da aula estão em um formato inválido.');
+      }
+      return materiais;
+    }
+
+    function renderizarMateriaisAula(materiais) {
+      const lista = el('lista-materiais');
+      lista.replaceChildren();
+      if (!materiais.length) {
+        const vazio = document.createElement('p');
+        vazio.className = 'materials-empty';
+        vazio.textContent = 'Nenhum material de aula foi publicado ainda.';
+        lista.append(vazio);
+        return;
+      }
+      materiais.forEach(material => {
+        const link = document.createElement('a');
+        link.className = 'material-link';
+        link.href = linkSeguro(material.url);
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        const icone = document.createElement('i');
+        icone.className = 'fa-solid fa-file-lines';
+        const titulo = document.createElement('span');
+        titulo.textContent = material.titulo;
+        const abrir = document.createElement('i');
+        abrir.className = 'fa-solid fa-arrow-up-right-from-square';
+        link.append(icone, titulo, abrir);
+        lista.append(link);
+      });
+    }
+
     async function carregarDados() {
       const btn = el('btn-atualizar');
       const icone = btn.querySelector('i');
@@ -184,7 +241,7 @@
         const { data, error } = await _supabase
           .from('configuracoes')
           .select('chave, valor')
-          .in('chave', ['link_aula_ao_vivo', 'horario_aula', 'recado_aula']);
+          .in('chave', ['link_aula_ao_vivo', 'horario_aula', 'recado_aula', 'materiais_aula']);
 
         if (error) throw error;
         const configs = Object.fromEntries((data || []).map(item => [item.chave, item.valor]));
@@ -192,6 +249,7 @@
         linkAula = linkSeguro(configs.link_aula_ao_vivo);
         el('txt-horario').textContent = configs.horario_aula || 'A definir';
         el('txt-recado').textContent = configs.recado_aula || 'Nenhum recado publicado no momento.';
+        renderizarMateriaisAula(lerMateriaisAula(configs.materiais_aula));
         el('btn-acessar').disabled = !linkAula;
 
         if (linkAula) {
@@ -207,6 +265,7 @@
         el('txt-sincronizacao').textContent = 'Falha na sincronização';
         el('txt-horario').textContent = 'Indisponível no momento';
         el('txt-recado').textContent = 'Não foi possível carregar os recados.';
+        el('lista-materiais').textContent = 'Não foi possível carregar os materiais.';
         el('btn-acessar').disabled = true;
       } finally {
         btn.disabled = false;
