@@ -343,6 +343,52 @@ input:focus-visible {
     border-bottom-color: var(--hw-gold) !important;
 }
 
+.material-aula {
+    width: min(100%, 1000px);
+    margin: 24px auto 0;
+    padding: clamp(18px, 4vw, 30px);
+    border: 1px solid var(--border-tech);
+    border-radius: 14px;
+    background: var(--surface-card);
+    color: var(--text-secondary);
+}
+
+.material-aula h2 {
+    margin: 0 0 8px;
+}
+
+.material-aula p {
+    margin: 0 0 16px;
+}
+
+.material-aula iframe {
+    display: block;
+    width: 100%;
+    height: clamp(420px, 75vh, 900px);
+    border: 1px solid var(--border-highlight);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.material-aula-download {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 44px;
+    margin-top: 14px;
+    padding: 10px 16px;
+    border-radius: 9px;
+    background: var(--hw-copper);
+    color: var(--bg-main) !important;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.material-aula-download:hover {
+    background: #ecc063;
+}
+
 @media (max-width: 640px) {
     body {
         padding: 14px !important;
@@ -357,8 +403,14 @@ input:focus-visible {
     .container,
     .card,
     .congratulations-card,
-    .quiz-card {
+    .quiz-card,
+    .material-aula {
         border-radius: 14px !important;
+    }
+
+    .material-aula iframe {
+        height: 65vh;
+        min-height: 360px;
     }
 
     .peça-card {
