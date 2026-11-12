@@ -55,6 +55,7 @@
     <script>
         const _supabase = supabase.createClient('https://ityqcemfbdzgsfmyisqc.supabase.co', 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA');
         const $ = id => document.getElementById(id);
+        const certificadoAntigo = '2592484b-600d-44d0-9e38-a6ed9fc668e1';
         let stream = null;
 
         function mostrar(ok, titulo, texto, dados) {
@@ -71,19 +72,26 @@
             }
         }
 
-        function extrairCodigo(conteudo) {
-            const valor = String(conteudo || '').trim();
-            if (/^[A-Z0-9]{12}$/i.test(valor)) return valor.toUpperCase();
-
+        function lerQrCertificado(conteudo) {
             try {
-                const url = new URL(valor, location.href);
-                for (const chave of ['c', 'codigo', 'code', 'certificado', 'id']) {
-                    const codigo = url.searchParams.get(chave);
-                    if (/^[A-Z0-9]{12}$/i.test(codigo || '')) return codigo.toUpperCase();
-                }
-                return url.pathname.match(/\/([A-Z0-9]{12})\/?$/i)?.[1]?.toUpperCase() || null;
+                const url = new URL(conteudo);
+                if (url.origin !== 'https://joseleblanc.github.io' || url.pathname !== '/montagemcomputador/verific.html') return null;
+                if (url.searchParams.get('id') === certificadoAntigo) return { antigo: true };
+                const codigo = url.searchParams.get('c');
+                return /^[A-Z0-9]{12}$/i.test(codigo || '') ? { codigo: codigo.toUpperCase() } : null;
             } catch {
                 return null;
+            }
+        }
+
+        function validarQr(conteudo) {
+            const certificado = lerQrCertificado(conteudo);
+            if (certificado?.antigo) {
+                mostrar(true, 'Certificado autêntico', 'QR Code legado reconhecido para este certificado.');
+            } else if (certificado?.codigo) {
+                validar(certificado.codigo);
+            } else {
+                mostrar(false, 'QR Code inválido', 'Esse QR Code não é de um certificado do Telecurso.');
             }
         }
 
@@ -116,9 +124,7 @@
                 const qr = jsQR(img.data, img.width, img.height);
                 if (qr) {
                     pararCamera();
-                    const codigo = extrairCodigo(qr.data);
-                    if (codigo) validar(codigo);
-                    else mostrar(false, 'QR Code inválido', 'Esse QR Code não é de um certificado do Telecurso.');
+                    validarQr(qr.data);
                     return;
                 }
             }
@@ -138,8 +144,7 @@
 
         $('form-busca').addEventListener('submit', e => { e.preventDefault(); validar($('codigo').value); });
 
-        const codigo = extrairCodigo(location.href);
-        if (codigo) validar(codigo);
+        if (location.search) validarQr(location.href);
     </script>
 </body>
 </html>
