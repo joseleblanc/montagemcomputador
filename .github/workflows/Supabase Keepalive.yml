@@ -2,9 +2,8 @@ name: Supabase Keepalive
 
 on:
   schedule:
-    - cron: "0 12 * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
-
 jobs:
   keepalive:
     runs-on: ubuntu-latest
@@ -14,14 +13,16 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
+          set -euo pipefail
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
             echo "::error::Configure SUPABASE_URL and SUPABASE_ANON_KEY in the repository secrets."
             exit 1
           fi
-
-          curl --fail --silent --show-error --get \
-            "$SUPABASE_URL/rest/v1/avatares" \
-            --data-urlencode "select=id" \
-            --data-urlencode "limit=1" \
+          curl --fail-with-body --silent --show-error \
+            --connect-timeout 10 --max-time 30 \
+            --request POST \
+            "$SUPABASE_URL/rest/v1/rpc/registrar_atividade_diaria" \
+            --data '{}' \
+            --header "Content-Type: application/json" \
             --header "apikey: $SUPABASE_ANON_KEY" \
             --header "Authorization: Bearer $SUPABASE_ANON_KEY"
