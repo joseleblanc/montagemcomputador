@@ -71,6 +71,22 @@
             }
         }
 
+        function extrairCodigo(conteudo) {
+            const valor = String(conteudo || '').trim();
+            if (/^[A-Z0-9]{12}$/i.test(valor)) return valor.toUpperCase();
+
+            try {
+                const url = new URL(valor, location.href);
+                for (const chave of ['c', 'codigo', 'code', 'certificado', 'id']) {
+                    const codigo = url.searchParams.get(chave);
+                    if (/^[A-Z0-9]{12}$/i.test(codigo || '')) return codigo.toUpperCase();
+                }
+                return url.pathname.match(/\/([A-Z0-9]{12})\/?$/i)?.[1]?.toUpperCase() || null;
+            } catch {
+                return null;
+            }
+        }
+
         async function validar(codigo) {
             codigo = String(codigo || '').trim().toUpperCase();
             if (!/^[A-Z0-9]{12}$/.test(codigo)) {
@@ -100,8 +116,9 @@
                 const qr = jsQR(img.data, img.width, img.height);
                 if (qr) {
                     pararCamera();
-                    try { validar(new URL(qr.data).searchParams.get('c')); }
-                    catch { mostrar(false, 'QR Code inválido', 'Esse QR Code não é de um certificado do Telecurso.'); }
+                    const codigo = extrairCodigo(qr.data);
+                    if (codigo) validar(codigo);
+                    else mostrar(false, 'QR Code inválido', 'Esse QR Code não é de um certificado do Telecurso.');
                     return;
                 }
             }
@@ -121,8 +138,8 @@
 
         $('form-busca').addEventListener('submit', e => { e.preventDefault(); validar($('codigo').value); });
 
-        const c = new URLSearchParams(location.search).get('c');
-        if (c) validar(c);
+        const codigo = extrairCodigo(location.href);
+        if (codigo) validar(codigo);
     </script>
 </body>
 </html>
