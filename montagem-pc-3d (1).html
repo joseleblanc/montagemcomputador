@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Montagem de PC em 3D – Telecurso</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#071426;--ink:#f1f6fd;--mut:#9aacc3;--card:rgba(10,27,48,.94);--ac:#e0b04a;--ok:#34d399;--ln:rgba(161,185,215,.2);--cyan:#2dd4bf;--line:rgba(161,185,215,.15);--shadow:0 24px 70px rgba(0,0,0,.38)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+body:after{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 73% 14%,rgba(45,212,191,.09),transparent 40%),radial-gradient(ellipse at 22% 88%,rgba(224,176,74,.08),transparent 35%);content:"";pointer-events:none}
+#c{position:fixed;inset:0;z-index:1;width:100%;height:100%;touch-action:none;cursor:grab}
+#c:active{cursor:grabbing}
+header{position:fixed;top:0;left:0;right:0;z-index:3;min-height:68px;padding:12px 20px;display:flex;gap:16px;align-items:center;background:linear-gradient(180deg,rgba(7,20,38,.94),rgba(7,20,38,.72),transparent);pointer-events:none}
+header h1{font-size:15px;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+.brand{display:flex;align-items:center;gap:10px;min-width:max-content}
+.brand-mark{display:grid;width:36px;height:36px;place-items:center;border:1px solid rgba(224,176,74,.34);border-radius:11px;background:rgba(224,176,74,.12);color:var(--ac)}
+#dots{display:flex;flex:1;gap:7px;overflow-x:auto;pointer-events:auto;padding:8px 5px;scrollbar-width:none}
+#dots::-webkit-scrollbar{display:none}
+#dots button{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--ln);background:rgba(13,33,58,.92);color:#a9b9ce;font-weight:750;font-size:11px;cursor:pointer;transition:transform .2s,border-color .2s,background .2s,box-shadow .2s}
+#dots button:hover{transform:translateY(-2px);border-color:var(--cyan)}
+#dots button.done{background:rgba(52,211,153,.18);border-color:rgba(52,211,153,.65);color:#9df0c7}
+#dots button.on{background:var(--ac);border-color:var(--ac);color:#111827;transform:scale(1.13);box-shadow:0 0 0 5px rgba(224,176,74,.12)}
+#dots button:focus-visible,.nav button:focus-visible,.top-action:focus-visible,.resource-nav button:focus-visible,.resource-close:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+.top-action{display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:0 13px;border:1px solid rgba(224,176,74,.4);border-radius:10px;background:rgba(224,176,74,.12);color:#f8dfaa;font:750 12px Inter,sans-serif;cursor:pointer;pointer-events:auto;white-space:nowrap;transition:background .2s,transform .2s}
+.top-action:hover{transform:translateY(-2px);background:rgba(224,176,74,.2)}
+#bar{position:fixed;top:0;left:0;z-index:4;height:3px;background:linear-gradient(90deg,var(--ac),var(--cyan));transition:width .55s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 14px rgba(224,176,74,.5)}
+#panel{position:fixed;left:20px;bottom:20px;z-index:2;width:min(440px,calc(100% - 40px));max-height:min(72vh,720px);overflow:auto;padding:21px 22px 17px;border:1px solid var(--line);border-radius:18px;background:var(--card);backdrop-filter:blur(18px);box-shadow:var(--shadow);animation:panel-in .45s cubic-bezier(.2,.8,.2,1)}
+#panel::-webkit-scrollbar,.resource-main::-webkit-scrollbar{width:7px}
+#panel::-webkit-scrollbar-thumb,.resource-main::-webkit-scrollbar-thumb{border-radius:10px;background:rgba(146,169,202,.3)}
+.step-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}
+#cnt{color:var(--cyan);font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.phase-tag{padding:5px 9px;border:1px solid var(--line);border-radius:999px;color:var(--mut);font-size:10px;font-weight:700}
+#panel h2{margin:2px 0 9px;color:#fff;font-family:Sora,Inter,sans-serif;font-size:clamp(19px,2.4vw,24px);letter-spacing:-.03em;line-height:1.2}
+#panel p{margin-bottom:9px;color:#c3d3ea;font-size:13.5px;line-height:1.65}
+#panel h3{margin:15px 0 7px;color:#f1f6fd;font-size:12px;font-weight:800;letter-spacing:.035em}
+#panel ol{padding-left:20px;color:#c3d3ea;font-size:13px;line-height:1.6}
+#panel ol li{margin-bottom:6px;padding-left:3px;animation:item-in .3s both}
+#panel ol li::marker{color:var(--ac);font-weight:800}
+#panel ul{padding-left:18px;color:#aabbd0;font-size:12px;line-height:1.55}
+#panel li{margin-bottom:4px}
+#why{margin-top:12px;padding:12px 13px;border:1px solid rgba(45,212,191,.2);border-radius:11px;background:rgba(45,212,191,.06)}
+#why strong{display:block;margin-bottom:4px;color:var(--cyan);font-size:11px}
+#why span{display:block;color:#c3d3ea;font-size:12px;line-height:1.55}
+#warn{margin-top:11px;padding:10px 12px;border:1px solid rgba(251,146,60,.25);border-left:3px solid #fb923c;background:rgba(251,146,60,.09);color:#ffd7b3;font-size:12px;line-height:1.55;border-radius:0 9px 9px 0}
+#warn:empty{display:none}
+.nav{display:flex;gap:9px;margin-top:16px}
+.nav button{flex:1;min-height:42px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);font:750 13px Inter,sans-serif;cursor:pointer;color:var(--ink);transition:transform .18s,background .18s,border-color .18s}
+.nav button:not(:disabled):hover{transform:translateY(-2px);border-color:var(--cyan)}
+.nav button.p{border-color:var(--ac);background:var(--ac);color:#071426}
+.nav button:disabled{opacity:.35;cursor:default}
+#lab{position:fixed;z-index:2;pointer-events:none;padding:6px 10px;border:1px solid rgba(45,212,191,.28);border-radius:8px;background:rgba(7,20,38,.9);color:#fff;font-size:11px;font-weight:750;transform:translate(-50%,-150%);white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.3);transition:opacity .2s}
+#hint{position:fixed;right:20px;bottom:20px;z-index:2;padding:10px 13px;border:1px solid var(--line);border-radius:11px;background:rgba(7,20,38,.68);backdrop-filter:blur(10px);color:#c3d3ea;font-size:11px;line-height:1.7;text-align:right}
+#resources{position:fixed;inset:0;z-index:10;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,9,19,.78);backdrop-filter:blur(12px)}
+#resources.open{display:flex;animation:fade-in .22s ease both}
+.resource-dialog{display:grid;grid-template-rows:auto auto minmax(0,1fr);width:min(1100px,100%);height:min(800px,92vh);overflow:hidden;border:1px solid rgba(146,169,202,.22);border-radius:20px;background:linear-gradient(145deg,#102541,#09182b);box-shadow:0 30px 90px rgba(0,0,0,.55);animation:dialog-in .28s cubic-bezier(.2,.8,.2,1) both}
+.resource-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px 14px;border-bottom:1px solid var(--line)}
+.resource-head h2{margin:0 0 4px;font:750 20px Sora,Inter,sans-serif;color:#fff}
+.resource-head p{margin:0;color:var(--mut);font-size:12px}
+.resource-close{display:grid;flex:0 0 38px;width:38px;height:38px;place-items:center;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.04);color:var(--ink);font-size:16px;cursor:pointer}
+.resource-nav{display:flex;gap:8px;overflow-x:auto;padding:13px 22px;border-bottom:1px solid var(--line);scrollbar-width:thin}
+.resource-nav button{flex:none;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.025);color:#b7c6d9;font:700 11px Inter,sans-serif;cursor:pointer;transition:all .18s}
+.resource-nav button:hover,.resource-nav button.active{border-color:rgba(45,212,191,.5);background:rgba(45,212,191,.1);color:#8ff4df}
+.resource-main{overflow:auto;padding:22px 24px 26px}
+.resource-main h3{margin:0 0 8px;color:#fff;font:700 17px Sora,Inter,sans-serif}
+.resource-main p{color:#b8c8dc;font-size:13px;line-height:1.65}
+.resource-intro{max-width:780px;margin-bottom:18px}
+.resource-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.resource-card{min-height:132px;padding:17px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.035);color:inherit;text-align:left;cursor:pointer;transition:transform .2s,border-color .2s,background .2s}
+.resource-card:hover{transform:translateY(-3px);border-color:rgba(224,176,74,.5);background:rgba(255,255,255,.06)}
+.resource-card i{display:grid;width:34px;height:34px;place-items:center;margin-bottom:11px;border-radius:10px;background:rgba(224,176,74,.12);color:var(--ac)}
+.resource-card strong{display:block;margin-bottom:5px;color:#f1f6fd;font-size:13px}
+.resource-card span{display:block;color:var(--mut);font-size:11px;line-height:1.5}
+.tool-box{max-width:800px;padding:18px;border:1px solid var(--line);border-radius:14px;background:rgba(7,20,38,.58)}
+.tool-box label{display:block;margin:14px 0 6px;color:#d9e5f3;font-size:12px;font-weight:700}
+.tool-box select,.tool-box input{width:100%;min-height:42px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#0b1b30;color:#f1f6fd;font:13px Inter,sans-serif}
+.tool-box button,.tool-button{min-height:40px;padding:9px 13px;border:1px solid rgba(224,176,74,.35);border-radius:9px;background:rgba(224,176,74,.12);color:#f6d88e;font:750 12px Inter,sans-serif;cursor:pointer}
+.tool-box button:hover,.tool-button:hover{background:rgba(224,176,74,.2)}
+.tool-result{min-height:44px;margin-top:14px;padding:12px;border:1px solid rgba(45,212,191,.18);border-radius:9px;background:rgba(45,212,191,.06);color:#d7f7ef;font-size:12px;line-height:1.6}
+.tool-result:empty{display:none}
+.tool-note{margin-top:12px!important;color:#92a9ca!important;font-size:11px!important}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
+.airflow-case{position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;min-height:140px;margin:15px 0;padding:20px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(90deg,rgba(45,212,191,.05),rgba(255,255,255,.025),rgba(224,176,74,.05))}
+.fan-control{display:grid;gap:8px;justify-items:center}
+.fan-toggle{min-width:104px}
+.fan-arrow{font-size:23px;color:var(--cyan);transition:transform .4s,color .2s}
+.fan-toggle[data-direction="out"]~.fan-arrow{transform:rotate(180deg);color:var(--ac)}
+.case-label{padding:10px 12px;border:1px solid var(--line);border-radius:8px;color:#dce7f5;font-size:11px;font-weight:750}
+.resource-feedback{margin-top:12px;color:var(--cyan);font-size:12px;font-weight:700}
+.choice-list{display:grid;gap:9px;margin-top:14px}
+.choice-list button{padding:12px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.035);color:#dce7f5;text-align:left;font:600 12px/1.45 Inter,sans-serif;cursor:pointer;transition:all .18s}
+.choice-list button:hover{border-color:var(--cyan);background:rgba(45,212,191,.07)}
+.choice-list button.correct{border-color:var(--ok);background:rgba(52,211,153,.1)}
+.choice-list button.incorrect{border-color:#fb7185;background:rgba(251,113,133,.08)}
+.bios-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.bios-tabs button{padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.03);color:#dce7f5;font:700 11px Inter,sans-serif;cursor:pointer}
+.bios-tabs button.active{border-color:var(--cyan);color:var(--cyan)}
+.resource-back{display:inline-flex;gap:8px;align-items:center;margin-bottom:16px;border:0;background:none;color:var(--cyan);font:750 12px Inter,sans-serif;cursor:pointer}
+@keyframes panel-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes item-in{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+@keyframes dialog-in{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:760px){header{min-height:60px;padding:9px 11px;gap:8px}.brand{min-width:auto}.brand-mark{width:32px;height:32px}.brand h1{display:none}#dots{gap:5px}.top-action{min-height:34px;padding:0 10px;font-size:11px}.top-action .action-label{display:none}#panel{left:12px;bottom:12px;width:min(450px,calc(100% - 24px));max-height:57vh;padding:17px}.resource-dialog{height:94vh}.resource-head{padding:16px}.resource-nav{padding:11px 14px}.resource-main{padding:17px}.resource-grid{grid-template-columns:1fr}.resource-card{min-height:unset}.resource-main h3{font-size:16px}#hint{right:12px;bottom:12px;font-size:10px}}
+@media(max-width:480px){#panel{max-height:54vh;left:8px;bottom:8px;width:calc(100% - 16px);padding:15px;border-radius:15px}#panel h2{font-size:18px}#panel p{font-size:12.5px}#panel ol{font-size:12px}.phase-tag{display:none}.resource-head h2{font-size:17px}.resource-head p{max-width:245px;font-size:11px}.field-grid{grid-template-columns:1fr}.airflow-case{gap:6px;padding:12px}.fan-toggle{min-width:88px;font-size:10px!important}.case-label{padding:8px;font-size:10px}.tool-box{padding:14px}#resources{padding:8px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Modelo 3D de um PC sendo montado"></canvas>
+<div id="bar"></div>
+<header>
+  <div class="brand"><span class="brand-mark"><i class="fas fa-microchip" aria-hidden="true"></i></span><h1>Montagem de PC 3D</h1></div>
+  <div id="dots" role="tablist" aria-label="Etapas da montagem"></div>
+  <button type="button" class="top-action" id="open-resources" aria-label="Abrir recursos interativos"><i class="fas fa-toolbox" aria-hidden="true"></i><span class="action-label">Recursos</span></button>
+</header>
+<div id="lab"></div>
+<div id="panel" aria-live="polite">
+  <div class="step-meta"><small id="cnt"></small><span class="phase-tag" id="phase-tag"></span></div>
+  <h2 id="ttl"></h2><p id="txt"></p>
+  <div id="why"><strong><i class="fas fa-lightbulb" aria-hidden="true"></i> Por que esta etapa importa</strong><span id="why-text"></span></div>
+  <h3>Passo a passo</h3><ol id="steps"></ol><h3>Dicas de montagem</h3><ul id="tips"></ul><div id="warn"></div>
+  <div class="nav"><button id="prev">Voltar</button><button id="next" class="p">Próxima etapa</button></div>
+</div>
+<div id="hint">Arraste para girar · role para aproximar<br>Setas ← → trocam de etapa</div>
+
+<div id="resources" aria-hidden="true">
+  <section class="resource-dialog" role="dialog" aria-modal="true" aria-labelledby="resources-title">
+    <div class="resource-head">
+      <div><h2 id="resources-title">Recursos interativos</h2><p>Pratique diagnóstico, conexões e planejamento antes de trabalhar no PC real.</p></div>
+      <button type="button" class="resource-close" id="close-resources" aria-label="Fechar recursos"><i class="fas fa-times" aria-hidden="true"></i></button>
+    </div>
+    <nav class="resource-nav" id="resource-nav" aria-label="Ferramentas de aprendizagem"></nav>
+    <div class="resource-main" id="resource-main" tabindex="0"></div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ===== Etapas do curso ===== */
+const STEPS=[
+{ph:"Preparação",t:"Preparando a bancada e as ferramentas",x:"Antes de abrir qualquer caixa, monte um espaço de trabalho limpo e seguro. Quase todo erro de montagem vem de pressa e de peça forçada.",s:["Escolha uma mesa ampla, bem iluminada e longe de tapetes ou carpetes.","Separe uma chave Phillips nº 2 (de estrela). Se tiver, use também pulseira antiestática, abraçadeiras de nylon e um alicate de corte.","Abra as caixas e confira se tem tudo: gabinete, placa-mãe, processador, memória, SSD, fonte, cooler e placa de vídeo.","Guarde as caixas da placa-mãe e da fonte: trazem manuais, parafusos e cabos.","Deixe o manual da placa-mãe (PDF) aberto no celular: você vai consultar slots e conectores.","Mantenha a fonte desconectada da tomada durante toda a montagem."],b:["Descarregue a estática tocando numa parte metálica sem pintura do gabinete antes de pegar nas peças","Segure placas pelas bordas, nunca pelos componentes","Use a caixa da placa-mãe como bancada para montar CPU, RAM, SSD e cooler"],w:"Não monte sobre carpete nem com roupa de lã: a estática pode danificar componentes sem deixar sinal.",f:[0,0,0],d:20,lab:"Gabinete ATX"},
+{ph:"Preparação",t:"Conhecendo o gabinete",x:"Veja onde cada coisa vai antes de instalar. Neste modelo a frente fica à direita e a traseira à esquerda.",s:["Solte os parafusos de aperto manual na traseira e remova as duas laterais.","Localize a bandeja da placa-mãe (o painel metálico no fundo) e seus furos de fixação.","Identifique o compartimento da fonte, embaixo, e os slots de expansão na traseira, onde fica a placa de vídeo.","Veja as aberturas de passagem de cabos pela bandeja: os cabos serão escondidos atrás dela.","Encontre os cabos soltos do gabinete: botão power, reset, LEDs, USB e áudio frontal.","Retire o saquinho de parafusos de dentro do gabinete e separe por tipo."],b:["O ventilador da frente puxa ar frio e o de trás expulsa o ar quente","A maioria dos parafusos é do tipo M3 ou 6-32; os da placa-mãe costumam vir em saquinho separado"],w:"",f:[0,0,0],d:20,lab:"Gabinete ATX"},
+{ph:"Montagem",t:"Espaçadores e espelho de I/O",x:"Os espaçadores (standoffs) são os pilares dourados que mantêm a placa-mãe afastada da bandeja metálica. Cada furo da placa precisa de um espaçador embaixo, e nenhum a mais.",s:["Confira o tamanho da sua placa: ATX, micro-ATX ou mini-ITX.","Apoie a placa sobre a bandeja, sem parafusar, só para ver quais furos dela coincidem com os pontos do gabinete.","Parafuse um espaçador em cada ponto correspondente, apertando com os dedos ou com chave soquete até firmar.","Remova qualquer espaçador que não tenha furo da placa em cima.","Encaixe o espelho de I/O (chapa retangular com recortes das portas) por dentro da traseira, pressionando as bordas até estalar. Se sua placa tem espelho integrado, pule este passo."],b:["Os pontos costumam vir marcados com letras (A, B, C) no gabinete","Alguns gabinetes já vêm com espaçadores instalados para ATX"],w:"Espaçador sobrando embaixo de uma região sem furo pode causar curto-circuito na placa-mãe.",f:[.5,1,-1.8],d:14,lab:"Espaçadores",},
+{ph:"Montagem",t:"Instalando a placa-mãe",x:"Na prática, muita gente instala CPU, RAM, SSD e cooler na placa ainda sobre a caixa dela e só depois a leva ao gabinete. Aqui seguimos a ordem para você ver cada peça.",s:["Incline levemente a placa e encaixe as portas traseiras nos recortes do espelho de I/O.","Baixe a placa até ela apoiar em todos os espaçadores.","Alinhe os furos e coloque um parafuso em cada um, sem apertar de início.","Aperte todos os parafusos em cruz, até firmar.","Confira que a placa não ficou torta nem encostando em nenhum ponto metálico."],b:["Não aperte demais: a placa pode rachar","Use os parafusos que vieram com o gabinete (cabeça chata ou panela)"],w:"",f:[.5,1,-1.5],d:14,lab:"Placa-mãe"},
+{ph:"Montagem",t:"Instalando o processador (CPU)",x:"É a peça mais delicada. Ela encaixa em um único sentido e não exige nenhuma força.",s:["Localize o soquete e a alavanca lateral ao lado dele.","Solte a alavanca empurrando-a levemente para o lado e levante-a. Abra a trava metálica, se houver.","Pegue o processador pelas bordas, sem tocar nos contatos dourados nem nos pinos.","Identifique o triângulo dourado em um canto do processador e o triângulo correspondente no soquete.","Apoie o processador alinhado, sem pressionar: ele deve assentar sozinho.","Abaixe a trava e a alavanca. É normal sentir resistência, mas nunca force."],b:["Guarde a tampa de plástico do soquete: ela é necessária se você precisar enviar a placa para garantia","Processadores AMD AM4 têm pinos no próprio chip; os Intel e AMD AM5 têm pinos no soquete"],w:"Se o processador não assenta com leveza, pare e confira a orientação. Forçar pode entortar pinos e perder a placa.",f:[.4,1.9,-1.3],d:7,lab:"CPU"},
+{ph:"Montagem",t:"Instalando a memória RAM",x:"Os pentes de memória precisam estar nos slots certos para funcionar em dual channel, que dobra a largura de banda.",s:["Abra as travas laterais dos slots que vai usar.","Consulte o manual: com dois pentes, normalmente se usa o segundo e o quarto slots a partir do processador (A2 e B2).","Alinhe o chanfro do pente com a divisão do slot.","Pressione de cima, com os polegares, nas duas pontas ao mesmo tempo, até ouvir o clique.","Confira se as travas laterais fecharam e se o pente está reto."],b:["O pente só entra em um sentido: não force se não encaixar","Use dois pentes iguais, de preferência do mesmo kit","Ative o perfil XMP ou EXPO na BIOS depois, para atingir a velocidade anunciada"],w:"Se o PC não der imagem no primeiro boot, o primeiro suspeito é a RAM mal encaixada.",f:[1.8,1.9,-1],d:8,lab:"Memória RAM ×2"},
+{ph:"Montagem",t:"Instalando o SSD NVMe (M.2)",x:"O SSD M.2 é pequeno, rápido e vai direto na placa-mãe, sem cabos.",s:["Localize o slot M.2 no manual. Os mais próximos do processador costumam ser os mais rápidos.","Retire o dissipador do slot, se a placa tiver um.","Se houver parafuso ou espaçador M.2, posicione-o no comprimento do seu SSD (normalmente 2280).","Insira o SSD em ângulo de uns 30° no slot e abaixe até ficar paralelo à placa.","Fixe com o parafuso M.2 na ponta oposta.","Retire a película plástica do thermal pad do dissipador e recoloque-o."],b:["O chanfro do SSD só encaixa em um sentido","Há SSDs M.2 NVMe e M.2 SATA: confira se a placa aceita o seu","O parafuso é muito pequeno: use ímã ou mesa limpa para não perdê-lo"],w:"",f:[.4,.5,-1.3],d:8,lab:"SSD NVMe"},
+{ph:"Montagem",t:"Pasta térmica e cooler do processador",x:"O cooler retira o calor do processador. A pasta térmica preenche as imperfeições entre os dois e ajuda a passar o calor.",s:["Se o cooler já vem com pasta aplicada, retire o plástico protetor da base e não encoste nela.","Sem pasta aplicada: ponha uma gota do tamanho de uma ervilha no centro do processador.","Apoie o cooler sobre o processador, alinhado com os furos do suporte.","Aperte os parafusos em cruz, dando meia volta em cada um por vez, até a mola parar.","Ligue o cabo do cooler no conector CPU_FAN da placa-mãe."],b:["Não espalhe a pasta com o dedo: a pressão do cooler a espalha","Em coolers líquidos (AIO), ligue a bomba em AIO_PUMP ou CPU_FAN","Confira se o cabo não ficou perto das hélices"],w:"Esquecer de retirar o plástico da base do cooler faz o processador superaquecer.",f:[.4,1.9,-.6],d:8,lab:"Cooler"},
+{ph:"Montagem",t:"Instalando a fonte de alimentação",x:"A fonte vai embaixo no gabinete. Escolha a posição certa para o ventilador e deixe a chave desligada.",s:["Posicione a fonte no compartimento inferior com o ventilador virado para baixo, se houver abertura com filtro; senão, para cima.","Alinhe os furos da fonte com os da traseira do gabinete.","Fixe com os 4 parafusos que acompanham a fonte.","Se a fonte for modular, encaixe só os cabos necessários: 24 pinos, EPS (CPU) e PCIe (placa de vídeo).","Deixe a chave da fonte em O (desligada) e o cabo de força desconectado."],b:["Não conecte cabos de uma fonte em outra: os conectores modulares não são padronizados entre marcas","Passe os cabos por trás da bandeja assim que forem encaixados"],w:"",f:[-.2,-4,-.2],d:10,lab:"Fonte"},
+{ph:"Montagem",t:"Instalando a placa de vídeo",x:"A placa de vídeo é a peça maior e mais pesada. Ela entra no slot PCIe x16 mais próximo do processador.",s:["Retire as tampas de PCI da traseira que correspondem ao tamanho da placa (normalmente 2 ou 3).","Abra o clipe do slot PCIe x16 superior.","Alinhe a ponta dourada da placa com o slot e o painel traseiro com o vão do gabinete.","Empurre com firmeza e em linha reta até o clipe travar com um clique.","Fixe o suporte da placa no gabinete com os parafusos das tampas de PCI."],b:["Placas pesadas podem envergar: use suporte antiqueda","Se o slot tiver trava de segurança, ela só abre quando você levanta o clipe"],w:"",f:[.3,-.7,-.6],d:10,lab:"Placa de vídeo"},
+{ph:"Cabos",t:"Cabo de 24 pinos (placa-mãe)",x:"É o maior cabo da fonte e leva energia para toda a placa-mãe. Fica na borda direita da placa.",s:["Pegue o cabo identificado como MB ou ATX 24-pin.","Passe-o pela abertura de cabos atrás da bandeja, se possível.","Alinhe o conector com o encaixe da placa, de forma que a trava do conector fique para o lado de fora.","Empurre uniformemente até a trava lateral estalar."],b:["Algumas fontes têm o 24 pinos dividido em 20+4: junte as duas partes antes de encaixar","Pressione com os dois polegares, sem torcer"],w:"",f:[2.5,-1,-.5],d:12,lab:"24 pinos (ATX)"},
+{ph:"Cabos",t:"Cabo EPS (alimentação do processador)",x:"Alimenta o processador. Passe o cabo pela abertura superior esquerda e conecte no topo da placa, perto do soquete.",s:["Pegue o cabo identificado como CPU ou EPS na fonte.","Passe-o por trás da bandeja até a abertura superior esquerda.","Encaixe no conector 4+4 pinos da placa, no canto superior.","Se a placa tem dois conectores EPS, ligue ambos.","Confira se a trava clicou."],b:["O EPS pode vir como 4+4 pinos: junte as duas metades para formar 8 pinos","Placas básicas podem ter só um conector de 4 pinos: neste caso use apenas a metade"],w:"Cuidado: o cabo PCIe da placa de vídeo é parecido, mas a pinagem é diferente. Nunca use PCIe no conector EPS da CPU.",f:[-1.5,1,0],d:14,lab:"EPS 4+4 pinos"},
+{ph:"Cabos",t:"Cabo PCIe da placa de vídeo",x:"Liga a fonte ao conector de energia da placa de vídeo. Se sua placa pede energia extra, é este cabo.",s:["Veja quantos conectores de energia a sua placa de vídeo tem e quantos pinos cada um usa.","Pegue os cabos identificados como PCIe ou VGA na fonte.","Prefira um cabo para cada conector da placa em vez de um cabo com duas pontas, quando possível.","Encaixe até a trava clicar. Em placas com 12VHPWR, empurre o conector até o fim."],b:["No 12VHPWR, não dobre o cabo perto do conector","Placas de entrada podem não usar cabo extra: o slot PCIe já basta"],w:"Um 12VHPWR mal encaixado pode superaquecer. Confirme que está inteiro no soquete, sem folga.",f:[1.8,-1.5,.3],d:11,lab:"PCIe 8 pinos"},
+{ph:"Cabos",t:"Painel frontal: power, reset e LEDs",x:"Os conectores pequenos do gabinete vão no bloco F_PANEL, na borda inferior da placa. É onde mais se erra.",s:["Localize no manual da placa-mãe o desenho do F_PANEL.","Ache os conectores do gabinete: POWER SW, RESET SW, POWER LED e HDD LED.","Encaixe cada um nos pinos indicados no manual.","Respeite o + e o - nos LEDs. Nos botões não importa a polaridade.","Conecte o USB 3.0 frontal no header USB3 e o USB-C frontal no header USB-C, se houver.","Encaixe o cabo de áudio HD_AUDIO no canto inferior esquerdo da placa."],b:["Se um LED não acender depois, inverta o conector","Se o PC não ligar pelo botão, confira o POWER SW"],w:"",f:[.8,-.5,-1],d:15,lab:"Painel frontal"},
+{ph:"Cabos",t:"Ventiladores do gabinete",x:"Ligue os ventiladores aos conectores da placa. Eles controlam a velocidade conforme a temperatura.",s:["Encaixe os cabos dos ventiladores nos conectores SYS_FAN ou CHA_FAN.","Ventiladores de 4 pinos (PWM) permitem controle de velocidade; os de 3 pinos controlam a voltagem.","Se o ventilador tiver LED RGB, descubra qual é o padrão: ARGB (5 V, 3 pinos) ou RGB (12 V, 4 pinos).","Ligue o RGB no conector correto e as fontes de energia, se houver.","Verifique o sentido do fluxo de ar: frente puxa, traseira expulsa."],b:["Muitos gabinetes têm hub de ventiladores que usa um só conector da placa","O sentido do ar costuma estar marcado por setas na lateral do ventilador"],w:"Ligar um ventilador ARGB 5 V em conector RGB de 12 V queima os LEDs.",f:[0,1.5,-1],d:18,lab:"Ventiladores"},
+{ph:"Cabos",t:"Organizando os cabos",x:"Cabos organizados melhoram o fluxo de ar, a aparência e facilitam futuras manutenções.",s:["Leve os cabos soltos para trás da bandeja e feche a tampa traseira para ver se ela fecha.","Junte cabos com braçadeiras de velcro ou nylon, sem apertar demais.","Prenda os cabos nos pontos de amarração do gabinete.","Afaste cabos das hélices dos ventiladores e dissipadores.","Deixe o cabo da placa de vídeo sem tensão no conector."],b:["Deixe um pouco de folga: cabo esticado pode soltar do conector","Cabos grossos (24 pinos) devem ser guiados primeiro"],w:"",f:[0,0,0],d:17,lab:"Cabos"},
+{ph:"Teste",t:"Conferência final antes de ligar",x:"Passe os olhos por tudo antes de energizar. Corrigir agora leva um minuto e evita perdas.",s:["Cooler: base sem plástico, parafusos firmes e cabo no CPU_FAN.","Memória: travas das duas pontas fechadas.","SSD M.2: parafuso fixado.","Placa de vídeo: encaixada, parafusada e com cabo(s) de energia.","24 pinos e EPS: totalmente encaixados.","Painel frontal e USB: nos conectores certos.","Nenhum parafuso solto ou cabo encostando em ventilador."],b:["Chacoalhe o gabinete de leve para ouvir se há parafuso solto lá dentro","Use a lanterna do celular para ver o interior"],w:"",f:[0,0,0],d:19,lab:"Revisão"},
+{ph:"Teste",t:"Fechando o gabinete",x:"Antes de fechar, faça o primeiro teste com a lateral aberta se preferir; depois recoloque as tampas.",s:["Se quiser, teste o PC ligado com a lateral aberta para facilitar a correção.","Recoloque a tampa lateral de vidro ou metal alinhando-a às guias.","Aperte os parafusos de aperto manual.","Recoloque a tampa do lado dos cabos.","Posicione o gabinete com espaço para o ar circular: pelo menos 10 cm atrás."],b:["Vidro temperado é pesado: segure com as duas mãos","Mantenha o gabinete afastado de paredes e fora de carpete"],w:"",f:[0,0,0],d:19,lab:"Painel lateral"},
+{ph:"Teste",t:"Primeiro boot",x:"É a hora da verdade. Conecte os periféricos e ligue o PC.",s:["Conecte monitor, teclado e mouse. O monitor vai na saída da placa de vídeo, não na da placa-mãe.","Ligue o cabo de energia na fonte e mova a chave para I.","Aperte o botão power do gabinete.","Os ventiladores devem girar e deve aparecer o logotipo da placa-mãe em até 30 segundos.","Se não aparecer imagem, desligue e confira RAM, monitor na saída certa e cabos EPS e PCIe."],b:["O primeiro boot pode demorar mais: a placa treina a memória","Bipes e luzes de diagnóstico da placa indicam o erro: veja o manual"],w:"Se sentir cheiro de queimado, ouvir estalos ou ver faísca, desligue a fonte imediatamente.",f:[0,0,0],d:19,lab:"PC ligado"},
+{ph:"Software",t:"Configurando a BIOS/UEFI",x:"A BIOS é o programa que controla o hardware antes do sistema operacional.",s:["Aperte DEL ou F2 repetidamente logo após ligar para entrar na BIOS.","Confira se processador, memória e SSD aparecem no resumo.","Ative o perfil XMP ou EXPO da memória.","Ative o Resizable BAR (ou Above 4G Decoding), se a placa de vídeo for compatível.","Veja a temperatura do processador: em repouso, algo entre 30 e 50 °C é normal.","Salve e saia (F10)."],b:["Anote a versão da BIOS: pode ser preciso atualizar para processadores novos","Não mude outros parâmetros que você não conhece"],w:"",f:[0,0,0],d:19,lab:"BIOS"},
+{ph:"Software",t:"Instalando o Windows",x:"Prepare um pendrive de instalação em outro computador e instale o sistema no SSD.",s:["Em outro PC, baixe a Ferramenta de Criação de Mídia do site da Microsoft e crie um pendrive de pelo menos 8 GB.","Conecte o pendrive no PC novo e ligue, apertando F11 ou F12 para escolher o boot por USB.","Siga o assistente: escolha idioma e teclado.","Em «Instalação personalizada», selecione o SSD e continue.","Aguarde as reinicializações: não remova o pendrive antes de o PC reiniciar pela primeira vez.","Faça a configuração inicial com conta e rede."],b:["Sem licença, o Windows instala mas fica com limitações","Retire o pendrive quando o instalador pedir"],w:"A instalação apaga o que houver no disco escolhido. Em PC novo isso não é problema, mas confirme o disco.",f:[0,0,0],d:19,lab:"Windows"},
+{ph:"Software",t:"Drivers e atualizações",x:"Com o Windows instalado, instale os drivers para ter desempenho completo.",s:["Conecte o PC à internet e execute o Windows Update até não haver mais atualizações.","Baixe do site do fabricante da placa-mãe os drivers de chipset, rede e áudio.","Instale o driver da placa de vídeo do site da NVIDIA, AMD ou Intel.","Reinicie quando o instalador pedir.","No gerenciador de dispositivos, confira se nenhum item tem aviso amarelo."],b:["Baixe sempre do site oficial, nunca de sites de drivers de terceiros","Evite atualizar a BIOS sem necessidade"],w:"",f:[0,0,0],d:19,lab:"Drivers"},
+{ph:"Software",t:"Testes e temperaturas",x:"Confirme se o PC é estável antes de começar a usar de verdade.",s:["No Gerenciador de Tarefas, confira se o total de RAM e a velocidade estão corretos.","Em Configurações de vídeo, ajuste resolução e taxa de atualização do monitor para o máximo.","Instale um monitor de temperaturas, como HWiNFO ou o próprio da fabricante.","Rode um teste de carga de uns 15 minutos (como Cinebench ou OCCT).","Observe: CPU abaixo de 90 °C e placa de vídeo abaixo de 85 °C sob carga são valores comuns.","Se o PC reiniciar ou travar, volte e revise cooler, RAM e energia."],b:["Teste também um jogo pesado por 30 minutos","Ruído alto pode indicar ventilador mal fixado ou cabo encostando"],w:"",f:[0,0,0],d:19,lab:"Testes"},
+{ph:"Software",t:"Montagem concluída",x:"Parabéns! Seu PC está montado, configurado e testado. Para ele durar, faça a manutenção básica.",s:["Limpe a poeira a cada 3 a 6 meses com pincel e ar comprimido, com o PC desligado.","Atualize drivers e o Windows regularmente.","Faça backup dos arquivos importantes.","Guarde as notas fiscais e os manuais de cada peça para garantia."],b:["Anote as temperaturas de repouso para comparar no futuro","Revise o aperto do cooler e dos cabos uma vez por ano"],w:"",f:[0,0,0],d:19,lab:"PC pronto"}
+];
+
+/* ===== Recursos interativos ===== */
+const RESOURCE_LABELS=[
+  ['inicio','Visão geral'],['diagnostico','Diagnóstico'],['conexoes','Conexões'],
+  ['compatibilidade','Compatibilidade'],['fluxo','Fluxo de ar'],
+  ['armazenamento','Armazenamento'],['desafio','Encontre o erro'],['bios','BIOS/UEFI']
+];
+const RESOURCE_VIEWS={
+  diagnostico:`<button class="resource-back" data-open-tool="inicio"><i class="fas fa-arrow-left" aria-hidden="true"></i> Todos os recursos</button>
+    <h3>Diagnóstico guiado por sintomas</h3><p class="resource-intro">Selecione o que está acontecendo. A sequência ajuda a começar pelas verificações simples e seguras; desligue o computador antes de mexer em componentes.</p>
+    <div class="tool-box"><label for="symptom">Qual sintoma você observa?</label><select id="symptom"><option value="">Selecione um sintoma</option><option value="sem-energia">Não liga ou não acende nada</option><option value="sem-imagem">Liga, mas não aparece imagem</option><option value="temperatura">Desliga ou esquenta demais</option><option value="instabilidade">Reinicia durante jogos ou tarefas pesadas</option></select><div class="tool-result" id="diagnostic-result" role="status"></div><p class="tool-note">Se houver fumaça, faísca, cheiro de queimado ou ruído anormal, desligue a alimentação externa e procure um técnico. Nunca abra a fonte.</p></div>`,
+  conexoes:`<button class="resource-back" data-open-tool="inicio"><i class="fas fa-arrow-left" aria-hidden="true"></i> Todos os recursos</button>
+    <h3>Guia rápido de conexões</h3><p class="resource-intro">Escolha um cabo para ver sua função e onde procurar o conector correspondente. O manual da placa-mãe é a referência final: nomes e posições variam conforme o modelo.</p>
+    <div class="tool-box"><label for="connector">Componente ou cabo</label><select id="connector"><option value="">Selecione</option><option value="atx">ATX de 24 pinos</option><option value="eps">EPS / CPU</option><option value="pcie">PCIe / alimentação da GPU</option><option value="fan">CPU_FAN</option><option value="front">Painel frontal (PWR SW)</option><option value="sata">SATA de dados e energia</option><option value="usb">USB frontal</option></select><div class="tool-result" id="connector-result" role="status"></div><p class="tool-note">Não force conectores. EPS e PCIe podem parecer semelhantes, mas têm pinagem e uso diferentes; use apenas o cabo correto da fonte.</p></div>`,
+  compatibilidade:`<button class="resource-back" data-open-tool="inicio"><i class="fas fa-arrow-left" aria-hidden="true"></i> Todos os recursos</button>
+    <h3>Verificação inicial de compatibilidade</h3><p class="resource-intro">Compare as especificações principais do processador, da placa-mãe e da memória. Este é um filtro didático, não substitui a lista oficial de CPUs suportadas nem as medidas do gabinete.</p>
+    <form class="tool-box" id="compatibility-form"><div class="field-grid"><div><label for="cpu-socket">Socket do processador</label><input id="cpu-socket" placeholder="Ex.: AM5" required></div><div><label for="board-socket">Socket da placa-mãe</label><input id="board-socket" placeholder="Ex.: AM5" required></div><div><label for="ram-kit">Tipo da memória</label><input id="ram-kit" placeholder="Ex.: DDR5" required></div><div><label for="board-ram">Tipo aceito pela placa</label><input id="board-ram" placeholder="Ex.: DDR5" required></div><div><label for="gpu-power">Consumo estimado da GPU (W)</label><input id="gpu-power" type="number" min="0" placeholder="Ex.: 250" required></div><div><label for="psu-power">Potência nominal da fonte (W)</label><input id="psu-power" type="number" min="1" placeholder="Ex.: 650" required></div></div><button type="submit">Verificar itens informados</button><div class="tool-result" id="compatibility-result" role="status"></div></form>
+    <p class="tool-note">A potência da GPU não representa o consumo total do PC. Confira conectores, qualidade e recomendações da fabricante da placa de vídeo, processador e fonte.</p>`,
+  fluxo:`<button class="resource-back" data-open-tool="inicio"><i class="fas fa-arrow-left" aria-hidden="true"></i> Todos os recursos</button>
+    <h3>Planejador visual de fluxo de ar</h3><p class="resource-intro">Defina a direção dos ventiladores da frente e da traseira. A visualização ilustra um arranjo comum: ar fresco entrando pela frente e ar aquecido saindo atrás.</p>
+    <div class="tool-box"><div class="airflow-case"><div class="fan-control"><button class="tool-button fan-toggle" data-fan="front" data-direction="in">Frente: entrada</button><i class="fas fa-arrow-right fan-arrow" aria-hidden="true"></i></div><span class="case-label">GABINETE<br>fluxo interno</span><div class="fan-control"><button class="tool-button fan-toggle" data-fan="rear" data-direction="out">Traseira: saída</button><i class="fas fa-arrow-right fan-arrow" aria-hidden="true"></i></div></div><p class="resource-feedback" id="airflow-feedback" role="status">Configuração equilibrada para começar: entrada frontal e saída traseira.</p><p class="tool-note">Confira as setas gravadas na moldura do ventilador. Pressão e temperatura dependem do gabinete, filtros, quantidade de fans e componentes.</p></div>`,
+  armazenamento:`<button class="resource-back" data-open-tool="inicio"><i class="fas fa-arrow-left" aria-hidden="true"></i> Todos os recursos</button>
+    <h3>Planejador de armazenamento</h3><p class="resource-intro">Some uma estimativa para sistema, programas e arquivos. A recomendação inclui uma folga aproximada de 25% para atualizações e crescimento dos dados.</p>
+    <div class="tool-box"><div class="field-grid"><div><label for="system-size">Sistema operacional (GB)</label><input id="system-size" type="number" min="0" value="60"></div><div><label for="apps-size">Programas e jogos (GB)</label><input id="apps-size" type="number" min="0" value="400"></div><div><label for="files-size">Arquivos pessoais (GB)</label><input id="files-size" type="number" min="0" value="200"></div></div><div class="tool-result" id="storage-result" role="status"></div><p class="tool-note">Capacidade anunciada e espaço disponível no sistema diferem por unidades e formatação. Mantenha backup em outro dispositivo ou serviço.</p></div>`,
+  desafio:`<button class="resource-back" data-open-tool="inicio"><i class="fas fa-arrow-left" aria-hidden="true"></i> Todos os recursos</button>
+    <h3>Desafio: encontre o erro</h3><p class="resource-intro">O computador liga, mas não há imagem. Você confirmou que o monitor funciona e está na entrada correta. Qual verificação faz mais sentido antes de trocar peças?</p>
+    <div class="tool-box"><div class="choice-list" id="error-choices"><button data-correct="false">Abrir a fonte para verificar os capacitores</button><button data-correct="true">Desligar e conferir encaixe da RAM e alimentação da GPU/CPU</button><button data-correct="false">Retirar o cooler com o computador ligado</button><button data-correct="false">Forçar o processador no soquete para garantir contato</button></div><div class="tool-result" id="error-result" role="status"></div><button class="tool-button" id="reset-challenge" type="button">Tentar novamente</button><p class="tool-note">Segurança primeiro: desligue, coloque a fonte em O e desconecte da tomada antes de revisar componentes.</p></div>`,
+  bios:`<button class="resource-back" data-open-tool="inicio"><i class="fas fa-arrow-left" aria-hidden="true"></i> Todos os recursos</button>
+    <h3>Explorador de conceitos da BIOS/UEFI</h3><p class="resource-intro">Uma visão demonstrativa das opções que aparecem com frequência. Os nomes e menus variam; não aplique configurações sem consultar o manual.</p>
+    <div class="tool-box"><div class="bios-tabs"><button class="active" data-bios="boot">Ordem de boot</button><button data-bios="memory">Perfil de memória</button><button data-bios="security">Secure Boot</button><button data-bios="monitor">Monitoramento</button></div><div class="tool-result" id="bios-result" role="status"></div><p class="tool-note">Este explorador é apenas educativo: não acessa nem altera a BIOS real do computador.</p></div>`
+};
+const RESOURCE_INTRO=`<p class="resource-intro">Ferramentas de apoio para você entender decisões comuns de montagem. Os resultados são orientativos: confirme sempre as especificações no manual e nas páginas oficiais dos fabricantes.</p><div class="resource-grid">
+  <button class="resource-card" data-open-tool="diagnostico"><i class="fas fa-stethoscope" aria-hidden="true"></i><strong>Diagnóstico por sintomas</strong><span>Siga uma sequência de verificações seguras para problemas comuns.</span></button>
+  <button class="resource-card" data-open-tool="conexoes"><i class="fas fa-plug" aria-hidden="true"></i><strong>Guia de conexões</strong><span>Entenda a função dos cabos ATX, EPS, PCIe, painel frontal e outros.</span></button>
+  <button class="resource-card" data-open-tool="compatibilidade"><i class="fas fa-puzzle-piece" aria-hidden="true"></i><strong>Compatibilidade e upgrade</strong><span>Compare socket, tipo de RAM e uma margem inicial para fonte.</span></button>
+  <button class="resource-card" data-open-tool="fluxo"><i class="fas fa-wind" aria-hidden="true"></i><strong>Fluxo de ar</strong><span>Experimente entrada e saída de ar no gabinete.</span></button>
+  <button class="resource-card" data-open-tool="armazenamento"><i class="fas fa-hard-drive" aria-hidden="true"></i><strong>Planejador de armazenamento</strong><span>Estime espaço para sistema, programas e arquivos.</span></button>
+  <button class="resource-card" data-open-tool="desafio"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><strong>Encontre o erro</strong><span>Pratique a escolha de verificações antes de substituir componentes.</span></button>
+  <button class="resource-card" data-open-tool="bios"><i class="fas fa-sliders" aria-hidden="true"></i><strong>Explorador de BIOS/UEFI</strong><span>Aprenda conceitos de boot, memória, segurança e monitoramento.</span></button>
+  </div>`;
+const DIAGNOSTICS={
+  'sem-energia':['Confira se a tomada funciona e se o cabo está firme.','Verifique se a chave traseira da fonte está em I.','Com o PC desconectado, confira o ATX de 24 pinos, o EPS da CPU e o cabo PWR SW no manual.','Se persistir, pare e procure assistência; não abra a fonte.'],
+  'sem-imagem':['Confirme a entrada selecionada no monitor e conecte-o à GPU dedicada quando houver uma.','Desligue e desconecte a energia antes de revisar se a RAM está totalmente encaixada.','Confira os cabos EPS da CPU e PCIe da placa de vídeo.','Consulte LEDs ou bipes de diagnóstico no manual da placa-mãe.'],
+  'temperatura':['Desligue o PC e confira se o cooler está firme e sem película protetora na base.','Verifique se a ventoinha está ligada em CPU_FAN.','Confira se entradas, saídas de ar e filtros estão desobstruídos.','Se a temperatura continuar alta, interrompa o uso e revise a instalação térmica.'],
+  'instabilidade':['Observe temperaturas e se o problema ocorre sob carga.','Com o PC desligado, confira conexões EPS e PCIe e se a GPU está bem encaixada.','Revise se a fonte atende às recomendações da placa de vídeo e do restante do sistema.','Reverta ajustes recentes de BIOS/overclock antes de continuar os testes.']
+};
+const CONNECTOR_INFO={
+  atx:'Alimenta a placa-mãe. Procure o conector largo de 24 pinos na borda da placa; encaixe até a trava prender.',
+  eps:'Alimenta o processador. Fica normalmente perto do topo da placa-mãe e costuma ser 4+4 pinos, identificado como CPU/EPS.',
+  pcie:'Alimenta a placa de vídeo quando necessário. Use o cabo PCIe correto da fonte e respeite o tipo de conector indicado pela fabricante.',
+  fan:'O cabo da ventoinha do cooler do processador vai em CPU_FAN. O conector costuma ter 4 pinos; alinhe a guia sem forçar.',
+  front:'PWR SW liga o botão de energia aos pinos do painel frontal. Consulte o diagrama exato no manual; LEDs têm polaridade.',
+  sata:'SATA de dados liga unidade SATA à placa-mãe; SATA de energia sai da fonte. São dois cabos distintos.',
+  usb:'USB frontal conecta-se ao header USB correspondente na placa-mãe. Alinhe o bloqueio do conector e confira USB 2.0/3.x no manual.'
+};
+const BIOS_INFO={
+  boot:'A ordem de boot define de qual dispositivo o firmware tenta iniciar o sistema. Para instalar um sistema, escolha temporariamente o pendrive de instalação.',
+  memory:'XMP (Intel) e EXPO (AMD) carregam perfis de memória testados pelo fabricante do kit. Ativá-los pode exigir estabilidade e suporte da CPU/placa.',
+  security:'Secure Boot ajuda a validar componentes do processo de inicialização. Requisitos e opções dependem do sistema e da configuração instalada.',
+  monitor:'A tela de monitoramento mostra temperaturas, rotações de ventoinhas e tensões reportadas. Compare valores em repouso e consulte limites do fabricante.'
+};
+
+/* ===== Cena ===== */
+const $=id=>document.getElementById(id), cv=$('c');
+const ren=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+ren.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x101b2b);
+const cam=new THREE.PerspectiveCamera(40,1,.1,100);
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a9a94,.9));
+const dl=new THREE.DirectionalLight(0xffffff,.8); dl.position.set(5,10,12); scene.add(dl);
+const M=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.55,metalness:.25},o));
+const B=(w,h,d,c,x,y,z,g,o)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c,o));m.position.set(x||0,y||0,z||0);g.add(m);return m};
+const spin=[];
+function fan(r,col){const g=new THREE.Group(),s=new THREE.Group();
+ g.add(new THREE.Mesh(new THREE.TorusGeometry(r,r*.07,6,28),M(0x20262b)));
+ for(let i=0;i<7;i++){const a=new THREE.Group();a.rotation.z=i*Math.PI*2/7;const b=new THREE.Mesh(new THREE.BoxGeometry(r*.7,r*.22,.03),M(col||0x2d3640));b.position.x=r*.5;b.rotation.x=.5;a.add(b);s.add(a)}
+ const h=new THREE.Mesh(new THREE.CylinderGeometry(r*.2,r*.2,.1,12),M(0x111111));h.rotation.x=Math.PI/2;s.add(h);g.add(s);spin.push(s);return g}
+
+const parts=[], cables=[];
+function part(step,tx,ty,tz,off,build){const g=new THREE.Group();build(g);scene.add(g);
+ const mats=[];g.traverse(o=>{if(o.material&&o.material.emissive)mats.push(o.material)});
+ parts.push({step,g,t:new THREE.Vector3(tx,ty,tz),off:new THREE.Vector3(...off),p:0,mats});g.visible=false}
+
+/* gabinete */
+part(0,0,0,0,[0,0,0],g=>{
+ B(9,10,.1,0x252b33,0,0,-2.2,g);B(9,.15,4.4,0x2e353e,0,-5,0,g);B(9,.15,4.4,0x2e353e,0,5,0,g);
+ B(.15,10,4.4,0x2a3038,-4.5,0,0,g);B(.15,10,4.4,0x2a3038,4.5,0,0,g,{transparent:true,opacity:.35});
+ const e=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(9,10,4.4)),new THREE.LineBasicMaterial({color:0x5a6b66}));g.add(e);
+ for(let i=0;i<6;i++)for(let j=0;j<5;j++){const s=B(.1,.1,.2,0x3b444d,-2.4+i*1.1,-2.2+j*1.8,-2.05,g)}
+ [[4.25,2.2],[4.25,-.5]].forEach(p=>{const f=fan(1.1,0x3b86c4);f.rotation.y=Math.PI/2;f.position.set(p[0],p[1],-.7);g.add(f)});
+ const rf=fan(.75,0x3b86c4);rf.rotation.y=Math.PI/2;rf.position.set(-4.25,2.8,-.9);g.add(rf)});
+
+/* placa-mãe */
+part(3,.5,1,-1.5,[0,0,6],g=>{
+ B(5.4,5.4,.12,0x2c4a3a,0,0,0,g);
+ B(1.15,1.15,.06,0x14181c,-.1,.9,.09,g);          // soquete
+ B(.9,.9,.2,0x7d8a92,.9,-2.1,.15,g);              // chipset
+ B(.3,1.8,.3,0x808c94,-1.6,1.9,.17,g);B(1.8,.3,.3,0x808c94,-.7,2.55,.17,g); // VRM
+ B(.3,1.6,.5,0x9aa5ab,-2.75,1.6,.2,g);            // I/O
+ B(.1,2.6,.12,0x15191d,.2+1.0,.9,.1,g);B(.1,2.6,.12,0x15191d,.5+1.0,.9,.1,g); // slots RAM
+ B(4.4,.14,.12,0x15191d,-.1,-1.4,.1,g);           // PCIe
+ B(1.4,.4,.08,0x202428,-.1,-.4,.1,g);             // M.2
+ B(.3,1.2,.3,0xe8e6dc,2.45,-.8,.15,g);            // 24 pinos
+ B(.9,.25,.2,0xe8e6dc,-1.2,2.4,.15,g);            // EPS
+ B(.9,.4,.2,0x15191d,1.6,-2.45,.1,g)});          // painel frontal
+
+/* CPU */
+part(4,.4,1.9,-1.28,[0,0,5],g=>{B(.8,.8,.07,0xcfd5d8,0,0,0,g,{metalness:.8,roughness:.3});B(.55,.55,.02,0xaab2b6,0,0,.05,g)});
+
+/* RAM */
+part(5,1.7,1.9,-1.04,[0,5,0],g=>{[0,.3].forEach(dx=>{B(.1,2.4,.7,0x14181c,dx,0,0,g);B(.12,2.3,.45,0xb3212a,dx,0,.05,g,{metalness:.5})})});
+
+/* NVMe */
+part(6,.4,.5,-1.36,[0,0,5],g=>{B(2.2,.5,.05,0x141414,0,0,0,g);B(.5,.4,.07,0x4b7bd1,.5,0,.05,g);B(.4,.4,.07,0x333,-.7,0,.05,g)});
+
+/* cooler */
+part(7,.4,1.9,-.55,[0,0,5],g=>{B(1.5,1.5,.9,0x7d8a92,0,0,0,g,{metalness:.7});
+ const f=fan(.62,0x2d3640);f.position.z=.5;g.add(f)});
+
+/* fonte */
+part(8,-.2,-4.1,-.2,[0,-5,0],g=>{B(3.6,1.6,2.8,0x191c20,0,0,0,g);
+ const f=fan(.7,0x333a42);f.position.z=1.41;g.add(f);B(.5,.5,.05,0xe2540d,1.3,.4,1.42,g)});
+
+/* placa de vídeo */
+part(9,.3,-.4,-.7,[0,0,6],g=>{B(4.4,.06,1.5,0x14181c,0,0,0,g);B(4.4,1,1.4,0x23282d,0,-.55,-.05,g,{metalness:.5});
+ [-1.1,1.1].forEach(x=>{const f=fan(.55,0xc9ced2);f.rotation.x=Math.PI/2;f.position.set(x,-1.07,0);g.add(f)});
+ B(.5,.2,.3,0x111,1.7,.1,.6,g)});
+
+/* espaçadores */
+part(2,0,0,0,[0,0,4],g=>{[-2.4,0,2.4].forEach(dx=>[-2.4,0,2.4].forEach(dy=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.6,10),M(0xc9a24b,{metalness:.7}));c.rotation.x=Math.PI/2;c.position.set(.5+dx,1+dy,-1.85);g.add(c)}))});
+/* tampa lateral */
+part(17,0,0,0,[0,0,8],g=>{B(9,10,.08,0x9fc4d8,0,0,2.25,g,{transparent:true,opacity:.22})});
+
+/* cabos */
+function cable(step,pts,col,r){const v=pts.map(p=>new THREE.Vector3(...p));
+ const g=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(v),70,r,8);
+ const m=new THREE.Mesh(g,M(col,{roughness:.85,metalness:0}));
+ const k=new THREE.Mesh(new THREE.BoxGeometry(.4,.4,.4),M(col,{roughness:.5}));k.position.copy(v[v.length-1]);
+ const grp=new THREE.Group();grp.add(m,k);scene.add(grp);grp.visible=false;
+ cables.push({step,m,k,n:g.index.count,p:0,grp})}
+cable(10,[[1,-3.3,.5],[3.2,-3.0,.6],[3.8,-1.2,0],[3.4,.3,-.8],[3.0,.2,-1.2]],0xe2c21a,.14);
+cable(11,[[0,-3.3,.5],[-2.6,-3,.9],[-3.3,0,.5],[-3.0,3.2,-.3],[-1.9,3.5,-1.3],[-1.35,3.4,-1.3]],0x20252a,.1);
+cable(12,[[1.2,-3.3,.7],[2.2,-2.6,.9],[3.0,-1.6,.7],[2.4,-.5,.3],[2.0,-.3,.0]],0x2f6f93,.09);
+cable(13,[[4.2,-1.2,-1.6],[3.7,-2.2,-1.5],[2.8,-2.6,-1.3],[2.1,-2.5,-1.2]],0xc8372d,.06);
+cable(14,[[-4.1,2.8,-1],[-3.4,3.3,-1.6],[-2.2,3.9,-1.4],[-1.3,3.6,-1.35]],0x20252a,.05);
+cable(14,[[4.0,2.1,-1.6],[3.8,.3,-1.7],[3.5,-1.0,-1.5],[2.4,-2.3,-1.3]],0x9aa0a6,.05);
+
+/* ===== Câmera e entrada ===== */
+let az=.5,el=.2,d=20,df=20,cur=0,tgt=new THREE.Vector3(),tf=new THREE.Vector3(),drag=null;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+cv.onpointerdown=e=>{drag=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId)};
+cv.onpointermove=e=>{if(!drag)return;az-=(e.clientX-drag[0])*.007;el=clamp(el+(e.clientY-drag[1])*.007,-.3,1.3);drag=[e.clientX,e.clientY]};
+cv.onpointerup=cv.onpointercancel=()=>drag=null;
+cv.addEventListener('wheel',e=>{e.preventDefault();df=clamp(df*(1+e.deltaY*.001),4,30)},{passive:false});
+function resize(){const w=innerWidth,h=innerHeight;ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+addEventListener('resize',resize);resize();
+
+/* ===== Interface ===== */
+const dots=$('dots');
+const WHY_BY_STEP=[
+  [/bancada|ferramentas/i,'A preparação reduz descargas eletrostáticas, perda de parafusos e interrupções durante a montagem. Deixe a fonte desconectada até a revisão final.'],
+  [/gabinete/i,'Reconhecer baias, passagens e pontos de fixação antes de instalar peças ajuda a planejar o espaço e evitar retrabalho.'],
+  [/espaçador|espelho/i,'Os espaçadores mantêm a placa isolada da bandeja metálica. Um ponto sobrando pode encostar no circuito e provocar curto.'],
+  [/placa-mãe/i,'A placa precisa apoiar nos pontos corretos sem torção. Fixação uniforme reduz tensão na placa e protege os conectores.'],
+  [/processador|cpu/i,'Alinhar a CPU sem força protege os contatos delicados do soquete e permite que o sistema inicialize corretamente.'],
+  [/memória|ram/i,'Encaixe completo e slots recomendados são necessários para o sistema reconhecer a memória e usar os canais disponíveis.'],
+  [/ssd|nvme/i,'Orientação e fixação corretas evitam danos ao slot M.2 e garantem contato adequado com a unidade.'],
+  [/pasta térmica|cooler/i,'O contato correto entre cooler e processador permite transferir calor. O cabo em CPU_FAN também ajuda a placa a monitorar a refrigeração.'],
+  [/fonte/i,'A fonte deve ficar ventilada e desligada enquanto as peças são conectadas. Use apenas cabos compatíveis com o próprio modelo modular.'],
+  [/placa de vídeo/i,'A GPU precisa estar totalmente encaixada no slot e apoiada pelo gabinete; cabos de energia incorretos podem causar falhas ou danos.'],
+  [/cabo de 24 pinos/i,'O ATX de 24 pinos alimenta a placa-mãe. A trava presa e o encaixe completo evitam falhas intermitentes.'],
+  [/cabo eps/i,'O EPS fornece energia à CPU. Não o confunda com PCIe: os cabos podem parecer parecidos, mas não são intercambiáveis.'],
+  [/cabo pcie/i,'O conector PCIe alimenta a placa de vídeo. Uma conexão firme e os cabos indicados pelo fabricante são importantes sob carga.'],
+  [/painel frontal/i,'Os pinos do painel frontal são pequenos e variam por modelo. Consultar o diagrama evita inverter LEDs ou ligar o botão no lugar errado.'],
+  [/ventiladores/i,'A direção e o sentido dos fans definem o caminho do ar. Uma configuração clara facilita dissipar o calor dos componentes.'],
+  [/organizando os cabos/i,'Cabos presos longe das hélices evitam ruído e bloqueio de ventilação, além de facilitar manutenção futura.'],
+  [/conferência final/i,'A revisão antes de energizar detecta cabos soltos, parafusos esquecidos e erros de montagem quando ainda são simples de corrigir.'],
+  [/fechando/i,'Fechar o gabinete depois da inspeção protege as peças e mantém um espaço livre para circulação de ar.'],
+  [/boot/i,'O primeiro boot confirma se os componentes recebem energia e se o vídeo aparece. Se houver sinais elétricos anormais, interrompa imediatamente.'],
+  [/bios|uefi/i,'A BIOS/UEFI inicializa e identifica o hardware antes do sistema operacional. Altere somente opções que você compreende e pode reverter.'],
+  [/windows/i,'A instalação prepara o disco e o sistema para uso. A seleção do disco precisa ser conferida porque a instalação pode apagar dados existentes.'],
+  [/drivers/i,'Drivers adequados permitem que o sistema operacional use corretamente chipset, rede, áudio e placa de vídeo. Prefira fontes oficiais.'],
+  [/temperaturas|testes/i,'Testes controlados ajudam a encontrar instabilidade e refrigeração inadequada antes do uso diário. Acompanhe temperaturas e interrompa se houver anormalidade.'],
+  [/concluída/i,'Manutenção preventiva, backups e documentação prolongam a vida útil e ajudam em futuras atualizações ou solicitações de garantia.']
+];
+STEPS.forEach((s,i)=>{const b=document.createElement('button');b.textContent=i+1;b.title=s.t;b.setAttribute('role','tab');b.setAttribute('aria-label',`Etapa ${i+1}: ${s.t}`);b.onclick=()=>go(i);dots.appendChild(b)});
+function go(i){cur=clamp(i,0,STEPS.length-1);const s=STEPS[cur];
+ tf.set(...s.f);df=s.d;
+ $('cnt').textContent='Etapa '+(cur+1)+' de '+STEPS.length;$('phase-tag').textContent=s.ph;$('ttl').textContent=s.t;$('txt').textContent=s.x;
+ $('why-text').textContent=(WHY_BY_STEP.find(([pattern])=>pattern.test(s.t))||[])[1]||'Esta etapa ajuda a montar o computador com segurança e deixa mais simples verificar o resultado antes de prosseguir.';
+ $('steps').innerHTML='';s.s.forEach((t,index)=>{const l=document.createElement('li');l.textContent=t;l.style.animationDelay=`${Math.min(index*45,270)}ms`;$('steps').appendChild(l)});$('panel').scrollTop=0;$('tips').innerHTML='';s.b.forEach((t,index)=>{const l=document.createElement('li');l.textContent=t;l.style.animationDelay=`${Math.min(index*45,180)}ms`;$('tips').appendChild(l)});
+ $('warn').textContent=s.w;
+ $('prev').disabled=cur===0;$('next').disabled=cur===STEPS.length-1;
+ $('bar').style.width=(cur/(STEPS.length-1)*100)+'%';
+ [...dots.children].forEach((b,j)=>{b.className=j<cur?'done':j===cur?'on':'';b.setAttribute('aria-selected',String(j===cur));b.tabIndex=j===cur?0:-1;if(j===cur)b.scrollIntoView({inline:'center',block:'nearest'})});
+ $('lab').textContent=s.lab}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+addEventListener('keydown',e=>{if($('resources').classList.contains('open'))return;if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
+
+const resourceOverlay=$('resources'),resourceNav=$('resource-nav'),resourceMain=$('resource-main');
+let activeResource='inicio',resourceOpener=null;
+RESOURCE_LABELS.forEach(([id,label])=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.dataset.resource=id;b.setAttribute('aria-pressed','false');resourceNav.appendChild(b)});
+function showResource(id){
+  activeResource=RESOURCE_VIEWS[id]?id:'inicio';
+  [...resourceNav.children].forEach(button=>{const active=button.dataset.resource===activeResource;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active))});
+  resourceMain.innerHTML=activeResource==='inicio'?RESOURCE_INTRO:RESOURCE_VIEWS[activeResource];
+  resourceMain.scrollTop=0;
+  if(activeResource==='armazenamento')updateStorage();
+  if(activeResource==='bios')updateBios('boot');
+}
+function openResources(){
+  resourceOpener=document.activeElement;
+  resourceOverlay.classList.add('open');resourceOverlay.setAttribute('aria-hidden','false');
+  showResource('inicio');$('close-resources').focus();
+}
+function closeResources(){
+  resourceOverlay.classList.remove('open');resourceOverlay.setAttribute('aria-hidden','true');
+  if(resourceOpener&&resourceOpener.focus)resourceOpener.focus();
+}
+$('open-resources').addEventListener('click',openResources);
+$('close-resources').addEventListener('click',closeResources);
+resourceOverlay.addEventListener('click',event=>{if(event.target===resourceOverlay)closeResources()});
+addEventListener('keydown',event=>{if(event.key==='Escape'&&resourceOverlay.classList.contains('open'))closeResources()});
+resourceNav.addEventListener('click',event=>{const button=event.target.closest('[data-resource]');if(button)showResource(button.dataset.resource)});
+resourceMain.addEventListener('click',event=>{
+  const opener=event.target.closest('[data-open-tool]');
+  if(opener){showResource(opener.dataset.openTool);return}
+  const fanButton=event.target.closest('.fan-toggle');
+  if(fanButton){
+    const dir=fanButton.dataset.direction==='in'?'out':'in';
+    fanButton.dataset.direction=dir;
+    fanButton.textContent=`${fanButton.dataset.fan==='front'?'Frente':'Traseira'}: ${dir==='in'?'entrada':'saída'}`;
+    updateAirflow();
+  }
+  const choice=event.target.closest('#error-choices button');
+  if(choice){
+    const buttons=[...resourceMain.querySelectorAll('#error-choices button')];
+    buttons.forEach(button=>{button.disabled=true;if(button.dataset.correct==='true')button.classList.add('correct')});
+    if(choice.dataset.correct==='true')$('error-result').textContent='Isso mesmo. Desligue e desconecte o computador antes de revisar encaixes; nunca abra a fonte.';
+    else{choice.classList.add('incorrect');$('error-result').textContent='Essa ação é insegura ou não é o primeiro passo. Desligue o PC e revise conexões acessíveis seguindo o manual.'}
+  }
+  if(event.target.closest('#reset-challenge'))showResource('desafio');
+  const biosButton=event.target.closest('[data-bios]');
+  if(biosButton)updateBios(biosButton.dataset.bios);
+});
+resourceMain.addEventListener('change',event=>{
+  if(event.target.id==='symptom'){
+    const result=$('diagnostic-result');
+    result.innerHTML=event.target.value?`<strong>Verifique nesta ordem:</strong><ol>${DIAGNOSTICS[event.target.value].map(item=>`<li>${item}</li>`).join('')}</ol>`:'';
+  }
+  if(event.target.id==='connector')$('connector-result').textContent=CONNECTOR_INFO[event.target.value]||'';
+});
+resourceMain.addEventListener('input',event=>{if(['system-size','apps-size','files-size'].includes(event.target.id))updateStorage()});
+resourceMain.addEventListener('submit',event=>{
+  if(event.target.id!=='compatibility-form')return;
+  event.preventDefault();
+  const normalize=value=>value.trim().toLocaleUpperCase('pt-BR').replace(/\s+/g,'');
+  const cpu=normalize($('cpu-socket').value),board=normalize($('board-socket').value);
+  const ram=normalize($('ram-kit').value),boardRam=normalize($('board-ram').value);
+  const gpu=Number($('gpu-power').value),psu=Number($('psu-power').value),checks=[];
+  checks.push(cpu===board?'Socket informado confere.':'Socket informado não confere; confirme a compatibilidade da CPU com a placa.');
+  checks.push(ram===boardRam?'Tipo de memória informado confere.':'Tipo de memória informado não confere.');
+  checks.push(psu>=gpu+150?'A fonte tem a margem didática de 150 W acima do consumo informado da GPU.':'A margem indicada é pequena nesta estimativa; verifique o consumo total e as recomendações da fabricante.');
+  $('compatibility-result').innerHTML=`<strong>Resultado preliminar:</strong><ul>${checks.map(item=>`<li>${item}</li>`).join('')}</ul>`;
+});
+function updateStorage(){
+  const ids=['system-size','apps-size','files-size'];
+  if(ids.some(id=>!$(id)))return;
+  const values=ids.map(id=>Math.max(0,Number($(id).value)||0));
+  const total=values.reduce((sum,value)=>sum+value,0),recommended=Math.ceil(total*1.25);
+  $('storage-result').textContent=`Estimativa usada: ${total.toLocaleString('pt-BR')} GB. Considere pelo menos ${recommended.toLocaleString('pt-BR')} GB para manter cerca de 25% de folga.`;
+}
+function updateAirflow(){
+  const front=resourceMain.querySelector('[data-fan="front"]').dataset.direction;
+  const rear=resourceMain.querySelector('[data-fan="rear"]').dataset.direction;
+  const feedback=$('airflow-feedback');
+  if(front==='in'&&rear==='out')feedback.textContent='Configuração equilibrada para começar: entrada frontal e saída traseira.';
+  else if(front==='out'&&rear==='in')feedback.textContent='As direções estão invertidas em relação ao fluxo comum. Confirme as setas e temperaturas após a montagem.';
+  else feedback.textContent='Os dois ventiladores estão na mesma direção. Experimente entrada pela frente e saída atrás para criar um caminho de ar.';
+}
+function updateBios(id){
+  if(!$('bios-result'))return;
+  $('bios-result').textContent=BIOS_INFO[id]||'';
+  resourceMain.querySelectorAll('[data-bios]').forEach(button=>button.classList.toggle('active',button.dataset.bios===id));
+}
+showResource('inicio');
+
+/* ===== Loop ===== */
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ease=p=>p*p*(3-2*p),v3=new THREE.Vector3();
+let T=0;
+function loop(){requestAnimationFrame(loop);T+=.016;
+ parts.forEach(o=>{const want=cur>=o.step?1:0;o.p+=clamp(want-o.p,-.03,.03)*(reduce?10:1);o.p=clamp(o.p,0,1);
+  const e=ease(o.p);o.g.position.copy(o.t).addScaledVector(o.off,1-e);o.g.visible=o.p>.01;
+  const hot=o.step===cur;
+  o.mats.forEach(m=>{m.emissive.setHex(hot?0x2f7bff:0);m.emissiveIntensity=hot?.25+.2*Math.sin(T*4):0})});
+ cables.forEach(c=>{const want=cur>=c.step?1:0;c.p=clamp(c.p+clamp(want-c.p,-.025,.025)*(reduce?10:1),0,1);
+  c.grp.visible=c.p>.005;c.m.geometry.setDrawRange(0,Math.floor(c.n*c.p/3)*3);c.k.visible=c.p>.97});
+ const done=cur>=18;spin.forEach(s=>{if(done)s.rotation.z+=.25});
+ tgt.lerp(tf,.07);d+=(df-d)*.07;
+ cam.position.set(tgt.x+d*Math.cos(el)*Math.sin(az),tgt.y+d*Math.sin(el),tgt.z+d*Math.cos(el)*Math.cos(az));cam.lookAt(tgt);
+ v3.copy(tgt).project(cam);const l=$('lab');l.style.left=((v3.x+1)/2*innerWidth)+'px';l.style.top=((1-v3.y)/2*innerHeight)+'px';
+ ren.render(scene,cam)}
+go(0);loop();
+</script>
+</body>
+</html>

@@ -18,6 +18,22 @@
     --border-highlight: #2e528a;
 }
 
+body :focus-visible {
+    outline: 3px solid var(--hw-cyan) !important;
+    outline-offset: 3px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 body {
     font-family: 'Inter', sans-serif;
     background: var(--bg-main) !important;

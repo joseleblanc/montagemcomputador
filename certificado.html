@@ -62,7 +62,7 @@
                 </div>
             </div>
 
-            <button class="btn-ready" id="btn-download" onclick="gerarPDF()" style="display:none;">
+            <button class="btn-ready" id="btn-download" onclick="baixarCertificado()" style="display:none;">
                 <i class="fas fa-file-download"></i> BAIXAR MEU CERTIFICADO
             </button>
         </div>
@@ -77,6 +77,7 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let dadosAluno = null;
+        let modeloQrCertificado = null;
 
         // Máscara de CPF em tempo real
         function mascaraCPF(i) {
@@ -120,6 +121,17 @@
 
             if (!user) {
                 window.location.href = 'index.html';
+                return;
+            }
+
+            const codigoEmitido = new URLSearchParams(window.location.search).get('codigo');
+            if (codigoEmitido) {
+                try {
+                    await prepararCertificadoEmitido(codigoEmitido);
+                } catch (error) {
+                    console.error('Erro ao abrir certificado emitido:', error);
+                    mostrarMensagemCertificado('Não foi possível abrir o certificado.', error.message || 'Verifique sua conexão e tente novamente.', false);
+                }
                 return;
             }
 
@@ -190,6 +202,52 @@
             document.getElementById('msg-aluno').innerText = `Confirme seus dados para emissão.`;
         }
 
+        async function prepararCertificadoEmitido(codigo) {
+            if (!/^[A-Z0-9]{12}$/i.test(codigo)) {
+                throw new Error('O código do certificado é inválido.');
+            }
+
+            const { data: administrador, error: erroAdministrador } = await _supabase.rpc('is_admin');
+            if (erroAdministrador) throw erroAdministrador;
+            if (administrador !== true) {
+                mostrarMensagemCertificado('Acesso não autorizado.', 'Somente administradores podem visualizar certificados emitidos por este painel.', false);
+                return;
+            }
+
+            const { data: certificado, error: erroCertificado } = await _supabase
+                .from('certificados')
+                .select('codigo,nome,cpf,emitido_em')
+                .eq('codigo', codigo.toUpperCase())
+                .maybeSingle();
+            if (erroCertificado) throw erroCertificado;
+            if (!certificado) throw new Error('Certificado não encontrado.');
+
+            const { data: perfil, error: erroPerfil } = await _supabase
+                .from('perfil_alunos')
+                .select('data_nascimento')
+                .eq('cpf', certificado.cpf)
+                .maybeSingle();
+            if (erroPerfil) throw erroPerfil;
+            if (!perfil?.data_nascimento) throw new Error('Data de nascimento do aluno não encontrada no cadastro.');
+
+            const dataNascimento = new Date(String(perfil.data_nascimento).slice(0, 10));
+            const dataEmissao = new Date(certificado.emitido_em);
+            if (Number.isNaN(dataNascimento.getTime()) || Number.isNaN(dataEmissao.getTime())) {
+                throw new Error('Não foi possível validar as datas do certificado.');
+            }
+
+            dadosAluno = {
+                nome: certificado.nome,
+                cpf: certificado.cpf,
+                nascFormatada: dataNascimento.toLocaleDateString('pt-BR', { timeZone: 'UTC' }),
+                dataHoje: dataEmissao.toLocaleDateString('pt-BR'),
+                codigo: certificado.codigo
+            };
+            prepararQrCertificado(certificado.codigo);
+            const doc = gerarPDF(false);
+            window.location.replace(doc.output('bloburl'));
+        }
+
         function confirmarDados() {
             const nome = document.getElementById('input-nome').value.trim();
             const cpf = document.getElementById('input-cpf').value.trim();
@@ -244,17 +302,50 @@
             }
             dadosAluno.codigo = codigo;
 
-            // O QR leva só o código. Nome e CPF ficam no banco, não na URL.
-            const urlVerificacao = `https://joseleblanc.github.io/montagemcomputador/verific.html?c=${encodeURIComponent(codigo)}`;
-            document.getElementById('qrcode-box').innerHTML = '';
-            new QRCode(document.getElementById('qrcode-box'), { text: urlVerificacao, width: 150, height: 150 });
+            try {
+                prepararQrCertificado(codigo);
+            } catch (error) {
+                console.error('Erro ao preparar o QR Code do certificado:', error);
+                alert('O certificado foi emitido, mas não foi possível gerar o QR Code. Você pode tentar visualizar novamente pelo painel.');
+                return;
+            }
 
             document.getElementById('preview-area').style.display = 'none';
             document.getElementById('btn-download').style.display = 'block';
             document.getElementById('msg-aluno').innerText = `Dados aprovados! Código ${codigo}. Clique abaixo para baixar.`;
         }
 
-function gerarPDF() {
+        function prepararQrCertificado(codigo) {
+            if (typeof QRCode !== 'function') throw new Error('Não foi possível carregar o gerador do QR Code.');
+            const urlVerificacao = `https://joseleblanc.github.io/montagemcomputador/verific.html?c=${encodeURIComponent(codigo)}`;
+            const container = document.getElementById('qrcode-box');
+            container.innerHTML = '';
+            // O PDF desenha a matriz em vetor; não precisamos exportar o canvas do QR.
+            const QRCodeParaPdf = class extends QRCode {
+                makeImage() {}
+            };
+            const qr = new QRCodeParaPdf(container, {
+                text: urlVerificacao,
+                width: 150,
+                height: 150,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            modeloQrCertificado = qr._oQRCode;
+            if (!modeloQrCertificado || typeof modeloQrCertificado.getModuleCount !== 'function' || typeof modeloQrCertificado.isDark !== 'function') {
+                throw new Error('O gerador não retornou os módulos do QR Code.');
+            }
+        }
+
+        function baixarCertificado() {
+            try {
+                gerarPDF();
+            } catch (error) {
+                console.error('Erro ao gerar PDF do certificado:', error);
+                alert('Não foi possível gerar o certificado: ' + (error.message || 'tente novamente.'));
+            }
+        }
+
+function gerarPDF(salvarArquivo = true) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
             const width = doc.internal.pageSize.getWidth();
@@ -300,18 +391,32 @@ function gerarPDF() {
             doc.setFontSize(14);
             doc.text(`emitido em: ${dataHoje}`, width / 2, 135, { align: "center" });
 
-            // --- AJUSTE DO QR CODE (SUBIU UM POUCO) ---
-            const qrContainer = document.getElementById("qrcode-box");
-            const canvas = qrContainer.querySelector("canvas");
-            if (canvas) {
-                const qrImage = canvas.toDataURL('image/png');
-                // Posicionamento: X=245 (direita), Y=145 (subiu de 155/165 para 145)
-                doc.addImage(qrImage, 'PNG', 245, 145, 30, 30);
-                doc.setFontSize(7);
-                doc.setTextColor(100, 100, 100);
-                doc.text("Valide este certificado", 260, 178, { align: "center" });
-                doc.text("Código: " + dadosAluno.codigo, 260, 182, { align: "center" });
+            if (!modeloQrCertificado) throw new Error('O QR Code do certificado não foi gerado.');
+            const quantidadeModulos = modeloQrCertificado.getModuleCount();
+            const qrX = 245;
+            const qrY = 145;
+            const qrTamanho = 30;
+            const tamanhoModulo = qrTamanho / quantidadeModulos;
+            doc.setFillColor(255, 255, 255);
+            doc.rect(qrX, qrY, qrTamanho, qrTamanho, 'F');
+            doc.setFillColor(0, 0, 0);
+            for (let linha = 0; linha < quantidadeModulos; linha++) {
+                for (let coluna = 0; coluna < quantidadeModulos; coluna++) {
+                    if (modeloQrCertificado.isDark(linha, coluna)) {
+                        doc.rect(
+                            qrX + coluna * tamanhoModulo,
+                            qrY + linha * tamanhoModulo,
+                            tamanhoModulo + 0.01,
+                            tamanhoModulo + 0.01,
+                            'F'
+                        );
+                    }
+                }
             }
+            doc.setFontSize(7);
+            doc.setTextColor(100, 100, 100);
+            doc.text("Valide este certificado", 260, 178, { align: "center" });
+            doc.text("Código: " + dadosAluno.codigo, 260, 182, { align: "center" });
 
             // 5. ASSINATURA (MANTIDA)
             const centroX = width / 2;
@@ -445,7 +550,8 @@ function gerarPDF() {
             doc.setTextColor(60, 60, 60);
             doc.text('Curso emitido eletronicamente em conformidade com os requisitos estabelecidos.', page2WidthFinal / 2, page2HeightFinal - 10, { align: 'center' });
 
-            doc.save(`Certificado_${nome.replace(/\s+/g, '_')}.pdf`);
+            if (salvarArquivo) doc.save(`Certificado_${nome.replace(/\s+/g, '_')}.pdf`);
+            return doc;
         }
         prepararDados().catch(error => {
             console.error('Erro ao preparar certificado:', error);

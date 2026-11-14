@@ -285,6 +285,10 @@ a.card-modulo{text-decoration:none;color:inherit}
         <span id="badge-novas-mensagens" aria-live="polite" aria-atomic="true"></span>
     </button>
 </div>
+<p style="margin:18px auto 28px;max-width:1360px;padding:0 20px;text-align:center;font-size:.78rem;color:var(--text-muted)">
+    <a href="informacoes-legais.html#privacidade" style="color:var(--hw-cyan)">Privacidade</a> ·
+    <a href="informacoes-legais.html#termos" style="color:var(--hw-cyan)">Termos de Uso</a>
+</p>
 <button id="notificacao-chat" type="button" onclick="abrirSuportePorNotificacao()" hidden role="alert">
     <i class="fas fa-bell" aria-hidden="true"></i>
     <span><strong>Nova mensagem do suporte</strong><small id="texto-notificacao-chat">Clique para abrir a conversa.</small></span>
@@ -323,7 +327,7 @@ a.card-modulo{text-decoration:none;color:inherit}
             <input id="perfil-cpf" name="cpf" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" required>
         </div>
         <div class="perfil-campo">
-            <label for="perfil-telefone">Telefone</label>
+            <label for="perfil-telefone">Telefone (opcional)</label>
             <input id="perfil-telefone" name="telefone" type="tel" maxlength="30" autocomplete="tel" placeholder="(00) 00000-0000">
         </div>
         <div class="perfil-campo">
@@ -362,7 +366,7 @@ a.card-modulo{text-decoration:none;color:inherit}
 
     const modulos = [
         { id: 999, t: "SALA DE AULA AO VIVO", d: "Entre na chamada de vídeo para aulas em tempo real e compartilhamento de tela." },
-        { id: 998, t: "FERRAMENTAS TÉCNICAS", d: "Acesse a Calculadora de Sockets e outras utilidades para sua bancada." },
+        { id: 998, t: "FERRAMENTAS TÉCNICAS", d: "Acesse calculadoras, glossário, checklists e recursos interativos para sua bancada." },
         { id: 0, t: "Introdução ao Curso", d: "Boas-vindas e como aproveitar o Telecurso." },
         { id: 1, t: "Conhecendo as peças", d: "Identificação de componentes e funções." },
         { id: 2, t: "Separando ferramentas", d: "O que não pode faltar na bancada." },
@@ -969,7 +973,15 @@ a.card-modulo{text-decoration:none;color:inherit}
         }).join('');
         html += '</div></details>';
         const recursos = [999, 998].map(id => porId(id)).filter(Boolean).map(m => cardModulo(m, concluidos, nota)).join('');
-        html += `<section class="trilha recursos-curso" aria-label="Recursos do curso"><div class="trilha-topo"><h2>Recursos do curso</h2><span>Acesso rápido</span></div><div class="grid-modulos">${recursos}</div></section>`;
+        const simuladorMontagem = `<a class="card-modulo ferramenta-card" href="montagem-pc-3d%20(1).html">
+            <div class="card-banner">Simulador interativo</div>
+            <div class="card-corpo">
+                <h3>Montagem de PC em 3D</h3>
+                <p>Explore a montagem em 24 etapas, gire o modelo e pratique com diagnóstico, conexões, compatibilidade e outros recursos interativos.</p>
+                <span class="status-aula"><i class="fas fa-cube" aria-hidden="true"></i> Abrir simulador 3D</span>
+            </div>
+        </a>`;
+        html += `<section class="trilha recursos-curso" aria-label="Recursos do curso"><div class="trilha-topo"><h2>Recursos do curso</h2><span>Acesso rápido</span></div><div class="grid-modulos">${recursos}${simuladorMontagem}</div></section>`;
         area.innerHTML = html;
 
         // Mantém a trilha completa acessível, mas somente o módulo atual ganha destaque no topo.

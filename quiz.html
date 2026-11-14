@@ -206,24 +206,49 @@
             });
         }
 
-        async function salvarProgresso() {
+        async function salvarProgresso(acertos, totalQuestoes, nota) {
             const { data: { user }, error: erroUsuario } = await _supabase.auth.getUser();
             if (erroUsuario) throw erroUsuario;
             if (!user) throw new Error('Sua sessão expirou. Entre novamente para salvar o progresso.');
+
+            const moduloId = Number(moduloAtual);
+            const { data: anterior, error: erroAnterior } = await _supabase
+                .from('progresso_alunos')
+                .select('concluido,nota,acertos,total_questoes,data_conclusao')
+                .eq('user_id', user.id)
+                .eq('modulo_id', moduloId)
+                .maybeSingle();
+            if (erroAnterior) throw erroAnterior;
+
+            const notaAnterior = anterior?.nota == null ? null : Number(anterior.nota);
+            const usarResultadoAtual = notaAnterior === null || !Number.isFinite(notaAnterior) || nota >= notaAnterior;
+            const resultadoSalvo = {
+                nota: usarResultadoAtual ? nota : notaAnterior,
+                acertos: usarResultadoAtual ? acertos : anterior.acertos,
+                totalQuestoes: usarResultadoAtual ? totalQuestoes : anterior.total_questoes
+            };
+            const aprovado = nota >= 60;
+            const concluido = Boolean(anterior?.concluido) || aprovado;
 
             const { error } = await _supabase
                 .from('progresso_alunos')
                 .upsert({
                     user_id: user.id,
-                    modulo_id: Number(moduloAtual),
-                    concluido: true,
-                    data_conclusao: new Date().toISOString(),
-                    email: user.email
+                    modulo_id: moduloId,
+                    concluido,
+                    data_conclusao: anterior?.concluido && anterior.data_conclusao
+                        ? anterior.data_conclusao
+                        : new Date().toISOString(),
+                    email: user.email,
+                    nota: resultadoSalvo.nota,
+                    acertos: resultadoSalvo.acertos,
+                    total_questoes: resultadoSalvo.totalQuestoes
                 }, {
                     onConflict: 'user_id, modulo_id'
                 });
 
             if (error) throw error;
+            return resultadoSalvo;
         }
 
         async function verificarRespostas() {
@@ -252,27 +277,26 @@
             }
 
             const percentual = Math.round((acertos / perguntas.length) * 100);
-            if (percentual >= 60) {
-                botaoVerificar.disabled = true;
-                botaoVerificar.textContent = 'Salvando progresso...';
-                try {
-                    await salvarProgresso();
-                } catch (error) {
-                    console.error('Erro ao salvar o progresso do módulo:', error);
-                    mensagemErro.textContent = error.message
-                        ? `Não foi possível salvar seu progresso: ${error.message}`
-                        : 'Não foi possível salvar seu progresso. Tente novamente.';
-                    mensagemErro.hidden = false;
-                    botaoVerificar.disabled = false;
-                    botaoVerificar.textContent = 'Tentar salvar novamente';
-                    return;
-                }
+            botaoVerificar.disabled = true;
+            botaoVerificar.textContent = 'Salvando resultado...';
+            let melhorResultado;
+            try {
+                melhorResultado = await salvarProgresso(acertos, perguntas.length, percentual);
+            } catch (error) {
+                console.error('Erro ao salvar o resultado do módulo:', error);
+                mensagemErro.textContent = error.message
+                    ? `Não foi possível salvar o resultado: ${error.message}`
+                    : 'Não foi possível salvar o resultado. Tente novamente.';
+                mensagemErro.hidden = false;
+                botaoVerificar.disabled = false;
+                botaoVerificar.textContent = 'Tentar salvar novamente';
+                return;
             }
 
-            mostrarResultado(percentual);
+            mostrarResultado(percentual, acertos, perguntas.length, melhorResultado);
         }
 
-        function mostrarResultado(nota) {
+        function mostrarResultado(nota, acertos, totalQuestoes, melhorResultado) {
             document.getElementById('caixa-quiz').style.display = 'none';
             const tela = document.getElementById('caixa-resultado');
             tela.style.display = 'block';
@@ -282,17 +306,20 @@
             const btn = document.getElementById('btn-acao');
             titulo.classList.toggle('aprovado', nota >= 60);
             titulo.classList.toggle('reprovado', nota < 60);
+            const descricaoMelhorResultado = melhorResultado.acertos == null
+                ? `nota ${melhorResultado.nota}% (acertos não registrados)`
+                : `${melhorResultado.acertos} de ${melhorResultado.totalQuestoes} (${melhorResultado.nota}%)`;
 
             if (nota >= 60) {
                 titulo.innerText = "Mandou bem! 🎉";
                 titulo.style.color = "#28a745";
-                texto.innerText = `Você acertou ${nota}%. Progresso salvo automaticamente e módulo liberado!`;
+                texto.innerText = `Você acertou ${acertos} de ${totalQuestoes} questões (${nota}%). Melhor resultado salvo: ${descricaoMelhorResultado}. Módulo liberado!`;
                 btn.innerText = "Continuar para os módulos";
                 btn.onclick = () => window.location.href = 'modulos.html';
             } else {
                 titulo.innerText = "Não foi dessa vez... ❌";
                 titulo.style.color = "#dc3545";
-                texto.innerText = `Você acertou ${nota}%. O mínimo necessário é 60%. Revise o conteúdo e tente novamente.`;
+                texto.innerText = `Você acertou ${acertos} de ${totalQuestoes} questões (${nota}%). Melhor resultado salvo: ${descricaoMelhorResultado}. O mínimo necessário é 60%. Revise o conteúdo e tente novamente.`;
                 btn.innerText = "Tentar Novamente";
                 btn.onclick = () => location.reload();
             }

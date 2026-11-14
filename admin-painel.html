@@ -8,6 +8,7 @@
     <title>Admin Supremo | Telecurso</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap">
     <style>
@@ -1441,9 +1442,10 @@
                     </td>
                     <td><span class="status-badge status-${escaparHtml(aluno.status)}">${escaparHtml(statusText)}</span></td>
                     <td>
-                        <div style="display:flex; gap:8px; align-items:center;">
+                        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                             ${actionButton}
                             ${provaButton}
+                            <button class="btn btn-primary" style="padding:8px;" onclick="verFichaAlunoPdf(this.closest(\'tr\').dataset.email)"><i class="fas fa-file-alt"></i> Ver ficha</button>
                             <button class="btn" style="padding:8px; background:rgba(224,176,74,.16); color:#e0b04a; font-weight:700;" onclick="enviarResetSenha(this.closest(\'tr\').dataset.email)"><i class="fas fa-key"></i> Resetar senha</button>
                             <button class="btn" style="padding:8px; background:rgba(45,212,191,.16); color:#2dd4bf; font-weight:700;" onclick="abrirVerificacaoModulos(this.closest(\'tr\').dataset.email)">Verificar Módulos</button>
                             <button class="btn" style="padding:8px; background:rgba(52,211,153,.16); color:#34d399; font-weight:700;" onclick="abrirAnotacoes(this.closest(\'tr\').dataset.email)"><i class="fas fa-sticky-note"></i> Consultar anotações</button>
@@ -1799,9 +1801,307 @@
                 <tr data-codigo="${escaparHtml(c.codigo)}">
                     <td><b>${escaparHtml(c.codigo)}</b></td><td>${escaparHtml(c.nome)}</td><td>${escaparHtml(c.cpf)}</td>
                     <td>${new Date(c.emitido_em).toLocaleDateString('pt-BR')}</td>
-                    <td><button class="btn" style="background:rgba(239,68,68,.16);color:#fca5a5;font-weight:700" onclick="revogarCertificado(this.closest('tr').dataset.codigo)">Revogar</button></td>
+                    <td><div style="display:flex;gap:8px;flex-wrap:wrap">
+                        <button class="btn btn-primary" onclick="visualizarCertificado(this.closest('tr').dataset.codigo)"><i class="fas fa-eye"></i> Ver certificado</button>
+                        <button class="btn" style="background:rgba(239,68,68,.16);color:#fca5a5;font-weight:700" onclick="revogarCertificado(this.closest('tr').dataset.codigo)">Revogar</button>
+                    </div></td>
                 </tr>`).join('') : '<tr><td colspan="5" style="color:var(--text-muted)">Nenhum certificado encontrado.</td></tr>';
         }
+        function visualizarCertificado(codigo) {
+            const url = new URL('certificado.html', window.location.href);
+            url.searchParams.set('codigo', codigo);
+            if (!window.open(url.href, '_blank')) {
+                alert('Permita a abertura de pop-ups para visualizar o certificado.');
+            }
+        }
+        async function verFichaAlunoPdf(email) {
+            const aluno = todosAlunos.find(item => item.email === email);
+            if (!aluno) { alert('Não foi possível localizar os dados deste aluno.'); return; }
+            if (!window.jspdf?.jsPDF) {
+                alert('Não foi possível carregar o gerador de PDF. Atualize a página e tente novamente.');
+                return;
+            }
+
+            const janela = window.open('about:blank', '_blank');
+            if (!janela) { alert('Permita a abertura de pop-ups para visualizar a ficha.'); return; }
+
+            try {
+                const userId = aluno.user_id || (aluno.email ? await fetchUserId(aluno.email) : null);
+                if (!userId) throw new Error('Não foi possível vincular o cadastro ao progresso do curso.');
+
+                const [progressoResposta, presencasResposta] = await Promise.all([
+                    _supabase.from('progresso_alunos').select('*').eq('user_id', userId).order('data_conclusao', { ascending: false }),
+                    _supabase.from('chamada_turmas').select('modulo_id,data,status,metodo,anotacao').eq('user_id', userId).order('data', { ascending: true })
+                ]);
+                if (progressoResposta.error) throw progressoResposta.error;
+                if (presencasResposta.error) throw presencasResposta.error;
+
+                const doc = gerarFichaAcademicaPdf(aluno, progressoResposta.data || [], presencasResposta.data || []);
+                janela.location.href = doc.output('bloburl');
+            } catch (error) {
+                console.error('Erro ao gerar ficha acadêmica:', error);
+                janela.close();
+                alert(`Não foi possível gerar a ficha: ${error.message || 'tente novamente.'}`);
+            }
+        }
+
+        function gerarFichaAcademicaPdf(aluno, progresso, presencas) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const largura = doc.internal.pageSize.getWidth();
+            const altura = doc.internal.pageSize.getHeight();
+            const margem = 14;
+            const larguraUtil = largura - margem * 2;
+            const ordenarPorData = (a, b) => {
+                const dataA = Date.parse(a.data_conclusao || '') || 0;
+                const dataB = Date.parse(b.data_conclusao || '') || 0;
+                return dataB - dataA;
+            };
+            const progressoOrdenado = [...progresso].sort(ordenarPorData);
+            const progressoPorModulo = new Map();
+            progressoOrdenado.forEach(registro => {
+                const moduloId = Number(registro.modulo_id);
+                if (Number.isInteger(moduloId) && moduloId >= 0 && moduloId < 15 && !progressoPorModulo.has(moduloId)) {
+                    progressoPorModulo.set(moduloId, registro);
+                }
+            });
+            const prova = progressoOrdenado.find(registro => Number(registro.modulo_id) === 100);
+            const notaProva = prova?.nota != null && Number.isFinite(Number(prova.nota)) ? Number(prova.nota) : null;
+            const acertosProva = prova?.acertos != null && Number.isFinite(Number(prova.acertos))
+                ? `${Number(prova.acertos)} / ${Number(prova.total_questoes) || 30}`
+                : notaProva === null ? 'Não registrado' : `~${Math.round(notaProva * 30 / 100)} / 30 (estimados)`;
+            const modulosConcluidos = [...progressoPorModulo.values()].filter(registro => registro.concluido).length;
+            const presentes = presencas.filter(registro => registro.status === 'presente').length;
+            const faltas = presencas.filter(registro => registro.status === 'falta').length;
+            const pendentes = presencas.filter(registro => registro.status !== 'presente' && registro.status !== 'falta').length;
+            const formatarData = valor => {
+                if (!valor) return '—';
+                const data = new Date(`${String(valor).slice(0, 10)}T12:00:00`);
+                return Number.isNaN(data.getTime()) ? '—' : data.toLocaleDateString('pt-BR');
+            };
+            const formatarNota = valor => valor == null || !Number.isFinite(Number(valor)) ? '—' : `${Number(valor)}/100`;
+            const moduloNome = id => modulosTurmas.find(modulo => modulo.id === id)?.nome || `Módulo ${String(id).padStart(2, '0')}`;
+
+            function cabecalho(titulo, subtitulo) {
+                doc.setFillColor(7, 20, 43);
+                doc.rect(0, 0, largura, 29, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(15);
+                doc.text(titulo, margem, 13);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.setTextColor(190, 210, 230);
+                doc.text(subtitulo, margem, 21);
+            }
+
+            function cabecalhoTabela(y, colunas) {
+                doc.setFillColor(18, 41, 74);
+                doc.rect(margem, y - 5, larguraUtil, 8, 'F');
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(7.5);
+                doc.setTextColor(255, 255, 255);
+                colunas.forEach(coluna => doc.text(coluna.titulo, coluna.x, y));
+                doc.setTextColor(30, 45, 65);
+                doc.setFont('helvetica', 'normal');
+            }
+
+            cabecalho('FICHA ACADÊMICA DO ALUNO', 'Curso de Montagem e Manutenção de Computadores');
+            doc.setTextColor(30, 45, 65);
+            doc.setFillColor(242, 246, 250);
+            doc.rect(margem, 35, larguraUtil, 32, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.text(`Aluno: ${aluno.nome_completo || '—'}`, margem + 4, 43, { maxWidth: larguraUtil - 8 });
+            doc.setFont('helvetica', 'normal');
+            doc.text(`CPF: ${aluno.cpf || '—'}`, margem + 4, 51);
+            doc.text(`E-mail: ${aluno.email || '—'}`, margem + 4, 59, { maxWidth: 105 });
+            doc.text(`Situação: ${aluno.status || '—'}`, margem + 116, 51, { maxWidth: 61 });
+            doc.text(`Ficha gerada: ${formatarData(new Date().toISOString())}`, margem + 116, 59);
+
+            const cartoes = [
+                ['Módulos concluídos', `${modulosConcluidos}/15`],
+                ['Presenças', String(presentes)],
+                ['Faltas', String(faltas)],
+                ['Nota da prova', notaProva === null ? '—' : `${notaProva}/100`]
+            ];
+            const cartaoGap = 3;
+            const cartaoLargura = (larguraUtil - cartaoGap * 3) / 4;
+            cartoes.forEach((cartao, indice) => {
+                const x = margem + indice * (cartaoLargura + cartaoGap);
+                doc.setFillColor(242, 246, 250);
+                doc.rect(x, 73, cartaoLargura, 23, 'F');
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7);
+                doc.setTextColor(80, 100, 120);
+                doc.text(cartao[0], x + 2, 80, { maxWidth: cartaoLargura - 4 });
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(11);
+                doc.setTextColor(7, 20, 43);
+                doc.text(cartao[1], x + 2, 91);
+            });
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.setTextColor(7, 20, 43);
+            doc.text('PROGRESSO E AVALIAÇÕES POR MÓDULO', margem, 106);
+            const colunasModulo = [
+                { titulo: 'Módulo', x: margem + 2 },
+                { titulo: 'Situação', x: margem + 76 },
+                { titulo: 'Melhor nota', x: margem + 105 },
+                { titulo: 'Acertos', x: margem + 130 },
+                { titulo: 'Conclusão', x: margem + 154 }
+            ];
+            cabecalhoTabela(114, colunasModulo);
+            doc.setFontSize(7.2);
+            for (let id = 0; id < 15; id++) {
+                const y = 119 + id * 7.6;
+                const registro = progressoPorModulo.get(id);
+                if (id % 2 === 0) {
+                    doc.setFillColor(247, 249, 251);
+                    doc.rect(margem, y - 5, larguraUtil, 7.6, 'F');
+                }
+                const totalQuestoes = Number(registro?.total_questoes);
+                const acertos = registro?.acertos == null
+                    ? '—'
+                    : `${Number(registro.acertos)}${Number.isInteger(totalQuestoes) && totalQuestoes > 0 ? `/${totalQuestoes}` : ''}`;
+                const valores = [
+                    [moduloNome(id), margem + 2],
+                    [registro?.concluido ? 'Concluído' : 'Pendente', margem + 76],
+                    [formatarNota(registro?.nota), margem + 105],
+                    [acertos, margem + 130],
+                    [formatarData(registro?.concluido ? registro.data_conclusao : null), margem + 154]
+                ];
+                valores.forEach(([valor, x]) => doc.text(String(valor), x, y, { maxWidth: 37 }));
+            }
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8.5);
+            doc.setTextColor(7, 20, 43);
+            doc.text('Prova final', margem, 239);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(30, 45, 65);
+            const situacaoProva = !prova ? 'Não realizada' : notaProva === null ? 'Resultado registrado' : notaProva >= 70 ? 'Aprovado' : 'Não aprovado';
+            doc.text(`Situação: ${situacaoProva}    Acertos: ${acertosProva}`, margem + 28, 239);
+            doc.setFontSize(7.5);
+            doc.setTextColor(90, 100, 110);
+            doc.text('Módulos: melhor nota e acertos registrados. Prova final: acertos exatos quando registrados; caso contrário, estimados pela nota de 30 questões.', margem, 247, { maxWidth: larguraUtil });
+            if (pendentes) doc.text(`Chamadas sem status definido: ${pendentes}.`, margem, 253);
+
+            doc.addPage('p', 'a4');
+            const colunasPresenca = [
+                { titulo: 'Data', x: margem + 2 },
+                { titulo: 'Módulo', x: margem + 34 },
+                { titulo: 'Situação', x: margem + 126 },
+                { titulo: 'Registro', x: margem + 158 }
+            ];
+            function cabecalhoPresencas() {
+                cabecalho('FREQUÊNCIA DO ALUNO', `${aluno.nome_completo || 'Aluno'} - CPF ${aluno.cpf || '—'}`);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(10);
+                doc.setTextColor(7, 20, 43);
+                doc.text(`Presentes: ${presentes}    Faltas: ${faltas}    Sem status: ${pendentes}`, margem, 42);
+                cabecalhoTabela(54, colunasPresenca);
+            }
+            cabecalhoPresencas();
+            let yPresenca = 60;
+            if (!presencas.length) {
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.setTextColor(70, 80, 90);
+                doc.text('Não há registros de chamada para este aluno.', margem, yPresenca + 5);
+            } else {
+                const chamadas = [...presencas].sort((a, b) => String(a.data || '').localeCompare(String(b.data || '')));
+                chamadas.forEach((registro, indice) => {
+                    if (yPresenca > altura - 18) {
+                        doc.addPage('p', 'a4');
+                        cabecalhoPresencas();
+                        yPresenca = 60;
+                    }
+                    if (indice % 2 === 0) {
+                        doc.setFillColor(247, 249, 251);
+                        doc.rect(margem, yPresenca - 5, larguraUtil, 8, 'F');
+                    }
+                    const status = registro.status === 'presente' ? 'Presente' : registro.status === 'falta' ? 'Falta' : 'Pendente';
+                    const metodo = registro.metodo === 'qr' ? 'QR Code' : registro.metodo ? 'Manual' : '—';
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(8);
+                    doc.setTextColor(30, 45, 65);
+                    doc.text(formatarData(registro.data), margem + 2, yPresenca);
+                    doc.text(moduloNome(Number(registro.modulo_id)), margem + 34, yPresenca, { maxWidth: 88 });
+                    doc.text(status, margem + 126, yPresenca);
+                    doc.text(metodo, margem + 158, yPresenca);
+                    yPresenca += 8;
+                });
+            }
+
+            const observacoes = presencas
+                .filter(registro => typeof registro.anotacao === 'string' && registro.anotacao.trim())
+                .sort((a, b) => String(b.data || '').localeCompare(String(a.data || '')));
+            const subtituloObservacoes = `${aluno.nome_completo || 'Aluno'} - CPF ${aluno.cpf || '—'}`;
+            const cabecalhoObservacoes = () => cabecalho('OBSERVAÇÕES DO ALUNO', subtituloObservacoes);
+            let yObservacoes = Math.max(yPresenca + 12, 82);
+            if (yObservacoes > altura - 28) {
+                doc.addPage('p', 'a4');
+                cabecalhoObservacoes();
+                yObservacoes = 42;
+            } else {
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(10);
+                doc.setTextColor(7, 20, 43);
+                doc.text('OBSERVAÇÕES', margem, yObservacoes);
+                yObservacoes += 8;
+            }
+
+            if (!observacoes.length) {
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                doc.setTextColor(70, 80, 90);
+                doc.text('Nenhuma observação registrada para este aluno.', margem, yObservacoes + 4, { maxWidth: larguraUtil });
+            } else {
+                observacoes.forEach(registro => {
+                    const texto = String(registro.anotacao).trim();
+                    const linhas = doc.splitTextToSize(texto, larguraUtil - 8);
+                    const status = registro.status === 'presente' ? 'Presente' : registro.status === 'falta' ? 'Falta' : 'Pendente';
+                    let indiceLinha = 0;
+                    while (indiceLinha < linhas.length) {
+                        if (yObservacoes + 24 > altura - 14) {
+                            doc.addPage('p', 'a4');
+                            cabecalhoObservacoes();
+                            yObservacoes = 42;
+                        }
+                        const maxLinhas = Math.max(1, Math.floor((altura - 14 - yObservacoes - 12) / 4));
+                        const trecho = linhas.slice(indiceLinha, indiceLinha + maxLinhas);
+                        const alturaBloco = trecho.length * 4 + 12;
+                        doc.setFillColor(247, 249, 251);
+                        doc.rect(margem, yObservacoes, larguraUtil, alturaBloco, 'F');
+                        const continuacao = indiceLinha > 0 ? ' · continuação' : '';
+                        const metadados = `${formatarData(registro.data)} · ${moduloNome(Number(registro.modulo_id))} · ${status}${continuacao}`;
+                        doc.setFont('helvetica', 'bold');
+                        doc.setFontSize(7.5);
+                        doc.setTextColor(70, 80, 90);
+                        doc.text(metadados, margem + 4, yObservacoes + 5);
+                        doc.setFont('helvetica', 'normal');
+                        doc.setFontSize(9);
+                        doc.setTextColor(30, 45, 65);
+                        doc.text(trecho, margem + 4, yObservacoes + 10);
+                        yObservacoes += alturaBloco + 4;
+                        indiceLinha += trecho.length;
+                    }
+                });
+            }
+
+            const totalPaginas = doc.getNumberOfPages();
+            for (let paginaAtual = 1; paginaAtual <= totalPaginas; paginaAtual++) {
+                doc.setPage(paginaAtual);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7);
+                doc.setTextColor(110, 120, 130);
+                doc.text(`Gerada em ${new Date().toLocaleDateString('pt-BR')} - Página ${paginaAtual} de ${totalPaginas}`, largura - margem, altura - 8, { align: 'right' });
+            }
+            return doc;
+        }
+
         async function revogarCertificado(codigo) {
             if (!confirm(`Revogar o certificado ${codigo}? A validação por QR Code deixará de funcionar.`)) return;
             const { error } = await _supabase.from('certificados').delete().eq('codigo', codigo);
