@@ -278,6 +278,9 @@
             <div class="nav-item" id="menu-avaliacoes" onclick="exibirTela('visao-avaliacoes', this)">
                 <i class="fas fa-star"></i> Avaliações do curso
             </div>
+            <div class="nav-item" id="menu-recursos-prova" onclick="exibirTela('visao-recursos-prova', this)">
+                <i class="fas fa-file-circle-question"></i> Recursos da prova
+            </div>
             <button type="button" class="nav-item submenu-toggle" id="menu-comunicacao" onclick="toggleSubmenuComunicacao()" aria-expanded="false" aria-controls="submenu-comunicacao">
                 <i class="fas fa-bullhorn"></i> Recados e calendário <i class="fas fa-chevron-down submenu-chevron"></i>
             </button>
@@ -528,6 +531,20 @@
             </div>
         </div>
 
+        <div id="visao-recursos-prova" class="alunos-view scroll-container">
+            <div class="admin-card" style="border-top-color:var(--warning);">
+                <div class="card-header"><i class="fas fa-file-circle-question"></i> Recursos da prova final</div>
+                <p style="margin:0 0 16px;color:var(--text-muted);font-size:13px;">Solicitações enviadas pelos alunos por questão.</p>
+                <div id="estado-recursos-prova" class="dashboard-vazio" aria-live="polite">Carregando recursos...</div>
+                <div id="tabela-recursos-prova-container" class="table-container" hidden>
+                    <table>
+                        <thead><tr><th>Aluno</th><th>Pergunta e alternativas</th><th>Motivo</th><th>Resposta do professor</th><th>Decisão</th><th>Ações</th></tr></thead>
+                        <tbody id="tabela-recursos-prova"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div id="visao-admins" class="alunos-view scroll-container">
             <div class="admin-card" style="border-top-color: var(--purple);">
                 <div class="card-header"><i class="fas fa-user-shield"></i> Administradores</div>
@@ -597,6 +614,131 @@
         let todosAlunos = []; // Cache para a pesquisa funcionar rápido
         let contatoTicketMap = {}; // ticket=>email
 
+        async function carregarRecursosProva() {
+            const estado = document.getElementById('estado-recursos-prova');
+            const container = document.getElementById('tabela-recursos-prova-container');
+            const tabela = document.getElementById('tabela-recursos-prova');
+            estado.hidden = false;
+            estado.textContent = 'Carregando recursos...';
+            container.hidden = true;
+            const { data, error } = await _supabase
+                .from('recursos_prova')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) {
+                estado.textContent = 'Não foi possível carregar os recursos: ' + error.message;
+                return;
+            }
+            if (!data?.length) {
+                estado.textContent = 'Nenhum recurso enviado.';
+                return;
+            }
+            estado.hidden = true;
+            container.hidden = false;
+            tabela.innerHTML = data.map(recurso => {
+                const id = String(recurso.id).replace(/'/g, '&#39;');
+                const resposta = escaparHtml(recurso.resposta_admin || '');
+                const status = recurso.status || 'pendente';
+                const pontoAplicado = Boolean(recurso.ponto_aplicado);
+                const opcoes = recurso.alternativas && typeof recurso.alternativas === 'object'
+                    ? recurso.alternativas
+                    : {};
+                const alternativasHtml = ['a', 'b', 'c', 'd', 'e']
+                    .filter(letra => opcoes[letra] != null && opcoes[letra] !== '')
+                    .map(letra => {
+                        const marcada = recurso.alternativa_marcada === letra;
+                        const correta = recurso.alternativa_correta === letra;
+                        const marcadores = [
+                            marcada ? 'Marcada pelo aluno' : '',
+                            correta ? 'Correta' : ''
+                        ].filter(Boolean).join(' · ');
+                        return `<li style="margin:4px 0;${correta ? 'color:#34d399;' : ''}${marcada && !correta ? 'color:#f87171;' : ''}">
+                            <b>${letra.toUpperCase()}.</b> ${escaparHtml(opcoes[letra])}
+                            ${marcadores ? `<small style="font-weight:700;"> — ${escaparHtml(marcadores)}</small>` : ''}
+                        </li>`;
+                    }).join('');
+                const perguntaHtml = recurso.pergunta
+                    ? `<strong>${escaparHtml(recurso.pergunta)}</strong>`
+                    : '<em>Enunciado não registrado neste recurso.</em>';
+                const opcoesHtml = alternativasHtml
+                    ? `<ol style="list-style:none;padding:0;margin:8px 0 0;">${alternativasHtml}</ol>`
+                    : '<p style="margin:8px 0 0;color:var(--text-muted);">Alternativas não registradas neste recurso.</p>';
+                const opcoesGabarito = ['a', 'b', 'c', 'd', 'e']
+                    .filter(letra => opcoes[letra] != null && opcoes[letra] !== '')
+                    .map(letra => `<option value="${letra}"${recurso.alternativa_correta === letra ? ' selected' : ''}>${letra.toUpperCase()}. ${escaparHtml(opcoes[letra])}</option>`)
+                    .join('');
+                return `<tr>
+                    <td>${escaparHtml(recurso.aluno_email || recurso.user_id)}</td>
+                    <td style="min-width:320px;white-space:normal;">
+                        <small style="display:block;color:var(--text-muted);margin-bottom:5px;">ID ${escaparHtml(recurso.questao_id)}</small>
+                        ${perguntaHtml}${opcoesHtml}
+                    </td>
+                    <td>${escaparHtml(recurso.motivo || '')}</td>
+                    <td><textarea data-resposta-recurso="${id}" maxlength="1000" style="min-width:220px;margin:0" placeholder="Resposta ao aluno">${resposta}</textarea></td>
+                    <td style="min-width:220px">
+                        <label style="display:block;margin-bottom:4px">Alternativa correta</label>
+                        <select data-gabarito-recurso="${id}" style="min-width:200px;margin:0 0 8px">
+                            <option value="">Não informada</option>${opcoesGabarito}
+                        </select>
+                        <label style="display:block;margin-bottom:4px">Decisão</label>
+                        <select data-status-recurso="${id}" style="min-width:150px;margin:0 0 8px"${pontoAplicado ? ' disabled' : ''}>
+                            <option value="pendente"${status === 'pendente' ? ' selected' : ''}>Pendente</option>
+                            <option value="em-analise"${status === 'em-analise' ? ' selected' : ''}>Em análise</option>
+                            <option value="deferido"${status === 'deferido' ? ' selected' : ''}>Deferido</option>
+                            <option value="indeferido"${status === 'indeferido' ? ' selected' : ''}>Indeferido</option>
+                        </select>
+                        ${pontoAplicado ? '<small style="display:block;color:var(--success)">1 ponto aplicado à tentativa.</small>' : ''}
+                    </td>
+                    <td style="min-width:170px">
+                        <button class="btn btn-primary" style="padding:8px 10px;margin-bottom:6px" onclick="responderRecurso('${id}')">Salvar decisão</button>
+                        <button class="btn btn-danger" style="padding:8px 10px"${pontoAplicado ? ' disabled title="O recurso já alterou a nota."' : ` onclick="excluirRecurso('${id}')"`}>Excluir recurso</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function responderRecurso(id) {
+            const resposta = document.querySelector(`[data-resposta-recurso="${id}"]`)?.value.trim() || '';
+            const status = document.querySelector(`[data-status-recurso="${id}"]`)?.value || 'pendente';
+            const alternativaCorreta = document.querySelector(`[data-gabarito-recurso="${id}"]`)?.value || null;
+            const { data, error } = await _supabase.rpc('resolver_recurso_prova', {
+                p_recurso_id: id,
+                p_status: status,
+                p_resposta_admin: resposta,
+                p_alternativa_correta: alternativaCorreta
+            });
+            if (error) {
+                alert('Não foi possível salvar a decisão: ' + error.message);
+                return;
+            }
+            if (data?.ponto_aplicado) {
+                alert(data.nota_aluno_atualizada
+                    ? `Recurso deferido. Um acerto foi somado; a nota do aluno agora é ${data.nota_tentativa}/100 (${data.acertos_tentativa} acertos).`
+                    : `Recurso deferido. Um acerto foi somado à tentativa (${data.nota_tentativa}/100), mas a melhor nota registrada já é igual ou superior.`);
+            } else {
+                alert('Decisão do recurso salva.');
+            }
+            await carregarRecursosProva();
+        }
+
+        async function excluirRecurso(id) {
+            if (!confirm('Excluir este recurso permanentemente?')) return;
+            const { data, error } = await _supabase
+                .from('recursos_prova')
+                .delete()
+                .eq('id', id)
+                .select('id');
+            if (error) {
+                alert('Não foi possível excluir o recurso: ' + error.message);
+                return;
+            }
+            if (!data?.length) {
+                alert('O recurso não foi excluído. Talvez já tenha sido removido ou não haja permissão.');
+                return;
+            }
+            await carregarRecursosProva();
+        }
+
         function exibirTela(id, elemento) {
             document.querySelectorAll('.main-content > [id^="visao-"]').forEach(view => {
                 view.style.display = 'none';
@@ -614,6 +756,7 @@
             if(id === 'visao-alunos') carregarAlunos();
             if(id === 'visao-certificados') carregarCertificados();
             if(id === 'visao-avaliacoes') carregarAvaliacoesCurso();
+            if(id === 'visao-recursos-prova') carregarRecursosProva();
             if(id === 'visao-admins') carregarAdmins();
             if(id === 'visao-geral') carregarMetricas();
             if(id !== 'visao-turmas') pararQrChamada();
@@ -1445,6 +1588,7 @@
                         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                             ${actionButton}
                             ${provaButton}
+                            <button class="btn btn-primary" style="padding:8px;" onclick="liberarTentativaPorEmail(this.closest(\'tr\').dataset.email)">Liberar tentativa extra</button>
                             <button class="btn btn-primary" style="padding:8px;" onclick="verFichaAlunoPdf(this.closest(\'tr\').dataset.email)"><i class="fas fa-file-alt"></i> Ver ficha</button>
                             <button class="btn" style="padding:8px; background:rgba(224,176,74,.16); color:#e0b04a; font-weight:700;" onclick="enviarResetSenha(this.closest(\'tr\').dataset.email)"><i class="fas fa-key"></i> Resetar senha</button>
                             <button class="btn" style="padding:8px; background:rgba(45,212,191,.16); color:#2dd4bf; font-weight:700;" onclick="abrirVerificacaoModulos(this.closest(\'tr\').dataset.email)">Verificar Módulos</button>
@@ -2200,6 +2344,19 @@
             } catch (err) {
                 console.error('toggleProva error', err);
                 alert('Erro ao atualizar nota da prova: ' + (err.message || err));
+            }
+        }
+
+        async function liberarTentativaPorEmail(email) {
+            if (!confirm(`Liberar uma tentativa extra de prova para ${email}?`)) return;
+            try {
+                const userId = await fetchUserId(email);
+                if (!userId) throw new Error('Usuário não encontrado.');
+                const { error } = await _supabase.rpc('liberar_tentativa_prova', { p_user_id: userId });
+                if (error) throw error;
+                alert('Tentativa extra liberada. O aluno poderá iniciar a prova novamente.');
+            } catch (error) {
+                alert('Não foi possível liberar a tentativa: ' + (error.message || error));
             }
         }
 

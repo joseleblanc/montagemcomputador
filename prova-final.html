@@ -17,7 +17,8 @@
         .topo{display:flex;align-items:center;gap:14px;padding:12px 24px;border-bottom:1px solid var(--line)}
         .topo img{width:42px;height:42px;object-fit:contain}
         .topo strong{display:block;line-height:1.1}.topo span{font-size:.78rem;color:var(--mut)}
-        .topo a{margin-left:auto;color:var(--teal);text-decoration:none;font-weight:600;font-size:.9rem}
+        .topo-acoes{margin-left:auto;display:flex;align-items:center;gap:14px}
+        .topo-acoes a{color:var(--teal);text-decoration:none;font-weight:600;font-size:.9rem}
         main{max-width:820px;margin:0 auto;padding:28px 20px 80px}
         .painel{background:var(--card);border:1px solid var(--line2);border-radius:14px;padding:28px}
         .painel h1{margin:0 0 6px;font-size:1.7rem}
@@ -63,30 +64,96 @@
         .nota.ok{color:var(--green)}.nota.no{color:var(--red)}
         .revisar{text-align:left;margin:24px 0;padding:16px 18px;background:var(--bg);border:1px solid var(--line);border-radius:10px}
         .revisar h3{margin:0 0 8px;font-size:1rem}.revisar ul{margin:0;padding-left:20px}.revisar li{margin:6px 0;font-size:.92rem}
+        #cronometro{color:var(--gold);font:700 1rem 'Sora',sans-serif}
+        #cronometro.critico{color:var(--red)}
+        .revisao-lista{display:grid;gap:12px;margin:18px 0;text-align:left}
+        .revisao-item{padding:16px;background:var(--bg);border:1px solid var(--line);border-radius:10px}
+        .revisao-item.correta{border-left:4px solid var(--green)}
+        .revisao-item.errada{border-left:4px solid var(--red)}
+        .revisao-item h3{margin:0 0 10px;font-size:.95rem}
+        .revisao-resposta{margin:6px 0;font-size:.88rem}
+        .revisao-resposta.marcada{color:var(--gold)}
+        .revisao-resposta.certa{color:var(--green)}
+        .revisao-recurso{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+        .revisao-recurso textarea{width:100%;min-height:82px;margin:8px 0;padding:10px;resize:vertical;color:var(--tx);background:var(--card);border:1px solid var(--line2);border-radius:8px}
+        .revisao-recurso .btn{padding:10px;font-size:.88rem}
+        .revisao-status{margin-top:8px;font-size:.82rem;color:var(--teal)}
 
         #anti{position:fixed;inset:0;z-index:100;background:rgba(3,8,18,.96);display:grid;place-items:center;padding:20px;text-align:center}
         #anti .painel{max-width:460px;border-color:var(--red)}
+        .blocos-revisao{display:grid;grid-template-columns:repeat(10,1fr);gap:8px;margin:20px 0;text-align:left}
+        .legenda-blocos{display:flex;flex-wrap:wrap;gap:8px 16px;margin:18px 0 8px;color:var(--mut);font-size:.78rem}
+        .legenda-blocos span{display:inline-flex;align-items:center;gap:6px}
+        .legenda-blocos i{width:11px;height:11px;border-radius:3px}
+        .bloco-questao{min-height:62px;border:0;border-radius:10px;color:#07142b;font:700 .92rem 'Sora',sans-serif;cursor:pointer}
+        .bloco-questao.acerto{background:var(--green)}
+        .bloco-questao.erro{background:var(--red);color:#fff}
+        .bloco-questao.recurso-aberto{background:var(--gold);color:#07142b}
+        .bloco-questao.recurso-concluido{background:#60a5fa;color:#07142b}
+        .bloco-questao.sem-gabarito{background:#64748b;color:#fff}
+        .bloco-questao small{display:inline-block;margin-top:3px;font:700 .56rem/1.1 'Sora',sans-serif}
+        .bloco-questao:hover{filter:brightness(1.08)}
+        #modal-revisao{position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(3,8,18,.92)}
+        #modal-revisao.aberto{display:flex}
+        #modal-revisao .modal-card{width:min(720px,100%);max-height:88vh;overflow:auto;text-align:left}
+        .modal-topo{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+        .modal-topo h3{margin:0}
+        .fechar-modal{width:auto;padding:8px 12px}
+        .alternativa-modal{display:flex;gap:10px;padding:11px 13px;margin-top:8px;border:1px solid var(--line);border-radius:9px;background:var(--bg)}
+        .alternativa-modal.marcada{border-color:var(--gold);color:var(--gold)}
+        .alternativa-modal.correta{border-color:var(--green);color:var(--tx);background:rgba(52,211,153,.08)}
+        .alternativa-modal.marcada.errada{border-color:var(--red);color:var(--red);background:rgba(248,113,113,.08)}
+        .resposta-modal{margin-top:10px}
+        .recurso-modal textarea{width:100%;min-height:82px;margin:8px 0;padding:10px;resize:vertical;color:var(--tx);background:var(--bg);border:1px solid var(--line2);border-radius:8px}
+        .recurso-modal .btn{padding:10px;font-size:.88rem}
+        .ultima-tentativa{margin:18px 0 0;padding:16px 18px;border:1px solid var(--teal);border-radius:12px;background:rgba(45,212,191,.07)}
+        .ultima-tentativa strong{color:var(--tx)}
+        .ultima-tentativa p{margin:4px 0 12px;font-size:.9rem}
+        .ultima-tentativa .btn{margin:0;padding:11px}
+        .dica-revisao{margin:6px 0 0;color:var(--mut);font-size:.88rem}
+        .hero-prova{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:20px;align-items:center}
+        .hero-prova h1{margin:0 0 8px}
+        .hero-selo{padding:18px;border:1px solid var(--line2);border-radius:12px;background:var(--bg);text-align:center}
+        .hero-selo strong{display:block;color:var(--gold);font:700 1.8rem 'Sora',sans-serif}
+        .hero-selo span{font-size:.8rem;color:var(--mut)}
+        .resposta-professor{padding:10px;margin-top:8px;border-left:3px solid var(--teal);background:rgba(45,212,191,.08);white-space:pre-wrap}
+        .btn-recurso-modal{max-width:260px}
+        @media (max-width:700px){.blocos-revisao{grid-template-columns:repeat(5,1fr)}}
         @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-        @media (max-width:520px){.painel{padding:20px}.topo{padding:10px 16px}.barra{position:static;background:none;backdrop-filter:none}}
+        @media (max-width:520px){.painel{padding:20px}.topo{padding:10px 16px;flex-wrap:wrap}.topo-acoes{width:100%;margin-left:56px;justify-content:space-between}.barra{position:static;background:none;backdrop-filter:none}.hero-prova{grid-template-columns:1fr}.hero-selo{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px}.hero-selo strong{font-size:1.25rem}}
     </style>
 </head>
 <body>
 <header class="topo">
     <img src="favicon.png" alt="">
     <div><strong>Exame final</strong><span>Montagem e Manutenção de Computadores</span></div>
-    <a href="modulos.html" id="link-voltar">Voltar aos módulos</a>
+    <nav class="topo-acoes" aria-label="Navegação da prova">
+        <a href="recursos-prova.html" id="link-recursos">Ver recursos</a>
+        <a href="modulos.html" id="link-voltar">Voltar aos módulos</a>
+    </nav>
 </header>
 
 <main>
     <section class="painel" id="tela-inicio">
-        <h1>Antes de começar</h1>
-        <p>O exame tem 30 questões sorteadas, com as alternativas embaralhadas.</p>
+        <div class="hero-prova">
+            <div>
+                <h1>Prova final</h1>
+                <p>Avalie o que aprendeu no curso de Montagem e Manutenção de Computadores.</p>
+            </div>
+            <div class="hero-selo"><strong>30</strong><span>questões · 60 minutos</span></div>
+        </div>
+        <div class="ultima-tentativa" id="ultima-tentativa" hidden>
+            <strong id="ultima-titulo"></strong>
+            <p id="ultima-detalhe"></p>
+            <button type="button" class="btn sec" id="btn-ver-gabarito" onclick="abrirRevisaoSalva()">Ver gabarito e abrir recurso</button>
+        </div>
         <ul class="regras">
             <li><b>Nota mínima:</b> 70% (21 acertos) para ser aprovado. Se refizer, vale a sua melhor nota.</li>
             <li><b>Sem sair da página:</b> trocar de janela ou aba trava o exame e ele recomeça com novas questões.</li>
             <li><b>Sem atualizar:</b> recarregar a página reinicia o exame e apaga as respostas.</li>
-            <li><b>Sem limite de tempo,</b> mas a tentativa expira em 6 horas.</li>
-            <li><b>Repetição:</b> se não passar, você pode refazer quantas vezes quiser.</li>
+            <li><b>Tempo limite:</b> 60 minutos. Ao terminar, a prova é enviada automaticamente e o resultado aparece.</li>
+            <li><b>Gabarito e recursos:</b> ao enviar a prova, você vê quais questões acertou e errou, com a resposta correta de cada uma, e pode abrir recurso nas questões que errou.</li>
+            <li><b>Tentativas:</b> são permitidas duas. Se reprovar na primeira e enviar recursos, aguarde a análise antes da segunda. Após reprovar na segunda, solicite liberação ao professor.</li>
         </ul>
         <button class="btn" id="btn-iniciar" onclick="iniciar()">Iniciar exame</button>
         <p class="erro" id="erro-inicio" role="alert"></p>
@@ -94,7 +161,7 @@
 
     <section id="tela-prova" hidden>
         <div class="barra">
-            <div class="barra-linha"><span><b id="n-resp">0</b> de <span id="n-total">30</span> respondidas</span><span id="faltam"></span></div>
+            <div class="barra-linha"><span>Tentativa <b id="tentativa-atual">1</b> de 2 · <b id="n-resp">0</b> de <span id="n-total">30</span> respondidas</span><span id="cronometro" aria-live="polite">60:00</span></div>
             <div class="trilho"><div id="preenche"></div></div>
             <nav id="navegador" aria-label="Ir para a questão"></nav>
         </div>
@@ -110,10 +177,22 @@
         <h2 id="res-titulo"></h2>
         <div class="nota" id="res-nota">0</div>
         <p id="res-detalhe"></p>
+        <div class="legenda-blocos" aria-label="Legenda do resultado">
+            <span><i style="background:var(--green)"></i>Acerto</span>
+            <span><i style="background:var(--red)"></i>Erro</span>
+            <span><i style="background:var(--gold)"></i>Recurso em aberto</span>
+            <span><i style="background:#60a5fa"></i>Recurso concluído</span>
+            <span><i style="background:#64748b"></i>Gabarito indisponível</span>
+        </div>
+        <p class="dica-revisao" id="dica-revisao">Toque em uma questão para ver a resposta correta e, se discordar do gabarito, abrir recurso.</p>
+        <p class="erro" id="erro-recursos-prova" role="status" hidden></p>
+        <div class="blocos-revisao" id="blocos-revisao" aria-label="Resultado das 30 questões"></div>
+        <div class="revisao-lista" id="res-revisao" aria-label="Revisão das questões"></div>
         <div class="revisar" id="res-revisar" hidden><h3>Temas para revisar</h3><ul id="res-lista"></ul></div>
         <a class="btn" href="modulos.html">Voltar aos módulos</a>
         <button class="btn sec" id="btn-refazer" onclick="location.reload()" hidden>Refazer o exame</button>
     </section>
+
 </main>
 
 <div id="anti" hidden>
@@ -124,35 +203,149 @@
     </div>
 </div>
 
+<div id="modal-revisao" role="dialog" aria-modal="true" aria-labelledby="modal-revisao-titulo" onclick="if(event.target === this) fecharModalRevisao()">
+    <div class="modal-card painel">
+        <div class="modal-topo">
+            <h3 id="modal-revisao-titulo">Questão</h3>
+            <button type="button" class="btn sec fechar-modal" onclick="fecharModalRevisao()">Fechar</button>
+        </div>
+        <div id="modal-revisao-conteudo"></div>
+    </div>
+</div>
+
 <script>
     const _supabase = supabase.createClient('https://ityqcemfbdzgsfmyisqc.supabase.co', 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA');
     const $ = id => document.getElementById(id);
     const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[c]));
 
-    let provaAtiva = false, tentativa = null, total = 30, atual = 0;
+    let revisaoSalva = null, provaAtiva = false, tentativa = null, numeroTentativa = 0, total = 30, atual = 0, questoes = [], tempoFim = 0, cronometro = null, enviando = false, usuarioAtual = null, meusRecursos = [], carregandoRecursos = false, erroCarregarRecursos = '';
     const respostas = {};
 
     function embaralhar(a) {
         for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
         return a;
     }
+    function restaurarRespostas() {
+        const chave = `prova_respostas_${tentativa}`;
+        let salvas;
+        try {
+            salvas = JSON.parse(sessionStorage.getItem(chave) || '{}');
+        } catch (error) {
+            console.warn('Respostas locais da prova inválidas; iniciando sem respostas restauradas.', error);
+            sessionStorage.removeItem(chave);
+            return;
+        }
+        questoes.forEach(q => {
+            const letra = salvas[q.id];
+            if (!['a', 'b', 'c', 'd', 'e'].includes(letra) || q[letra] == null) return;
+            respostas[q.id] = letra;
+            const input = document.querySelector(`.questao[data-id="${q.id}"] input[value="${letra}"]`);
+            if (input) input.checked = true;
+        });
+    }
+    function salvarRespostasLocais() {
+        try {
+            sessionStorage.setItem(`prova_respostas_${tentativa}`, JSON.stringify(respostas));
+        } catch (error) {
+            console.error('Não foi possível salvar as respostas nesta sessão:', error);
+            $('erro-envio').textContent = 'O navegador não conseguiu salvar uma cópia das respostas. Evite recarregar ou fechar esta página.';
+        }
+    }
     function mostrar(id) {
         ['tela-inicio', 'tela-prova', 'tela-resultado'].forEach(t => $(t).hidden = t !== id);
         $('link-voltar').hidden = id === 'tela-prova';
+        $('link-recursos').hidden = id === 'tela-prova';
+    }
+
+    async function carregarMeusRecursos() {
+        if (carregandoRecursos) return;
+        carregandoRecursos = true;
+        const { data: sessao, error: erroSessao } = await _supabase.auth.getUser();
+        if (erroSessao) {
+            erroCarregarRecursos = 'Não foi possível verificar sua sessão para carregar os status dos recursos: ' + erroSessao.message;
+            carregandoRecursos = false;
+            atualizarErroRecursosProva();
+            return;
+        }
+        usuarioAtual = sessao?.user || null;
+        if (!usuarioAtual) {
+            erroCarregarRecursos = 'Entre na sua conta para carregar os status dos recursos.';
+            carregandoRecursos = false;
+            atualizarErroRecursosProva();
+            return;
+        }
+        const { data, error } = await _supabase
+            .from('recursos_prova')
+            .select('id,tentativa_id,questao_id,alternativa_marcada,alternativa_correta,pergunta,alternativas,motivo,status,resposta_admin,ponto_aplicado,nota_tentativa,acertos_tentativa,nota_aluno_atualizada,created_at,respondido_em')
+            .eq('user_id', usuarioAtual.id)
+            .order('created_at', { ascending: false });
+        if (error) {
+            erroCarregarRecursos = 'Não foi possível carregar os status dos recursos: ' + error.message;
+            carregandoRecursos = false;
+            atualizarErroRecursosProva();
+            return;
+        }
+        meusRecursos = data || [];
+        erroCarregarRecursos = '';
+        if (!$('tela-resultado').hidden && questoes.length) renderizarRevisao();
+        carregandoRecursos = false;
+    }
+
+    function atualizarErroRecursosProva() {
+        const estado = $('erro-recursos-prova');
+        if (!estado) return;
+        estado.hidden = !erroCarregarRecursos;
+        estado.textContent = erroCarregarRecursos;
+    }
+
+    async function carregarRevisaoSalva() {
+        const { data, error } = await _supabase.rpc('obter_revisao_prova');
+        if (error || !data) return; // sem prova finalizada, sem sessão ou função ainda não instalada
+        revisaoSalva = data;
+        $('ultima-titulo').textContent = `Tentativa ${data.numero_tentativa} finalizada — nota ${data.nota}`;
+        $('ultima-detalhe').textContent = `${data.acertos} de ${data.total} questões corretas. Veja o gabarito e abra recurso nas questões que errou.`;
+        $('ultima-tentativa').hidden = false;
+    }
+
+    function abrirRevisaoSalva() {
+        const d = revisaoSalva;
+        if (!d) return;
+        tentativa = d.tentativa;
+        questoes = d.questoes || [];
+        total = questoes.length;
+        Object.keys(respostas).forEach(k => delete respostas[k]);
+        Object.assign(respostas, d.respostas_marcadas || {});
+        carregarMeusRecursos();
+        resultado({
+            aprovado: d.aprovado, nota: d.nota, acertos: d.acertos,
+            numero_tentativa: d.numero_tentativa,
+            respostas_corretas: d.respostas_corretas,
+            gabarito_disponivel: d.gabarito_disponivel
+        });
     }
 
     async function iniciar() {
         const btn = $('btn-iniciar'); btn.disabled = true; $('erro-inicio').textContent = '';
         const { data: u } = await _supabase.auth.getUser();
         if (!u?.user) { location.href = 'index.html'; return; }
-        const { data, error } = await _supabase.rpc('iniciar_prova');
+        const { data, error } = await _supabase.rpc('iniciar_prova_controlada');
         if (error) {
-            $('erro-inicio').textContent = error.code === 'PGRST202'
-                ? 'O exame ainda não foi configurado no banco de dados. Avise o instrutor.'
-                : error.message;
+            const mensagem = error.message || '';
+            $('erro-inicio').textContent = mensagem.includes('RECURSOS_PENDENTES')
+                ? 'Há recursos aguardando análise. A próxima tentativa será liberada quando todos forem respondidos.'
+                : mensagem.includes('LIMITE_TENTATIVAS')
+                    ? 'Você já utilizou as tentativas disponíveis. Entre em contato com o professor para solicitar outra.'
+                    : mensagem.includes('PROVA_APROVADA')
+                        ? 'Sua nota já atingiu o mínimo para aprovação.'
+                        : error.code === 'PGRST202'
+                            ? 'O sistema de tentativas ainda não foi configurado no banco de dados. Avise o instrutor.'
+                            : mensagem;
             btn.disabled = false; return;
         }
         tentativa = data.tentativa; total = data.questoes.length;
+        numeroTentativa = Number(data.numero_tentativa) || 1;
+        $('tentativa-atual').textContent = numeroTentativa;
+        questoes = data.questoes;
         $('n-total').textContent = total;
         $('lista').innerHTML = data.questoes.map((q, i) => {
             const alts = embaralhar(['a', 'b', 'c', 'd', 'e'].map(l => ({ l, t: q[l] })));
@@ -161,9 +354,33 @@
                 ${alts.map(o => `<label><input type="radio" name="q${q.id}" value="${o.l}"><span>${esc(o.t)}</span></label>`).join('')}
             </fieldset>`;
         }).join('');
+        restaurarRespostas();
         $('navegador').innerHTML = data.questoes.map((q, i) => `<button type="button" data-i="${i}" data-id="${q.id}" aria-label="Questão ${i + 1}">${i + 1}</button>`).join('');
+        Object.keys(respostas).forEach(id => {
+            document.querySelector(`#navegador button[data-id="${id}"]`)?.classList.add('ok');
+        });
         mostrar('tela-prova'); window.scrollTo(0, 0);
         provaAtiva = true; atualizar(); ir(0);
+        const inicioRegistrado = Date.parse(data.iniciada_em || '');
+        tempoFim = (Number.isFinite(inicioRegistrado) ? inicioRegistrado : Date.now()) + 60 * 60 * 1000;
+        iniciarCronometro();
+    }
+
+    function iniciarCronometro() {
+        clearInterval(cronometro);
+        cronometro = setInterval(() => {
+            if (!provaAtiva) return;
+            const restante = Math.max(0, tempoFim - Date.now());
+            const segundos = Math.ceil(restante / 1000);
+            const mm = String(Math.floor(segundos / 60)).padStart(2, '0');
+            const ss = String(segundos % 60).padStart(2, '0');
+            $('cronometro').textContent = `${mm}:${ss}`;
+            $('cronometro').classList.toggle('critico', segundos <= 300);
+            if (segundos <= 0) {
+                clearInterval(cronometro);
+                finalizar(true);
+            }
+        }, 250);
     }
 
     function ir(i) {
@@ -180,12 +397,16 @@
         $('btn-proximo').textContent = i === qs.length - 1 ? 'Finalizar exame' : 'Próximo';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    function proximo() { atual < total - 1 ? ir(atual + 1) : finalizar(); }
+    function proximo() {
+        if ($('btn-proximo').dataset.retry === 'true') return finalizar(true);
+        atual < total - 1 ? ir(atual + 1) : finalizar();
+    }
     $('navegador').addEventListener('click', e => { const b = e.target.closest('button'); if (b) ir(+b.dataset.i); });
 
     $('lista').addEventListener('change', e => {
         const id = e.target.closest('.questao')?.dataset.id; if (!id) return;
         respostas[id] = e.target.value;
+        salvarRespostasLocais();
         const nb = document.querySelector(`#navegador button[data-id="${id}"]`); nb?.classList.add('ok'); nb?.classList.remove('falta');
         atualizar();
     });
@@ -194,45 +415,281 @@
         const n = Object.keys(respostas).length;
         $('n-resp').textContent = n;
         $('preenche').style.width = (n / total * 100) + '%';
-        $('faltam').textContent = n === total ? 'Tudo respondido' : `Faltam ${total - n}`;
+        const faltam = $('faltam');
+        if (faltam) faltam.textContent = n === total ? 'Tudo respondido' : `Faltam ${total - n}`;
     }
 
-    async function finalizar() {
-        provaAtiva = false; // os diálogos abaixo tiram o foco da janela; não pode travar
+    async function finalizar(automatico = false) {
+        if (enviando) return;
+        provaAtiva = false;
+        clearInterval(cronometro);
         const faltam = total - Object.keys(respostas).length;
-        if (faltam > 0) {
+        if (faltam > 0 && !automatico) {
             const qs = [...document.querySelectorAll('.questao')];
             document.querySelectorAll('#navegador button').forEach((b, k) => b.classList.toggle('falta', !respostas[qs[k].dataset.id]));
             ir(qs.findIndex(q => !respostas[q.dataset.id]));
         }
-        const ok = confirm(faltam > 0
+        const ok = automatico || confirm(faltam > 0
             ? `Faltam ${faltam} questão(ões) sem resposta (marcadas com borda dourada na barra). Enviar assim mesmo?`
             : 'Enviar o exame agora? Depois do envio não é possível alterar as respostas.');
-        if (!ok) { provaAtiva = true; return; }
+        if (!ok) { provaAtiva = true; iniciarCronometro(); return; }
 
+        enviando = true;
         const btn = $('btn-proximo'); btn.disabled = true; $('erro-envio').textContent = '';
-        const { data, error } = await _supabase.rpc('enviar_prova', { p_tentativa: tentativa, p_respostas: respostas });
+        btn.dataset.retry = '';
+        const { data, error } = await _supabase.rpc('enviar_prova_controlada', { p_tentativa: tentativa, p_respostas: respostas });
         if (error) {
             $('erro-envio').textContent = 'Não foi possível enviar: ' + error.message;
-            btn.disabled = false; provaAtiva = true; return;
+            enviando = false;
+            btn.disabled = false;
+            if (Date.now() < tempoFim) {
+                provaAtiva = true;
+                iniciarCronometro();
+            } else {
+                $('btn-proximo').textContent = 'Tentar enviar novamente';
+                $('btn-proximo').dataset.retry = 'true';
+            }
+            return;
+        }
+        enviando = false;
+        try {
+            sessionStorage.removeItem(`prova_respostas_${tentativa}`);
+        } catch (error) {
+            console.warn('Não foi possível limpar as respostas salvas desta tentativa.', error);
         }
         resultado(data);
     }
 
     function resultado(r) {
         mostrar('tela-resultado'); window.scrollTo(0, 0);
+        numeroTentativa = Number(r.numero_tentativa) || numeroTentativa;
+        const revisoes = r.revisao || r.respostas_corrigidas || r.questoes || [];
+        window._resultadoRevisao = normalizarRevisoes(revisoes);
+        window._resultadoGabarito = r.respostas_corretas || r.alternativas_corretas || r.gabarito || r.correct_answers || {};
+        if (r.respostas_marcadas && typeof r.respostas_marcadas === 'object') {
+            Object.keys(respostas).forEach(k => delete respostas[k]);
+            Object.assign(respostas, r.respostas_marcadas);
+        }
+        const semGabarito = r.gabarito_disponivel === false
+            || (!Object.keys(window._resultadoGabarito).length && !window._resultadoRevisao.length);
+        $('dica-revisao').textContent = semGabarito
+            ? 'O gabarito desta tentativa não está disponível. Avise o professor se precisar solicitar recurso.'
+            : 'Toque em uma questão para ver a resposta correta e, se discordar do gabarito, abrir recurso.';
         $('res-titulo').textContent = r.aprovado ? 'Você foi aprovado!' : 'Ainda não foi desta vez';
         const n = $('res-nota'); n.textContent = r.nota; n.className = 'nota ' + (r.aprovado ? 'ok' : 'no');
         let txt = `${r.acertos} de ${total} questões corretas.`;
-        txt += r.aprovado ? ' Veja em Módulos se o seu certificado já está liberado.' : ' A nota mínima é 70. Revise os temas abaixo e tente de novo.';
+        txt += r.aprovado
+            ? ' Veja em Módulos se o seu certificado já está liberado.'
+            : numeroTentativa === 1
+                ? ' Após a análise de todos os recursos enviados, a segunda tentativa será liberada. Se não solicitar recursos, poderá iniciar a segunda tentativa.'
+                : ' Você já realizou as duas tentativas. Entre em contato com o professor para solicitar uma nova liberação.';
         if (r.melhor > r.nota) txt += ` Sua melhor nota continua sendo ${r.melhor}.`;
         $('res-detalhe').textContent = txt;
+        renderizarRevisao();
         if (r.erradas?.length) {
             $('res-lista').innerHTML = r.erradas.map(q => `<li>${esc(q)}</li>`).join('');
             $('res-revisar').hidden = false;
         }
-        $('btn-refazer').hidden = r.aprovado;
+        const botaoRefazer = $('btn-refazer');
+        botaoRefazer.hidden = r.aprovado;
+        if (numeroTentativa >= 2 && !r.aprovado) {
+            botaoRefazer.textContent = 'Falar com o professor';
+            botaoRefazer.onclick = () => { location.href = 'modulos.html'; };
+        } else {
+            botaoRefazer.textContent = 'Continuar para a 2ª tentativa';
+            botaoRefazer.onclick = () => location.reload();
+        }
     }
+
+    function renderizarRevisao() {
+        $('res-revisao').hidden = true;
+        atualizarErroRecursosProva();
+        $('blocos-revisao').innerHTML = questoes.map((q, i) => {
+            const marcada = respostas[q.id];
+            const revisao = revisaoDaQuestao(q, i);
+            const correta = obterAlternativaCorreta(q, revisao);
+            const recurso = recursoDaQuestao(q.id);
+            const recursoAberto = recurso && ['pendente', 'em-analise'].includes(recurso.status);
+            const recursoConcluido = recurso && ['deferido', 'indeferido'].includes(recurso.status);
+            const acertou = !!marcada && correta != null && marcada === correta;
+            const classe = recursoAberto ? 'recurso-aberto'
+                : recursoConcluido ? 'recurso-concluido'
+                    : correta == null ? 'sem-gabarito'
+                        : acertou ? 'acerto' : 'erro';
+            const rotulo = recursoAberto ? 'RECURSO ABERTO'
+                : recursoConcluido ? 'RECURSO CONCLUÍDO'
+                    : correta == null ? 'SEM GABARITO'
+                        : acertou ? 'ACERTO' : 'ERRO';
+            return `<button type="button" class="bloco-questao ${classe}"
+                onclick="abrirModalRevisao('${String(q.id).replace(/'/g, '&#39;')}')" aria-label="Questão ${i + 1}: ${rotulo}">
+                ${i + 1}<br><small>${rotulo}</small>
+            </button>`;
+        }).join('');
+    }
+
+    function abrirModalRevisao(questaoId) {
+        const q = questoes.find(item => String(item.id) === String(questaoId));
+        if (!q) return;
+        const indice = questoes.findIndex(item => String(item.id) === String(q.id));
+        const revisao = revisaoDaQuestao(q, indice);
+        const marcada = respostas[q.id];
+        const letras = { a: 'A', b: 'B', c: 'C', d: 'D', e: 'E' };
+        const alternativas = ['a', 'b', 'c', 'd', 'e'].filter(letra => q[letra] != null);
+        const recursoExistente = recursoDaQuestao(q.id);
+        const correta = obterAlternativaCorreta(q, revisao) || recursoExistente?.alternativa_correta;
+        const acertou = !!marcada && !!correta && marcada === correta;
+        const aviso = !marcada ? '<p class="revisao-status">Você não respondeu esta questão.</p>' : '';
+        $('modal-revisao-titulo').textContent = `Questão ${questoes.findIndex(item => String(item.id) === String(q.id)) + 1}`;
+        $('modal-revisao-conteudo').innerHTML = `
+            <p><b>${esc(q.q)}</b></p>
+            <div>${alternativas.map(letra => {
+                let classe = 'alternativa-modal';
+                if (letra === marcada) classe += letra === correta ? ' marcada correta' : ' marcada errada';
+                if (letra === correta) classe += ' correta';
+                const etiqueta = letra === marcada
+                    ? (letra === correta ? ' — Sua resposta (correta)' : ' — Sua resposta')
+                    : letra === correta ? ' — Resposta correta' : '';
+                return `<div class="${classe}"><b>${letras[letra]}</b><span>${esc(q[letra])}${esc(etiqueta)}</span></div>`;
+            }).join('')}</div>
+            ${recursoExistente
+                ? `<div class="recurso-modal">
+                    <p class="revisao-status"><b>Recurso enviado:</b> ${esc(recursoExistente.motivo)}</p>
+                    <p class="revisao-status"><b>Status:</b> ${esc(recursoExistente.status || 'pendente')}</p>
+                    ${recursoExistente.resposta_admin ? `<div class="resposta-professor"><b>Resposta do professor:</b><br>${esc(recursoExistente.resposta_admin)}</div>` : '<p class="revisao-status">Aguardando resposta do professor.</p>'}
+                </div>`
+                : acertou
+                ? `<p class="revisao-status">Você acertou esta questão, não há recurso a solicitar.</p>`
+                : `<div class="recurso-modal">
+                    ${aviso}
+                    <label for="motivo-${esc(q.id)}"><b>Solicitar recurso desta questão</b></label>
+                    <textarea id="motivo-${esc(q.id)}" maxlength="1000" placeholder="Explique o motivo do recurso"></textarea>
+                    <button type="button" class="btn sec btn-recurso-modal" onclick="solicitarRecurso('${esc(q.id)}', this)">Enviar recurso</button>
+                    <div class="revisao-status" id="status-${esc(q.id)}" role="status"></div>
+                </div>`}`;
+        $('modal-revisao').classList.add('aberto');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function normalizarRevisoes(valor) {
+        if (Array.isArray(valor)) return valor;
+        if (!valor || typeof valor !== 'object') return [];
+        return Object.entries(valor).map(([id, item]) =>
+            item && typeof item === 'object'
+                ? { ...item, questao_id: item.questao_id || item.question_id || id }
+                : { questao_id: id, alternativa_correta: item }
+        );
+    }
+
+    function revisaoDaQuestao(questao, indice) {
+        const revisoes = window._resultadoRevisao || [];
+        const revisao = revisoes.find(item =>
+            String(item.questao_id || item.question_id || item.id_questao || item.questionId || item.id) === String(questao.id)
+        ) || revisoes[indice] || {};
+        const gabarito = window._resultadoGabarito || {};
+        const respostaPorId = Array.isArray(gabarito) ? gabarito[indice] : gabarito[questao.id];
+        const respostaDoRecurso = recursoDaQuestao(questao.id)?.alternativa_correta;
+        const respostaCorreta = respostaPorId ?? respostaDoRecurso;
+        return respostaCorreta == null ? revisao : { ...revisao, alternativa_correta: respostaCorreta };
+    }
+
+    function recursoDaQuestao(questaoId) {
+        return meusRecursos.find(item =>
+            String(item.tentativa_id) === String(tentativa) && String(item.questao_id) === String(questaoId)
+        );
+    }
+
+    function obterAlternativaCorreta(questao, revisao) {
+        const candidatos = [
+            questao.alternativa_correta, questao.resposta_correta, questao.resposta_certa,
+            questao.correta, questao.correct, questao.gabarito, questao.letra_correta, questao.correta_letra,
+            questao.opcao_correta, questao.correct_answer, questao.correctAnswer, questao.correct_option,
+            questao.correctOption, questao.answer_key, questao.answer, questao.answerIndex,
+            revisao?.alternativa_correta, revisao?.resposta_correta, revisao?.resposta_certa,
+            revisao?.correta, revisao?.correct, revisao?.gabarito, revisao?.letra_correta, revisao?.correta_letra,
+            revisao?.opcao_correta, revisao?.respostaCorreta, revisao?.correct_answer, revisao?.correctAnswer,
+            revisao?.correct_option, revisao?.correctOption, revisao?.answer_key, revisao?.answer,
+            revisao?.answerIndex, revisao?.resposta
+        ];
+        for (const candidato of candidatos) {
+            const resposta = candidato && typeof candidato === 'object'
+                ? candidato.letra || candidato.alternativa || candidato.opcao || candidato.correct || candidato.answer || candidato.resposta
+                : candidato;
+            if (typeof resposta === 'string') {
+                const valor = resposta.trim().toLowerCase();
+                if (/^[a-e]$/.test(valor)) return valor;
+                const letra = ['a', 'b', 'c', 'd', 'e'].find(key =>
+                    String(questao[key] || '').trim().toLowerCase() === valor
+                );
+                if (letra) return letra;
+            } else if (Number.isInteger(resposta) && resposta >= 0 && resposta <= 4) {
+                return ['a', 'b', 'c', 'd', 'e'][resposta];
+            }
+        }
+        return null;
+    }
+
+    function fecharModalRevisao() {
+        $('modal-revisao').classList.remove('aberto');
+        document.body.style.overflow = '';
+    }
+
+    async function solicitarRecurso(questaoId, botao) {
+        const motivo = $(`motivo-${questaoId}`).value.trim();
+        const status = $(`status-${questaoId}`);
+        if (!motivo) {
+            status.textContent = 'Informe o motivo do recurso.';
+            $(`motivo-${questaoId}`).focus();
+            return;
+        }
+        botao.disabled = true;
+        status.textContent = 'Enviando recurso...';
+        const { data: u } = await _supabase.auth.getUser();
+        if (!u?.user) {
+            status.textContent = 'Sua sessão expirou. Entre novamente.';
+            botao.disabled = false;
+            return;
+        }
+        const q = questoes.find(item => String(item.id) === String(questaoId));
+        const indice = questoes.findIndex(item => String(item.id) === String(questaoId));
+        const revisao = q ? revisaoDaQuestao(q, indice) : null;
+        const alternativaCorreta = q ? obterAlternativaCorreta(q, revisao) : null;
+        const { data: novoRecurso, error } = await _supabase
+            .from('recursos_prova')
+            .insert({
+                tentativa_id: tentativa,
+                questao_id: questaoId,
+                user_id: u.user.id,
+                aluno_email: u.user.email,
+                alternativa_marcada: respostas[questaoId] || null,
+                alternativa_correta: alternativaCorreta,
+                pergunta: q?.q || null,
+                alternativas: q ? {
+                    a: q.a ?? null,
+                    b: q.b ?? null,
+                    c: q.c ?? null,
+                    d: q.d ?? null,
+                    e: q.e ?? null
+                } : null,
+                motivo,
+                status: 'pendente'
+            })
+            .select('id,tentativa_id,questao_id,alternativa_marcada,alternativa_correta,pergunta,alternativas,motivo,status,resposta_admin,ponto_aplicado,nota_tentativa,acertos_tentativa,nota_aluno_atualizada,created_at,respondido_em')
+            .single();
+        if (error) {
+            status.textContent = 'Não foi possível enviar o recurso: ' + error.message;
+            botao.disabled = false;
+            return;
+        }
+        meusRecursos.unshift(novoRecurso);
+        await carregarMeusRecursos();
+        abrirModalRevisao(questaoId);
+    }
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && $('modal-revisao').classList.contains('aberto')) {
+            fecharModalRevisao();
+        }
+    });
 
     // Anti-cola: sair da janela trava a tentativa
     function travar() { if (provaAtiva) { $('anti').hidden = false; $('tela-prova').style.filter = 'blur(14px)'; $('tela-prova').style.pointerEvents = 'none'; provaAtiva = false; } }
@@ -240,6 +697,11 @@
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') travar(); });
     document.addEventListener('contextmenu', e => { if (provaAtiva) e.preventDefault(); });
     window.addEventListener('beforeunload', e => { if (provaAtiva) { e.preventDefault(); e.returnValue = ''; } });
+    carregarMeusRecursos();
+    carregarRevisaoSalva();
+    setInterval(() => {
+        if (document.visibilityState === 'visible') carregarMeusRecursos();
+    }, 30000);
 </script>
 </body>
 </html>

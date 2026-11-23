@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus recursos | Telecurso</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root{--bg:#071426;--panel:#102640;--panel-deep:#0a1b31;--line:#213d5d;--line-light:#355778;--tx:#f4f7fb;--tx2:#c5d4e4;--muted:#91a8bf;--gold:#e7b957;--cyan:#5eead4;--green:#34d399;--red:#fb7185;--blue:#60a5fa}
+        *{box-sizing:border-box}
+        [hidden]{display:none!important}
+        body{margin:0;background:radial-gradient(ellipse at top right,rgba(29,78,116,.26),transparent 42%),var(--bg);color:var(--tx2);font:400 16px/1.55 'Inter',sans-serif}
+        h1,h2,h3,strong{color:var(--tx)}
+        a{color:inherit}
+        :focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+        .topo{display:flex;align-items:center;gap:12px;padding:13px max(20px,calc((100% - 1120px)/2));border-bottom:1px solid var(--line);background:rgba(5,17,32,.92)}
+        .topo img{width:42px;height:42px;object-fit:contain}
+        .marca strong{display:block;font:800 1rem 'Sora',sans-serif;line-height:1.2}
+        .marca span{display:block;margin-top:3px;color:var(--muted);font-size:.76rem}
+        .topo-acoes{display:flex;align-items:center;gap:9px;margin-left:auto}
+        .topo-acoes a{padding:9px 12px;border:1px solid var(--line-light);border-radius:9px;color:var(--tx2);font-size:.82rem;font-weight:700;text-decoration:none}
+        .topo-acoes a:hover{border-color:var(--cyan);color:var(--cyan)}
+        main{width:min(100% - 32px,920px);margin:38px auto 80px}
+        .hero{position:relative;overflow:hidden;padding:clamp(22px,5vw,38px);border:1px solid var(--line-light);border-radius:20px;background:linear-gradient(125deg,#142f4b,#102640 62%,#0d2038);box-shadow:0 18px 48px rgba(0,0,0,.2)}
+        .hero:after{content:'';position:absolute;right:-60px;top:-120px;width:280px;height:280px;border:1px solid rgba(94,234,212,.12);border-radius:50%;box-shadow:0 0 0 35px rgba(94,234,212,.025),0 0 0 70px rgba(94,234,212,.02);pointer-events:none}
+        .hero-conteudo{position:relative;z-index:1}
+        .etiqueta{display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;color:var(--cyan);font-size:.73rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+        .hero h1{margin:0 0 8px;font:800 clamp(1.55rem,4vw,2.1rem)/1.2 'Sora',sans-serif}
+        .hero p{max-width:660px;margin:0;color:var(--tx2);line-height:1.7}
+        .resumo{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+        .resumo-item{padding:15px 17px;border:1px solid var(--line);border-radius:13px;background:rgba(16,38,64,.78)}
+        .resumo-item span{display:block;color:var(--muted);font-size:.75rem}
+        .resumo-item strong{display:block;margin-top:4px;font:700 1.4rem 'Sora',sans-serif}
+        .resumo-item.abertos strong{color:var(--gold)}
+        .resumo-item.respondidos strong{color:var(--cyan)}
+        .lista-topo{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:28px 2px 12px}
+        .lista-topo h2{margin:0;font:700 1.08rem 'Sora',sans-serif}
+        .btn-atualizar{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:8px 13px;border:1px solid var(--line-light);border-radius:9px;background:rgba(255,255,255,.04);color:var(--tx);font:700 .82rem 'Inter',sans-serif;cursor:pointer}
+        .btn-atualizar:hover{border-color:var(--cyan);color:var(--cyan)}
+        .btn-atualizar:disabled{opacity:.55;cursor:wait}
+        .estado{padding:16px;border:1px dashed var(--line-light);border-radius:12px;background:rgba(10,27,49,.7);color:var(--muted);text-align:center}
+        .estado.erro{border-color:rgba(251,113,133,.5);color:#fecdd3}
+        .estado.vazio i{display:block;margin-bottom:8px;color:var(--cyan);font-size:1.3rem}
+        .lista-recursos{display:grid;gap:14px}
+        .recurso{overflow:hidden;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,rgba(16,38,64,.96),rgba(10,27,49,.96));box-shadow:0 10px 24px rgba(0,0,0,.12)}
+        .recurso-topo{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 17px;border-bottom:1px solid var(--line)}
+        .recurso-topo h3{margin:0;font:700 .95rem 'Sora',sans-serif}
+        .status{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid transparent;border-radius:999px;font-size:.73rem;font-weight:800;white-space:nowrap}
+        .status.pendente,.status.em-analise{border-color:rgba(231,185,87,.25);background:rgba(231,185,87,.12);color:var(--gold)}
+        .status.deferido{border-color:rgba(52,211,153,.22);background:rgba(52,211,153,.12);color:var(--green)}
+        .status.indeferido{border-color:rgba(96,165,250,.25);background:rgba(96,165,250,.12);color:var(--blue)}
+        .recurso-corpo{padding:16px 17px}
+        .meta{display:flex;flex-wrap:wrap;gap:7px 16px;margin:0 0 13px;color:var(--muted);font-size:.77rem}
+        .enunciado{margin:0 0 12px;color:var(--tx);font-weight:600;line-height:1.65}
+        .sem-enunciado{color:var(--muted);font-size:.84rem;font-style:italic}
+        .alternativas{display:grid;gap:7px;margin:10px 0 16px}
+        .alternativa{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:rgba(7,20,38,.68);font-size:.84rem}
+        .alternativa b{flex:0 0 22px;color:var(--muted)}
+        .alternativa.marcada-errada{border-color:rgba(251,113,133,.5);background:rgba(251,113,133,.08);color:#fecdd3}
+        .alternativa.correta{border-color:rgba(52,211,153,.42);background:rgba(52,211,153,.07);color:#bbf7d0}
+        .alternativa.marcada-certa{border-color:rgba(52,211,153,.72);background:rgba(52,211,153,.13);color:#bbf7d0}
+        .legenda{display:flex;flex-wrap:wrap;gap:8px 14px;margin:0 0 14px;color:var(--muted);font-size:.72rem}
+        .legenda span{display:inline-flex;align-items:center;gap:6px}
+        .legenda i{width:9px;height:9px;border-radius:3px}
+        .bloco-texto{margin-top:12px;padding:12px 13px;border-radius:10px;background:rgba(7,20,38,.65);font-size:.84rem;overflow-wrap:anywhere;white-space:pre-wrap}
+        .bloco-texto b{display:block;margin-bottom:4px;color:var(--tx)}
+        .resposta-professor{border-left:3px solid var(--cyan);background:rgba(45,212,191,.08)}
+        .aguardando{color:var(--muted);font-size:.82rem}
+        .ponto-aplicado{color:var(--green)}
+        @media(max-width:600px){.topo{flex-wrap:wrap;padding:11px 16px}.topo-acoes{width:100%;margin-left:54px}.topo-acoes a{flex:1;text-align:center}.resumo{gap:8px}.resumo-item{padding:12px 10px}.resumo-item span{font-size:.68rem}.resumo-item strong{font-size:1.2rem}.lista-topo{align-items:flex-start}.recurso-topo{align-items:flex-start;flex-direction:column}}
+        @media(max-width:380px){.topo-acoes{margin-left:0}.resumo{grid-template-columns:1fr}.resumo-item{display:flex;align-items:center;justify-content:space-between}.resumo-item strong{margin:0}}
+        @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+    </style>
+</head>
+<body>
+    <header class="topo">
+        <img src="favicon.png" alt="">
+        <div class="marca"><strong>Meus recursos</strong><span>Prova final · Telecurso</span></div>
+        <nav class="topo-acoes" aria-label="Navegação">
+            <a href="modulos.html"><i class="fas fa-th-large" aria-hidden="true"></i> Módulos</a>
+            <a href="prova-final.html"><i class="fas fa-clipboard-check" aria-hidden="true"></i> Prova</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" aria-labelledby="titulo-pagina">
+            <div class="hero-conteudo">
+                <span class="etiqueta"><i class="fas fa-comments" aria-hidden="true"></i> Acompanhamento</span>
+                <h1 id="titulo-pagina">Recursos da prova</h1>
+                <p>Acompanhe cada solicitação, reveja a questão e as alternativas e consulte a decisão e a resposta do professor.</p>
+            </div>
+        </section>
+
+        <section class="resumo" aria-label="Resumo dos recursos">
+            <div class="resumo-item"><span>Total de solicitações</span><strong id="total-recursos">—</strong></div>
+            <div class="resumo-item abertos"><span>Aguardando análise</span><strong id="total-abertos">—</strong></div>
+            <div class="resumo-item respondidos"><span>Concluídos</span><strong id="total-concluidos">—</strong></div>
+        </section>
+
+        <section aria-labelledby="titulo-lista">
+            <div class="lista-topo">
+                <h2 id="titulo-lista">Minhas solicitações</h2>
+                <button class="btn-atualizar" id="btn-atualizar" type="button" onclick="carregarRecursos()"><i class="fas fa-sync-alt" aria-hidden="true"></i> Atualizar</button>
+            </div>
+            <div class="estado" id="estado" role="status" aria-live="polite">Carregando seus recursos...</div>
+            <div class="lista-recursos" id="lista-recursos"></div>
+        </section>
+    </main>
+
+    <script>
+        const _supabase = supabase.createClient('https://ityqcemfbdzgsfmyisqc.supabase.co', 'sb_publishable_p6rMiOpEoL6smdIXgOaclQ_TNK0MwNA');
+        const $ = id => document.getElementById(id);
+        const esc = valor => String(valor ?? '').replace(/[&<>"']/g, caractere => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+        }[caractere]));
+        let carregando = false;
+
+        function exibirEstado(texto, tipo) {
+            const estado = $('estado');
+            estado.className = `estado${tipo ? ` ${tipo}` : ''}`;
+            estado.textContent = texto;
+            estado.hidden = false;
+            estado.hidden = false;
+        }
+
+        function formatarData(valor) {
+            if (!valor) return 'Data não disponível';
+            const data = new Date(valor);
+            return Number.isNaN(data.getTime()) ? 'Data não disponível' : data.toLocaleString('pt-BR');
+        }
+
+        function renderizarAlternativas(recurso) {
+            const alternativas = recurso.alternativas && typeof recurso.alternativas === 'object'
+                ? recurso.alternativas
+                : {};
+            const marcada = String(recurso.alternativa_marcada || '').toLowerCase();
+            const correta = String(recurso.alternativa_correta || '').toLowerCase();
+            const letras = ['a', 'b', 'c', 'd', 'e'].filter(letra => alternativas[letra] != null);
+            if (!letras.length) return '';
+            return `<div class="legenda">
+                    <span><i style="background:var(--red)"></i>Sua resposta incorreta</span>
+                    <span><i style="background:var(--green)"></i>Resposta correta</span>
+                </div>
+                <div class="alternativas">${letras.map(letra => {
+                    const estaMarcada = letra === marcada;
+                    const estaCorreta = letra === correta;
+                    const classe = estaMarcada && estaCorreta ? 'marcada-certa'
+                        : estaMarcada ? 'marcada-errada'
+                            : estaCorreta ? 'correta' : '';
+                    const identificacao = estaMarcada && estaCorreta ? ' · Marcada e correta'
+                        : estaMarcada ? ' · Sua resposta'
+                            : estaCorreta ? ' · Resposta correta' : '';
+                    return `<div class="alternativa ${classe}"><b>${letra.toUpperCase()}</b><span>${esc(alternativas[letra])}${identificacao}</span></div>`;
+                }).join('')}</div>`;
+        }
+
+        function renderizarRecurso(recurso) {
+            const rotulos = { pendente: 'Pendente', 'em-analise': 'Em análise', deferido: 'Deferido', indeferido: 'Indeferido' };
+            const status = rotulos[recurso.status] ? recurso.status : 'pendente';
+            const conclusao = recurso.resposta_admin
+                ? `<div class="bloco-texto resposta-professor"><b>Resposta do professor</b>${esc(recurso.resposta_admin)}</div>`
+                : '<p class="aguardando">Aguardando resposta do professor.</p>';
+            const credito = recurso.ponto_aplicado
+                ? `<div class="bloco-texto ponto-aplicado"><b>Ponto aplicado</b>${esc(recurso.acertos_tentativa)} acertos · nota da tentativa ${esc(recurso.nota_tentativa)}/100${recurso.nota_aluno_atualizada ? ' · sua melhor nota foi atualizada' : ' · uma nota melhor já estava registrada'}</div>`
+                : '';
+            return `<article class="recurso">
+                <div class="recurso-topo">
+                    <h3>Questão ${esc(recurso.questao_id)}</h3>
+                    <span class="status ${esc(status)}"><i class="fas ${status === 'deferido' ? 'fa-check-circle' : status === 'indeferido' ? 'fa-info-circle' : 'fa-hourglass-half'}" aria-hidden="true"></i>${esc(rotulos[status])}</span>
+                </div>
+                <div class="recurso-corpo">
+                    <p class="meta"><span><i class="far fa-calendar" aria-hidden="true"></i> ${esc(formatarData(recurso.created_at))}</span><span>Alternativa marcada: ${esc(recurso.alternativa_marcada ? recurso.alternativa_marcada.toUpperCase() : 'não informada')}</span></p>
+                    ${recurso.pergunta ? `<p class="enunciado">${esc(recurso.pergunta)}</p>` : '<p class="sem-enunciado">O enunciado desta solicitação não foi salvo.</p>'}
+                    ${renderizarAlternativas(recurso)}
+                    <div class="bloco-texto"><b>Motivo do recurso</b>${esc(recurso.motivo)}</div>
+                    ${credito}
+                    ${conclusao}
+                </div>
+            </article>`;
+        }
+
+        function atualizarResumo(recursos) {
+            const abertos = recursos.filter(item => ['pendente', 'em-analise'].includes(item.status)).length;
+            $('total-recursos').textContent = recursos.length;
+            $('total-abertos').textContent = abertos;
+            $('total-concluidos').textContent = recursos.length - abertos;
+        }
+
+        async function carregarRecursos() {
+            if (carregando) return;
+            carregando = true;
+            $('btn-atualizar').disabled = true;
+            exibirEstado('Carregando seus recursos...', '');
+
+            const { data: sessao, error: erroSessao } = await _supabase.auth.getUser();
+            if (erroSessao) {
+                exibirEstado('Não foi possível verificar sua sessão: ' + erroSessao.message, 'erro');
+                $('btn-atualizar').disabled = false;
+                carregando = false;
+                return;
+            }
+            if (!sessao?.user) {
+                exibirEstado('Entre na sua conta para acompanhar os recursos enviados.', 'erro');
+                $('lista-recursos').innerHTML = '<a class="btn-atualizar" href="index.html">Ir para o login</a>';
+                $('btn-atualizar').disabled = false;
+                carregando = false;
+                return;
+            }
+
+            const { data, error } = await _supabase
+                .from('recursos_prova')
+                .select('questao_id,pergunta,alternativas,alternativa_marcada,alternativa_correta,motivo,status,resposta_admin,ponto_aplicado,nota_tentativa,acertos_tentativa,nota_aluno_atualizada,created_at')
+                .eq('user_id', sessao.user.id)
+                .order('created_at', { ascending: false });
+            $('btn-atualizar').disabled = false;
+            carregando = false;
+            if (error) {
+                exibirEstado('Não foi possível carregar seus recursos: ' + error.message, 'erro');
+                return;
+            }
+
+            const recursos = data || [];
+            atualizarResumo(recursos);
+            if (!recursos.length) {
+                $('lista-recursos').innerHTML = '';
+                exibirEstado('Você ainda não enviou solicitações de recurso.', 'vazio');
+                $('estado').innerHTML = '<i class="fas fa-inbox" aria-hidden="true"></i>Você ainda não enviou solicitações de recurso.';
+                return;
+            }
+            $('estado').hidden = true;
+            $('lista-recursos').innerHTML = recursos.map(renderizarRecurso).join('');
+        }
+
+        carregarRecursos();
+        setInterval(() => {
+            if (document.visibilityState === 'visible') carregarRecursos();
+        }, 30000);
+    </script>
+</body>
+</html>

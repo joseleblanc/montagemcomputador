@@ -145,13 +145,25 @@ a.card-modulo{text-decoration:none;color:inherit}
 #painel-aluno .mensagem-conclusao small{display:block;margin-top:8px;color:var(--text-muted);font-size:.76rem}
 #painel-aluno .conclusao-icone{display:grid;place-items:center;flex:0 0 58px;width:58px;height:58px;border:1px solid rgba(231,185,87,.3);border-radius:16px;background:rgba(231,185,87,.1);color:var(--hw-gold);font-size:24px}
 </style>
+<style id="acoes-rapidas-header">
+.acoes-topo{margin-left:auto;display:flex;align-items:center;gap:7px;padding:5px;border:1px solid var(--border-tech);border-radius:14px;background:rgba(16,38,64,.72)}
+.acoes-topo .btn-chamada-topo{margin-left:0}
+.btn-recursos-topo{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border:1px solid rgba(94,234,212,.28);border-radius:10px;background:rgba(94,234,212,.1);color:var(--hw-cyan);font:700 .85rem 'Inter',sans-serif;text-decoration:none;transition:background .2s,border-color .2s,transform .2s}
+.btn-recursos-topo:hover{transform:translateY(-1px);border-color:rgba(94,234,212,.55);background:rgba(94,234,212,.17)}
+.acoes-topo :focus-visible{outline:2px solid var(--hw-cyan);outline-offset:3px}
+@media(max-width:700px){header{flex-wrap:wrap}.acoes-topo{gap:6px}.acoes-topo .btn-chamada-topo,.btn-recursos-topo{padding:9px 10px;font-size:.76rem}.acoes-topo .btn-chamada-topo i,.btn-recursos-topo i{display:none}}
+@media(max-width:420px){header>div{flex:1;min-width:0}header>div span{display:none}.acoes-topo{width:100%;margin-left:0;display:grid;grid-template-columns:1fr 1fr}.acoes-topo .btn-chamada-topo,.btn-recursos-topo{width:100%}}
+</style>
 </head>
 <body>
 
 <header>
     <img class="selo" src="favicon.png" alt="">
     <div><strong>Telecurso</strong><span>Montagem e Manutenção de Computadores</span></div>
-    <button type="button" class="btn-chamada-topo" onclick="abrirScannerChamada()" aria-label="Fazer chamada lendo o QR Code"><i class="fas fa-qrcode"></i> Chamada</button>
+    <nav class="acoes-topo" aria-label="Ações rápidas">
+        <button type="button" class="btn-chamada-topo" onclick="abrirScannerChamada()" aria-label="Fazer chamada lendo o QR Code"><i class="fas fa-qrcode" aria-hidden="true"></i> Chamada</button>
+        <a class="btn-recursos-topo" href="recursos-prova.html" aria-label="Ver meus recursos da prova"><i class="fas fa-clipboard-list" aria-hidden="true"></i> Ver recursos</a>
+    </nav>
 </header>
 
 <div id="modal-chamada" class="modal-chamada" role="dialog" aria-modal="true" aria-labelledby="titulo-chamada">
