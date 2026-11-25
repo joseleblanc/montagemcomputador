@@ -154,6 +154,7 @@ a.card-modulo{text-decoration:none;color:inherit}
 @media(max-width:700px){header{flex-wrap:wrap}.acoes-topo{gap:6px}.acoes-topo .btn-chamada-topo,.btn-recursos-topo{padding:9px 10px;font-size:.76rem}.acoes-topo .btn-chamada-topo i,.btn-recursos-topo i{display:none}}
 @media(max-width:420px){header>div{flex:1;min-width:0}header>div span{display:none}.acoes-topo{width:100%;margin-left:0;display:grid;grid-template-columns:1fr 1fr}.acoes-topo .btn-chamada-topo,.btn-recursos-topo{width:100%}}
 </style>
+<style>.btn-recursos-topo{position:relative}.badge-recursos{position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#fb7185;color:#fff;font:800 .7rem/20px Inter,sans-serif;text-align:center;box-shadow:0 0 0 2px #071426}</style>
 </head>
 <body>
 
@@ -162,7 +163,7 @@ a.card-modulo{text-decoration:none;color:inherit}
     <div><strong>Telecurso</strong><span>Montagem e Manutenção de Computadores</span></div>
     <nav class="acoes-topo" aria-label="Ações rápidas">
         <button type="button" class="btn-chamada-topo" onclick="abrirScannerChamada()" aria-label="Fazer chamada lendo o QR Code"><i class="fas fa-qrcode" aria-hidden="true"></i> Chamada</button>
-        <a class="btn-recursos-topo" href="recursos-prova.html" aria-label="Ver meus recursos da prova"><i class="fas fa-clipboard-list" aria-hidden="true"></i> Ver recursos</a>
+        <a class="btn-recursos-topo" href="recursos-prova.html" aria-label="Ver meus recursos da prova"><i class="fas fa-clipboard-list" aria-hidden="true"></i> Ver recursos<span class="badge-recursos" id="badge-recursos" hidden></span></a>
     </nav>
 </header>
 
@@ -1515,6 +1516,26 @@ const statusEl = document.getElementById('status-prova-topo');
     }
 }
 
+
+// Bolinha de aviso: recursos respondidos pelo professor e ainda não vistos
+(async function avisoRecursosRespondidos() {
+    try {
+        const { data: u } = await _supabase.auth.getUser();
+        if (!u?.user) return;
+        const { data, error } = await _supabase.from('recursos_prova')
+            .select('respondido_em,status').eq('user_id', u.user.id)
+            .in('status', ['deferido', 'indeferido']).not('respondido_em', 'is', null);
+        if (error || !data) return;
+        let visto = 0;
+        try { visto = Number(localStorage.getItem('recursos_visto_' + u.user.id)) || 0; } catch (e) {}
+        const novos = data.filter(r => Date.parse(r.respondido_em) > visto).length;
+        const badge = document.getElementById('badge-recursos');
+        if (!badge || !novos) return;
+        badge.textContent = novos > 9 ? '9+' : novos;
+        badge.hidden = false;
+        badge.parentElement.setAttribute('aria-label', `Ver meus recursos da prova: ${novos} resposta(s) nova(s)`);
+    } catch (e) { console.warn('Não foi possível verificar respostas de recursos.', e); }
+})();
 </script>
 </body>
 </html>

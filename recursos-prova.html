@@ -213,7 +213,7 @@
 
             const { data, error } = await _supabase
                 .from('recursos_prova')
-                .select('questao_id,pergunta,alternativas,alternativa_marcada,alternativa_correta,motivo,status,resposta_admin,ponto_aplicado,nota_tentativa,acertos_tentativa,nota_aluno_atualizada,created_at')
+                .select('respondido_em,questao_id,pergunta,alternativas,alternativa_marcada,alternativa_correta,motivo,status,resposta_admin,ponto_aplicado,nota_tentativa,acertos_tentativa,nota_aluno_atualizada,created_at')
                 .eq('user_id', sessao.user.id)
                 .order('created_at', { ascending: false });
             $('btn-atualizar').disabled = false;
@@ -224,6 +224,10 @@
             }
 
             const recursos = data || [];
+            try {
+                const ultimo = Math.max(0, ...recursos.map(r => Date.parse(r.respondido_em) || 0));
+                if (ultimo) localStorage.setItem('recursos_visto_' + sessao.user.id, String(ultimo));
+            } catch (e) { /* sem armazenamento local */ }
             atualizarResumo(recursos);
             if (!recursos.length) {
                 $('lista-recursos').innerHTML = '';
@@ -236,6 +240,7 @@
         }
 
         carregarRecursos();
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') carregarRecursos(); });
         setInterval(() => {
             if (document.visibilityState === 'visible') carregarRecursos();
         }, 30000);

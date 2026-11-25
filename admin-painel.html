@@ -535,6 +535,7 @@
             <div class="admin-card" style="border-top-color:var(--warning);">
                 <div class="card-header"><i class="fas fa-file-circle-question"></i> Recursos da prova final</div>
                 <p style="margin:0 0 16px;color:var(--text-muted);font-size:13px;">Solicitações enviadas pelos alunos por questão.</p>
+                <div id="ranking-questoes-recursos" style="margin-bottom:20px;"></div>
                 <div id="estado-recursos-prova" class="dashboard-vazio" aria-live="polite">Carregando recursos...</div>
                 <div id="tabela-recursos-prova-container" class="table-container" hidden>
                     <table>
@@ -629,6 +630,7 @@
                 estado.textContent = 'Não foi possível carregar os recursos: ' + error.message;
                 return;
             }
+            renderizarRankingQuestoes(data || []);
             if (!data?.length) {
                 estado.textContent = 'Nenhum recurso enviado.';
                 return;
@@ -691,10 +693,39 @@
                     </td>
                     <td style="min-width:170px">
                         <button class="btn btn-primary" style="padding:8px 10px;margin-bottom:6px" onclick="responderRecurso('${id}')">Salvar decisão</button>
-                        <button class="btn btn-danger" style="padding:8px 10px"${pontoAplicado ? ' disabled title="O recurso já alterou a nota."' : ` onclick="excluirRecurso('${id}')"`}>Excluir recurso</button>
+                        <button class="btn btn-danger" style="padding:8px 10px" onclick="excluirRecurso('${id}')">Excluir recurso</button>
                     </td>
                 </tr>`;
             }).join('');
+        }
+
+        function renderizarRankingQuestoes(recursos) {
+            const alvo = document.getElementById('ranking-questoes-recursos');
+            if (!alvo) return;
+            const grupos = {};
+            recursos.forEach(r => {
+                const g = grupos[r.questao_id] ||= { id: r.questao_id, pergunta: '', total: 0, deferidos: 0, indeferidos: 0, pendentes: 0 };
+                g.total++;
+                if (!g.pergunta && r.pergunta) g.pergunta = r.pergunta;
+                if (r.status === 'deferido') g.deferidos++;
+                else if (r.status === 'indeferido') g.indeferidos++;
+                else g.pendentes++;
+            });
+            const lista = Object.values(grupos).sort((a, b) => b.total - a.total || b.deferidos - a.deferidos).slice(0, 10);
+            if (!lista.length) { alvo.innerHTML = ''; return; }
+            const linhas = lista.map(g => {
+                const decididos = g.deferidos + g.indeferidos;
+                const taxa = decididos ? Math.round(g.deferidos / decididos * 100) + '%' : '—';
+                const revisar = g.total >= 5 || (decididos >= 2 && g.deferidos / decididos >= 0.5);
+                return `<tr>
+                    <td><small style="color:var(--text-muted)">ID ${escaparHtml(g.id)}</small><br>${escaparHtml((g.pergunta || 'Enunciado não registrado').slice(0, 110))}</td>
+                    <td>${g.total}</td><td>${g.deferidos}</td><td>${g.indeferidos}</td><td>${g.pendentes}</td><td>${taxa}</td>
+                    <td>${revisar ? '<b style="color:#f87171">Revisar questão</b>' : '—'}</td>
+                </tr>`;
+            }).join('');
+            alvo.innerHTML = `<h3 style="margin:0 0 4px;font-size:15px;"><i class="fas fa-ranking-star"></i> Questões mais contestadas</h3>
+                <p style="margin:0 0 10px;color:var(--text-muted);font-size:12px;">Questões com muitos recursos deferidos costumam ter enunciado ou gabarito a revisar.</p>
+                <div class="table-container"><table><thead><tr><th>Questão</th><th>Recursos</th><th>Deferidos</th><th>Indeferidos</th><th>Em aberto</th><th>Deferimento</th><th>Situação</th></tr></thead><tbody>${linhas}</tbody></table></div>`;
         }
 
         async function responderRecurso(id) {
@@ -711,12 +742,21 @@
                 alert('Não foi possível salvar a decisão: ' + error.message);
                 return;
             }
+            let removido = false;
+            if (status === 'deferido') {
+                const { data: apagados, error: erroExcluir } = await _supabase
+                    .from('recursos_prova').delete().eq('id', id).select('id');
+                removido = !erroExcluir && !!apagados?.length;
+                if (!removido) console.warn('Recurso deferido, mas não foi possível excluí-lo.', erroExcluir);
+            }
+            const aviso = removido ? ' O recurso deferido foi removido da lista.'
+                : status === 'deferido' ? ' Atenção: não foi possível remover o recurso; use o botão Excluir.' : '';
             if (data?.ponto_aplicado) {
-                alert(data.nota_aluno_atualizada
+                alert((data.nota_aluno_atualizada
                     ? `Recurso deferido. Um acerto foi somado; a nota do aluno agora é ${data.nota_tentativa}/100 (${data.acertos_tentativa} acertos).`
-                    : `Recurso deferido. Um acerto foi somado à tentativa (${data.nota_tentativa}/100), mas a melhor nota registrada já é igual ou superior.`);
+                    : `Recurso deferido. Um acerto foi somado à tentativa (${data.nota_tentativa}/100), mas a melhor nota registrada já é igual ou superior.`) + aviso);
             } else {
-                alert('Decisão do recurso salva.');
+                alert('Decisão do recurso salva.' + aviso);
             }
             await carregarRecursosProva();
         }

@@ -153,6 +153,9 @@
             <li><b>Sem atualizar:</b> recarregar a página reinicia o exame e apaga as respostas.</li>
             <li><b>Tempo limite:</b> 60 minutos. Ao terminar, a prova é enviada automaticamente e o resultado aparece.</li>
             <li><b>Gabarito e recursos:</b> ao enviar a prova, você vê quais questões acertou e errou, com a resposta correta de cada uma, e pode abrir recurso nas questões que errou.</li>
+            <li><b>Limite de recursos:</b> até 5 recursos por tentativa, um por questão. Escolha com cuidado as questões que deseja contestar.</li>
+            <li><b>Questões em branco:</b> não é possível abrir recurso em questões deixadas sem resposta. Só cabe recurso nas questões que você respondeu e errou.</li>
+            <li><b>Questões diferentes:</b> a segunda tentativa sorteia questões novas, que não apareceram na primeira.</li>
             <li><b>Tentativas:</b> são permitidas duas. Se reprovar na primeira e enviar recursos, aguarde a análise antes da segunda. Após reprovar na segunda, solicite liberação ao professor.</li>
         </ul>
         <button class="btn" id="btn-iniciar" onclick="iniciar()">Iniciar exame</button>
@@ -220,6 +223,8 @@
 
     let revisaoSalva = null, provaAtiva = false, tentativa = null, numeroTentativa = 0, total = 30, atual = 0, questoes = [], tempoFim = 0, cronometro = null, enviando = false, usuarioAtual = null, meusRecursos = [], carregandoRecursos = false, erroCarregarRecursos = '';
     const respostas = {};
+    const MAX_RECURSOS_POR_TENTATIVA = 5;
+    const recursosDaTentativa = () => meusRecursos.filter(r => String(r.tentativa_id) === String(tentativa)).length;
 
     function embaralhar(a) {
         for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
@@ -346,6 +351,7 @@
         numeroTentativa = Number(data.numero_tentativa) || 1;
         $('tentativa-atual').textContent = numeroTentativa;
         questoes = data.questoes;
+        verificarRepeticao(data.questoes, numeroTentativa);
         $('n-total').textContent = total;
         $('lista').innerHTML = data.questoes.map((q, i) => {
             const alts = embaralhar(['a', 'b', 'c', 'd', 'e'].map(l => ({ l, t: q[l] })));
@@ -364,6 +370,18 @@
         const inicioRegistrado = Date.parse(data.iniciada_em || '');
         tempoFim = (Number.isFinite(inicioRegistrado) ? inicioRegistrado : Date.now()) + 60 * 60 * 1000;
         iniciarCronometro();
+    }
+
+    // Compara as questões da 2ª tentativa com as da 1ª (guardadas ao carregar a página)
+    function verificarRepeticao(novas, numero) {
+        try {
+            if (numero < 2 || !revisaoSalva || !Array.isArray(revisaoSalva.questoes)) return;
+            const anteriores = new Set(revisaoSalva.questoes.map(q => String(q.id)));
+            const repetidas = novas.filter(q => anteriores.has(String(q.id)));
+            if (repetidas.length) {
+                console.warn(`Atenção: ${repetidas.length} questão(ões) repetida(s) da 1ª tentativa. O sorteio no banco (iniciar_prova_controlada) deve excluir as questões já usadas.`, repetidas.map(q => q.id));
+            }
+        } catch (e) { console.warn('Não foi possível comparar as tentativas.', e); }
     }
 
     function iniciarCronometro() {
@@ -457,7 +475,33 @@
         } catch (error) {
             console.warn('Não foi possível limpar as respostas salvas desta tentativa.', error);
         }
-        resultado(data);
+        let resultadoFinal = data;
+        try {
+            const { data: rev } = await _supabase.rpc('obter_revisao_prova');
+            if (rev && String(rev.tentativa) === String(tentativa)) {
+                revisaoSalva = rev;
+                const tem = o => o && typeof o === 'object' && Object.keys(o).length > 0;
+                resultadoFinal = {
+                    ...data,
+                    respostas_corretas: tem(data.respostas_corretas) ? data.respostas_corretas : rev.respostas_corretas,
+                    respostas_marcadas: tem(data.respostas_marcadas) ? data.respostas_marcadas : rev.respostas_marcadas,
+                    gabarito_disponivel: rev.gabarito_disponivel ?? data.gabarito_disponivel
+                };
+            }
+        } catch (e) { console.warn('Não foi possível buscar o gabarito oficial.', e); }
+        carregarMeusRecursos();
+        resultado(resultadoFinal);
+    }
+
+    // Garante o gabarito oficial (vindo do servidor) antes de abrir um recurso
+    async function garantirGabarito() {
+        try {
+            const { data: rev } = await _supabase.rpc('obter_revisao_prova');
+            if (!rev || String(rev.tentativa) !== String(tentativa)) return;
+            revisaoSalva = rev;
+            window._resultadoGabarito = rev.respostas_corretas || window._resultadoGabarito || {};
+            renderizarRevisao();
+        } catch (e) { console.warn('Gabarito indisponível.', e); }
     }
 
     function resultado(r) {
@@ -481,7 +525,7 @@
         txt += r.aprovado
             ? ' Veja em Módulos se o seu certificado já está liberado.'
             : numeroTentativa === 1
-                ? ' Após a análise de todos os recursos enviados, a segunda tentativa será liberada. Se não solicitar recursos, poderá iniciar a segunda tentativa.'
+                ? ' Após a análise de todos os recursos enviados, a segunda tentativa será liberada, com questões diferentes das desta tentativa. Se não solicitar recursos, poderá iniciar a segunda tentativa.'
                 : ' Você já realizou as duas tentativas. Entre em contato com o professor para solicitar uma nova liberação.';
         if (r.melhor > r.nota) txt += ` Sua melhor nota continua sendo ${r.melhor}.`;
         $('res-detalhe').textContent = txt;
@@ -514,10 +558,12 @@
             const acertou = !!marcada && correta != null && marcada === correta;
             const classe = recursoAberto ? 'recurso-aberto'
                 : recursoConcluido ? 'recurso-concluido'
+                    : !marcada ? 'erro'
                     : correta == null ? 'sem-gabarito'
                         : acertou ? 'acerto' : 'erro';
             const rotulo = recursoAberto ? 'RECURSO ABERTO'
                 : recursoConcluido ? 'RECURSO CONCLUÍDO'
+                    : !marcada ? 'EM BRANCO'
                     : correta == null ? 'SEM GABARITO'
                         : acertou ? 'ACERTO' : 'ERRO';
             return `<button type="button" class="bloco-questao ${classe}"
@@ -559,6 +605,10 @@
                 </div>`
                 : acertou
                 ? `<p class="revisao-status">Você acertou esta questão, não há recurso a solicitar.</p>`
+                : !marcada
+                ? `<p class="revisao-status">Você deixou esta questão em branco. Não é possível abrir recurso em questões sem resposta.</p>`
+                : recursosDaTentativa() >= MAX_RECURSOS_POR_TENTATIVA
+                ? `<p class="revisao-status">Você já usou os ${MAX_RECURSOS_POR_TENTATIVA} recursos permitidos nesta tentativa.</p>`
                 : `<div class="recurso-modal">
                     ${aviso}
                     <label for="motivo-${esc(q.id)}"><b>Solicitar recurso desta questão</b></label>
@@ -636,6 +686,14 @@
     async function solicitarRecurso(questaoId, botao) {
         const motivo = $(`motivo-${questaoId}`).value.trim();
         const status = $(`status-${questaoId}`);
+        if (!respostas[questaoId]) {
+            status.textContent = 'Não é possível abrir recurso em questão deixada em branco.';
+            return;
+        }
+        if (recursosDaTentativa() >= MAX_RECURSOS_POR_TENTATIVA) {
+            status.textContent = `Limite de ${MAX_RECURSOS_POR_TENTATIVA} recursos por tentativa atingido.`;
+            return;
+        }
         if (!motivo) {
             status.textContent = 'Informe o motivo do recurso.';
             $(`motivo-${questaoId}`).focus();
@@ -651,8 +709,13 @@
         }
         const q = questoes.find(item => String(item.id) === String(questaoId));
         const indice = questoes.findIndex(item => String(item.id) === String(questaoId));
-        const revisao = q ? revisaoDaQuestao(q, indice) : null;
-        const alternativaCorreta = q ? obterAlternativaCorreta(q, revisao) : null;
+        let revisao = q ? revisaoDaQuestao(q, indice) : null;
+        let alternativaCorreta = q ? obterAlternativaCorreta(q, revisao) : null;
+        if (q && !alternativaCorreta) {
+            await garantirGabarito();
+            revisao = revisaoDaQuestao(q, indice);
+            alternativaCorreta = obterAlternativaCorreta(q, revisao);
+        }
         const { data: novoRecurso, error } = await _supabase
             .from('recursos_prova')
             .insert({
@@ -676,7 +739,11 @@
             .select('id,tentativa_id,questao_id,alternativa_marcada,alternativa_correta,pergunta,alternativas,motivo,status,resposta_admin,ponto_aplicado,nota_tentativa,acertos_tentativa,nota_aluno_atualizada,created_at,respondido_em')
             .single();
         if (error) {
-            status.textContent = 'Não foi possível enviar o recurso: ' + error.message;
+            const m = error.message || '';
+            status.textContent = m.includes('LIMITE_RECURSOS') ? 'Você atingiu o limite de recursos desta tentativa.'
+                : m.includes('RECURSO_EM_BRANCO') ? 'Não é possível abrir recurso em questão deixada em branco.'
+                : m.includes('RECURSO_DUPLICADO') ? 'Já existe um recurso para esta questão.'
+                : 'Não foi possível enviar o recurso: ' + m;
             botao.disabled = false;
             return;
         }
@@ -699,6 +766,7 @@
     window.addEventListener('beforeunload', e => { if (provaAtiva) { e.preventDefault(); e.returnValue = ''; } });
     carregarMeusRecursos();
     carregarRevisaoSalva();
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') carregarMeusRecursos(); });
     setInterval(() => {
         if (document.visibilityState === 'visible') carregarMeusRecursos();
     }, 30000);
